@@ -1,0 +1,11 @@
+﻿# Propietarios del template (ajustar)
+* @jormazabal
+
+# Zona Copilot
+.github/agents/ @jormazabal
+.github/prompts/ @jormazabal
+.github/skills/ @jormazabal
+
+# Documentación base
+docs/ @jormazabal
+mkdocs.yml @jormazabal
