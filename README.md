@@ -1,31 +1,42 @@
 ﻿# spec-kit-template
 
-Plantilla interna para crear **especificaciones técnicas** en Markdown con un flujo “agentic” en VS Code:
+Plantilla interna para crear **especificaciones técnicas** en Markdown con VS Code + Copilot, siguiendo un flujo “agentic”:
 **Plan → Redacción → Revisión → Iteración**, versionado con Git.
 
-## Flujo recomendado (siempre igual)
-1. **Intake**: completa contexto mínimo y genera índice inicial.
-2. **Planner**: actualiza `docs/01-plan.md` con tareas atómicas + decisiones pendientes.
-3. **Writer**: ejecuta el plan editando los documentos en `docs/`.
-4. **Reviewer**: revisa con ojos críticos y deja notas accionables en `docs/97-review-notes.md`.
-5. Itera (Writer ↔ Reviewer) hasta cumplir el DoD del plan.
+## Qué incluye
+- Estructura de documentación en `docs/` (contexto, requisitos, UI, arquitectura, datos, backend, seguridad, infra, ADRs).
+- Agentes (custom agents) en `.github/agents/`:
+  - `intake` · `planner` · `writer` · `reviewer` (con creación automática de ADRs al detectar `DECISION:`).
+- Prompt files en `.github/prompts/` (comandos `/new-spec`, `/plan-iteration`, `/write-from-plan`, `/review-and-adr`).
+- Skills en `.github/skills/` (reutilizables para FR/NFR/UI/arquitectura/seguridad/infra).
+- `mkdocs.yml` para navegación y vista en navegador (opcional).
 
-## Convenciones rápidas
-- Requisitos funcionales: `FR-###` en `docs/10-requisitos-funcionales.md`
-- Requisitos técnicos / NFR: `NFR-###` en `docs/11-requisitos-tecnicos-nfr.md`
-- Decisiones: `docs/adr/ADR-XXXX.md`
-- Marcadores durante elaboración:
-  - `TODO:` trabajo pendiente
-  - `OPENQ:` pregunta abierta
-  - `RISK:` riesgo detectado
-  - `DECISION:` decisión pendiente (normalmente acaba en ADR)
+## Cómo usar esta plantilla (crear una nueva especificación)
+1) En GitHub, abre este repo y pulsa **Use this template** para crear un repositorio nuevo (normalmente privado).  
+2) Clona el repositorio nuevo y ábrelo en VS Code.
+
+Guía completa de uso: **`USAGE.md`**.
+
+## Estructura principal
+- Índice de la especificación: `docs/index.md`
+- Contexto: `docs/00-context.md`
+- Plan de iteración: `docs/01-plan.md`
+- Trazabilidad: `docs/02-trazabilidad.md`
+- Requisitos: `docs/10-...` y `docs/11-...`
+- Decisiones: `docs/adr/`
+
+## Ajuste recomendado en VS Code
+- Activar (preview) `chat.useAgentSkills = true` para que Copilot cargue automáticamente los skills del repo.
 
 ## Vista en navegador (opcional)
-Este repo incluye `mkdocs.yml`. Si queréis servirlo en local:
-1) `python -m venv .venv`
-2) Activar venv
-3) `pip install mkdocs mkdocs-material`
-4) `mkdocs serve`
+El repo incluye `mkdocs.yml`. Si quieres servirlo localmente:
+```powershell
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install mkdocs mkdocs-material
+mkdocs serve
+````
 
-> Nota: el uso de Material es opcional. Con MkDocs “pelado” también sirve.
+---
 
+Nota: Este repo es una **plantilla**. Los contenidos en `docs/` son placeholders para iniciar una especificación real en un repo creado desde aquí.
