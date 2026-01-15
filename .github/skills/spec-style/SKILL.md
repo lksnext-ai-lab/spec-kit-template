@@ -1,0 +1,77 @@
+---
+name: spec-style
+description: Usa este skill cuando generes o edites cualquier documento de especificación en docs/*.md. Define estilo, convenciones de IDs, enlaces, y el uso correcto de TODO/OPENQ/RISK/DECISION.
+---
+
+# spec-style — Estilo y convenciones del spec-kit
+
+## Objetivo
+Asegurar que toda la documentación en `docs/` sea **consistente, ejecutable y fácil de revisar**.
+
+## Idioma y tono
+- Idioma principal: **español**.
+- Tono: **profesional**, orientado a ejecución.
+- Prioriza claridad sobre “prosa bonita”.
+
+## Estructura recomendada
+- Usa encabezados claros (H2/H3) y listas.
+- Para catálogos (FR, NFR, UI, API, entidades): **tablas** + sección de detalle cuando sea necesario.
+- Evita párrafos largos: divide en bullets.
+
+## Convenciones de IDs
+- FR: `FR-###` (correlativo, no reutilizable)
+- NFR: `NFR-###`
+- UI: `UI-###`
+- API: `API-###`
+- EVT (asíncrono): `EVT-###`
+- OPENQ: `OPENQ-###`
+- TODO: `TODO-###`
+- ADR: `ADR-####`
+
+Reglas:
+- No reutilices IDs.
+- Si dudas del siguiente ID: mira el último de la tabla correspondiente y suma 1.
+
+## Marcadores permitidos durante elaboración
+- `TODO:` trabajo pendiente (si es relevante, también en `docs/96-todos.md`)
+- `OPENQ:` pregunta (si es relevante, también en `docs/95-open-questions.md`)
+- `RISK:` riesgo detectado
+- `DECISION:` decisión pendiente (normalmente debe acabar en un ADR)
+
+Buenas prácticas:
+- Si un `OPENQ` bloquea una iteración, debe aparecer también en `docs/01-plan.md`.
+- Si un `DECISION` afecta a arquitectura/seguridad/integraciones/operación, debe terminar en ADR.
+
+## Criterios de calidad (rápidos)
+- FR:
+  - criterios de aceptación **verificables**
+  - prioridad (MVP/Should/Could)
+  - trazabilidad (UI/API/Datos/ADR si aplica)
+- NFR:
+  - objetivo medible (SLO/SLI/umbral) o verificación explícita (prueba/evidencia)
+- UI:
+  - estados: cargando/vacío/error/sin permisos
+  - reglas por rol
+- Backend:
+  - errores, validaciones, authz
+  - síncrono/asíncrono claro
+- Seguridad/Infra:
+  - enfoque operativo (secretos, accesos, auditoría, backups/DR, observabilidad)
+
+## Enlaces
+- Dentro de `docs/`: usa enlaces relativos.
+  - Ejemplo desde `docs/40-arquitectura.md` a un ADR: `./adr/ADR-0001-...md`
+- En `.github/agents` y `.github/prompts`: usa rutas explícitas `docs/...` (para evitar rutas relativas erróneas).
+
+## Anti-patrones (evitar)
+- “El sistema será rápido / seguro / escalable” sin umbral o verificación.
+- Requisitos duplicados sin trazabilidad.
+- Decisiones escondidas dentro de texto sin ADR.
+- Cambios grandes sin reflejarlos en `docs/02-trazabilidad.md` y sin notas en review.
+
+## Mini-ejemplos
+### Criterio de aceptación verificable (bien)
+- “Dado X, cuando el usuario hace Y, entonces el sistema muestra Z en menos de 2s (p95).”
+
+### Vago (mal)
+- “La pantalla debe ser intuitiva y rápida.”
