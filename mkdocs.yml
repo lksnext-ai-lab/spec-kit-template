@@ -1,0 +1,26 @@
+﻿site_name: Especificación Técnica
+docs_dir: docs
+
+nav:
+  - Índice: index.md
+  - Contexto: 00-context.md
+  - Plan: 01-plan.md
+  - Trazabilidad: 02-trazabilidad.md
+  - Requisitos funcionales: 10-requisitos-funcionales.md
+  - Requisitos técnicos (NFR): 11-requisitos-tecnicos-nfr.md
+  - Conceptualización: 20-conceptualizacion.md
+  - UI Spec: 30-ui-spec.md
+  - Arquitectura: 40-arquitectura.md
+  - Modelo de datos: 50-modelo-datos.md
+  - Backend: 60-backend.md
+  - Frontend: 70-frontend.md
+  - Seguridad: 80-seguridad.md
+  - Infra: 90-infra.md
+  - Preguntas abiertas: 95-open-questions.md
+  - TODOs: 96-todos.md
+  - Review notes: 97-review-notes.md
+  - ADR:
+      - Plantilla ADR: adr/ADR-0001-template.md
+
+theme:
+  name: mkdocs

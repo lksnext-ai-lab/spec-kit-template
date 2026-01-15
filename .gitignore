@@ -1,0 +1,12 @@
+﻿# Python / MkDocs
+.venv/
+__pycache__/
+*.pyc
+site/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# VS Code local (si queréis, luego lo cambiamos a "permitido")
+.vscode/
