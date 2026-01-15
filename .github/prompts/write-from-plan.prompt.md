@@ -1,19 +1,39 @@
 ﻿---
 name: write-from-plan
-description: Ejecuta docs/01-plan.md (redacción/actualización de documentos), manteniendo trazabilidad y creando TODO/OPENQ cuando proceda.
+description: Ejecuta docs/01-plan.md (redacción/actualización de docs), manteniendo trazabilidad y registrando TODO/OPENQ/DECISION con disciplina.
 ---
 
-Objetivo: ejecutar el plan como “tareas de implementación” sobre docs/.
+Objetivo
+Ejecutar `docs/01-plan.md` como “tareas de implementación” y materializarlo en cambios concretos dentro de `docs/`.
 
-Instrucciones:
-1) Lee docs/01-plan.md y ejecuta tareas en orden.
-2) Para cada tarea:
-   - edita solo los archivos indicados (o el mínimo imprescindible)
-   - cumple el Resultado/DoD de la tarea
-   - si falta info: marca OPENQ: y registra OPENQ-### en docs/95-open-questions.md
-   - si surge trabajo nuevo: crea TODO-### en docs/96-todos.md
-   - si detectas una decisión: marca DECISION: (el Reviewer abrirá ADR)
-3) Actualiza docs/02-trazabilidad.md (mínimo) cuando crees/amplíes FR/UI/API/entidades.
-4) Evita reescrituras masivas; prioriza cambios incrementales.
+Reglas duras
+- No inventes requisitos ni detalles técnicos.
+- Ejecuta tareas en orden.
+- Evita reescrituras masivas: cambios incrementales y seguros.
+- Si falta info: marca `OPENQ:` y registra `OPENQ-###` en `docs/95-open-questions.md`.
+- Si surge trabajo pendiente: crea `TODO-###` en `docs/96-todos.md`.
+- Si aparece una elección relevante: marca `DECISION:` (el Reviewer abrirá el ADR).
 
-Usa rutas explícitas tipo docs/... (no enlaces relativos desde este prompt).
+Método
+1) Lee `docs/01-plan.md` (tareas + DoD de iteración).
+2) Por cada tarea Txx:
+   - edita solo los archivos indicados (o el mínimo imprescindible),
+   - completa el Resultado/DoD de la tarea,
+   - añade enlaces y trazabilidad cuando ya existan IDs.
+3) Mantén `docs/02-trazabilidad.md` (mínimo):
+   - si creas/amplías FR: añade/actualiza fila FR (aunque UI/API estén en TODO)
+   - si defines UI: enlaza FR
+   - si defines API/EVT: enlaza FR
+   - si identificas entidades: enlaza FR
+   - si existe ADR asociado: ponlo en la columna ADR (si se conoce)
+
+Gestión de IDs (OPENQ/TODO)
+- OPENQ: usa el siguiente número libre en `docs/95-open-questions.md`.
+- TODO: usa el siguiente número libre en `docs/96-todos.md`.
+- No reutilices IDs.
+
+Salida en el chat (resumen)
+- Archivos actualizados (lista)
+- FR/NFR/UI/API/EVT/Entidades añadidas o ampliadas (si aplica)
+- OPENQ/TODO/DECISION creadas (IDs)
+- Recomendación: ejecutar `/review-and-adr` o pasar al agente Reviewer
