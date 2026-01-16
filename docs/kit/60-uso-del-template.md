@@ -41,7 +41,7 @@ cd C:\Dev
 git clone <URL-del-nuevo-repo>
 cd <carpeta-del-repo>
 code .
-````
+```
 
 ---
 
@@ -182,3 +182,34 @@ Antes de compartir una especificación:
 * Operativa diaria: `docs/kit/70-operativa-diaria.md`
 * Previsualización en navegador: `docs/kit/80-previsualizacion-mkdocs.md`
 * FAQ/troubleshooting: `docs/kit/95-faq-y-troubleshooting.md`
+
+---
+
+## 10) Exportar la documentación a DOCX (Word)
+
+Este repositorio permite exportar la documentación a un archivo **DOCX** (Word) para compartirla fuera del repo.
+
+### Requisitos
+- Tener **Pandoc** instalado y disponible en PATH.
+- (Opcional) tener Python disponible para ejecutar el script del repo.
+
+### Exportar SPEC (docs/spec/**)
+```powershell
+python tools\export_docx.py --scope spec --output exports\spec.docx --title "Especificación técnica" --toc
+```
+
+### Exportar KIT (docs/kit/**)
+
+```powershell
+python tools\export_docx.py --scope kit --output exports\kit.docx --title "Spec-kit: guía interna" --toc
+```
+
+Notas:
+
+* El resultado se genera en `exports/`.
+* Si no quieres TOC, elimina `--toc`.
+* Para comprobar Pandoc:
+
+  ```powershell
+  pandoc --version
+  ```

@@ -115,6 +115,12 @@ Salida esperada:
 
 ---
 
+### 5) `/export-docx`
+**Propósito:** generar el comando de exportación a DOCX para `spec`, `kit` o `all`.  
+**Salida esperada:** comando listo para copiar/pegar en PowerShell y notas de verificación (Pandoc, ubicación del output).
+
+---
+
 ## Cómo se combinan con agentes
 
 Puedes usar prompts sin seleccionar agente. Aun así, la combinación típica es:

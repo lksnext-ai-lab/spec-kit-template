@@ -10,3 +10,6 @@ Thumbs.db
 
 # VS Code local (si queréis, luego lo cambiamos a "permitido")
 .vscode/
+
+#exports
+exports/

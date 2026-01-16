@@ -170,3 +170,9 @@ Cuando una idea demuestre valor real:
 Definir una lista corta de “ideas de evolución” priorizadas (Top 5) y probar 1 de ellas en un repo demo.
 
 (El objetivo no es imaginar mucho, sino experimentar poco y validar rápido.)
+
+---
+
+Siguiente lectura recomendada:
+
+* FAQ/troubleshooting: `docs/kit/95-faq-y-troubleshooting.md`

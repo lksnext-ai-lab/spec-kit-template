@@ -81,6 +81,10 @@ Los skills core actuales suelen cubrir las áreas clave de una especificación:
 
 > Nota: el conjunto exacto puede variar según el repo; lo importante es mantener los “core” para consistencia.
 
+### 8) `export-docx`
+**Objetivo:** exportar documentación Markdown a DOCX.  
+**Aporta:** procedimiento estándar para convertir `docs/spec/**` o `docs/kit/**` (o todo `docs/**`) a un `.docx` reproducible mediante Pandoc + script del repo.
+
 ---
 
 ## Cómo se usan (práctica)

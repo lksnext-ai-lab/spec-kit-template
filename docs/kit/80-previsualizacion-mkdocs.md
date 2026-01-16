@@ -180,5 +180,5 @@ Recomendación:
 
 Siguiente lectura recomendada:
 
-* FAQ/troubleshooting: `docs/kit/95-faq-y-troubleshooting.md`
+* FAQ/troubleshooting: `docs\kit\90-mantenimiento-y-evolucion.md`
 

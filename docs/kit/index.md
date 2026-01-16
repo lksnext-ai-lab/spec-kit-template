@@ -39,6 +39,7 @@ Esta sección documenta el **sistema** `spec-kit-template`: cómo está diseñad
 ### 4) Evolución y soporte
 - `90-mantenimiento-y-evolucion.md`
 - `95-faq-y-troubleshooting.md`
+- `99-anexos-ejemplos.md`
 
 ---
 

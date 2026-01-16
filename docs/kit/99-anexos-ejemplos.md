@@ -1,253 +1,99 @@
-﻿# FAQ y troubleshooting
+﻿# Anexos y ejemplos (referencia rápida)
 
-Este documento recoge dudas frecuentes y problemas habituales al usar `spec-kit-template`, junto con soluciones prácticas (especialmente en Windows + VS Code + Copilot + MkDocs).
+Este documento contiene ejemplos mínimos (copy/paste) para redactar y mantener una especificación con calidad, sin inventar información.
 
----
-
-## 1) Copilot / agentes / prompts
-
-### 1.1 ¿Tengo que seleccionar un agente para ejecutar un prompt como `/new-spec`?
-No necesariamente. Los prompt files pueden ejecutarse sin seleccionar un agente.
-
-Recomendación:
-- usar prompts como “procedimientos”
-- y agentes como “roles” cuando quieras un comportamiento más guiado.
-
-Si un equipo está empezando, es totalmente válido trabajar solo con prompts.
+> Objetivo: ejemplos cortos. Si crece demasiado, dividir por anexos.
 
 ---
 
-### 1.2 Error: “File './adr/ADR-####-<slug>.md' not found at '.github/prompts/...'”
-**Causa típica:** hay un enlace relativo en un archivo dentro de `.github/**` (prompts/agentes).  
-VS Code/Copilot resuelve rutas relativas desde esa carpeta, no desde `docs/spec/`.
+## 1) Ejemplo de FR (bien formado)
 
-**Solución:**
-- dentro de `.github/**` usar rutas desde la raíz del repo:
-  - ✅ `docs/spec/adr/ADR-0001-template.md`
-  - ❌ `./adr/ADR-0001-template.md`
-- si quieres mostrar un ejemplo de enlace “para spec”, ponlo como texto/código, no como link Markdown, para evitar warnings.
-
----
-
-### 1.3 Warning en VS Code: “Link … not found” en un prompt/agent
-**Causa:** el validador de Markdown intenta resolver el link relativo desde `.github/prompts/` o `.github/agents/`.
-
-**Solución recomendada:**
-- en prompts/agentes evita links Markdown relativos.
-- escribe rutas como texto o en bloque de código.
-
-Ejemplo:
-```txt
-En docs/spec usa: adr/ADR-####-<slug>.md
-En .github usa: docs/spec/adr/ADR-####-<slug>.md
-````
+**FR-001 — Checkout: confirmar pedido**
+- **Prioridad:** Alta
+- **Estado:** Draft
+- **Descripción:** El usuario podrá confirmar un pedido con los productos del carrito y una dirección de envío válida.
+- **Criterios de aceptación:**
+  1. **Dado** un usuario autenticado con un carrito no vacío, **cuando** confirma el pedido, **entonces** se crea un pedido con estado `CREATED`.
+  2. **Dado** que la dirección de envío es inválida, **cuando** confirma, **entonces** se muestra un error y no se crea el pedido.
+  3. **Dado** un error de stock, **cuando** confirma, **entonces** se informa qué ítems fallan y el pedido no se crea.
 
 ---
 
-### 1.4 ¿Puede un custom agent llamar a otro custom agent?
+## 2) Ejemplo de NFR (medible / verificable)
 
-En la práctica, lo habitual es que:
-
-* tú selecciones el agente adecuado,
-* o ejecutes un prompt concreto,
-  y el “handoff” se haga como recomendación (“siguiente paso: usa Planner / ejecuta /plan-iteration”).
-
-Si quieres automatizar encadenado de agentes, eso depende de las capacidades concretas del entorno (Copilot / VS Code / configuración disponible). El diseño del spec-kit ya está preparado para que el flujo se ejecute como:
-
-* prompts encadenables,
-* o agentes por rol.
+**NFR-001 — Rendimiento: latencia API checkout**
+- **Objetivo:** P95 < 800 ms para `POST /api/orders` bajo carga nominal definida.
+- **Verificación:** prueba de carga (k6) en entorno pre con dataset representativo.
+- **Notas:** excluir picos de cold start si aplica.
 
 ---
 
-### 1.5 “No inventar” me deja demasiadas OPENQ, ¿es normal?
+## 3) Ejemplo de UI spec (estados mínimos)
 
-Sí. La calidad de una spec mejora cuando:
-
-* las dudas están explícitas,
-* y se distinguen de afirmaciones.
-
-Una buena práctica es:
-
-* resolver OPENQ por “bloque” (MVP primero),
-* y cerrar las OPENQ críticas antes de compartir una versión final.
-
----
-
-## 2) Git / repositorios / template
-
-### 2.1 ¿Los cambios del template se propagan automáticamente a repos creados desde él?
-
-No. Crear un repo desde un template copia el contenido en ese momento, pero no se actualiza solo.
-
-Opciones:
-
-* mantener cada repo “congelado” con la versión usada,
-* o hacer upgrades manuales (por PR) copiando cambios en `.github/**` y configuración.
+**UI-010 — Pantalla “Checkout”**
+- **Roles:** Cliente
+- **Acciones:**
+  - confirmar pedido
+  - editar dirección
+- **Estados:**
+  - **Cargando:** skeleton + botón deshabilitado
+  - **Vacío:** si carrito vacío → CTA “Volver a catálogo”
+  - **Error:** mensaje no técnico + acción “Reintentar”
+  - **Sin permisos:** mensaje + logout (si sesión inválida)
+- **Validaciones:**
+  - dirección obligatoria
+  - email con formato válido
 
 ---
 
-### 2.2 Tengo warnings de LF/CRLF al hacer `git add`
+## 4) Ejemplo de DECISION → ADR
 
-**Causa:** Windows + configuración de autocrlf o line endings inconsistentes.
+En documento (por ejemplo `40-arquitectura.md`):
 
-Soluciones recomendadas:
+`DECISION: Comunicación asíncrona para confirmación de pedido (ver ADR-0003: adr/ADR-0003-eventing-checkout.md)`
 
-* añadir `.gitattributes` y fijar line endings (LF),
-* usar `git add --renormalize .` tras añadir `.gitattributes`,
-* acordar una norma de equipo.
-
----
-
-## 3) MkDocs (previsualización en navegador)
-
-### 3.1 Error: “El término 'mkdocs' no se reconoce…”
-
-**Causa:** el ejecutable `mkdocs.exe` no está en PATH (común con Python de Microsoft Store).
-
-**Solución:**
-Usa MkDocs así:
-
-```powershell
-python -m mkdocs serve
-```
-
-y para build estricto:
-
-```powershell
-python -m mkdocs build --strict
-```
+En ADR (`docs/spec/adr/ADR-0003-eventing-checkout.md`):
+- Contexto
+- Drivers (NFR)
+- Opciones (mínimo 2)
+- Decisión (o pendiente)
+- Consecuencias
+- Plan de adopción
 
 ---
 
-### 3.2 Pip instala “en user” aunque tengo el venv activado
+## 5) Ejemplo de OPENQ (con impacto)
 
-Puede ocurrir en algunos entornos de Windows (especialmente con Python de Microsoft Store).
-
-Recomendaciones:
-
-1. asegúrate de activar el venv:
-
-   * prompt debe mostrar `(.venv)`
-2. usa siempre:
-
-   * `python -m pip install ...`
-3. si persiste, considerar instalar Python desde python.org (si política lo permite).
+**OPENQ-002 — ¿Se requiere pago en el MVP?**
+- **Contexto:** FR-001 y UI-010 asumen confirmación “sin pago” o “con pago”.
+- **Impacto:** define flujo UI, integraciones, seguridad y modelo de datos.
+- **Bloquea:** `30-ui-spec.md`, `60-backend.md`, ADR de integración pagos.
+- **Cómo resolver:** decisión de negocio + proveedor de pago (si aplica).
 
 ---
 
-### 3.3 ¿Cómo cambio el puerto de MkDocs?
+## 6) Ejemplo de TODO (concreto)
 
-```powershell
-python -m mkdocs serve -a 127.0.0.1:8001
-```
-
----
-
-### 3.4 MkDocs falla por navegación (mkdocs.yml)
-
-Causas típicas:
-
-* rutas mal escritas en `mkdocs.yml`
-* archivos movidos/renombrados sin actualizar nav
-
-Solución:
-
-* revisar `mkdocs.yml`
-* validar con:
-
-```powershell
-python -m mkdocs build --strict
-```
+**TODO-004 — Definir catálogo de errores API-POST-ORDER**
+- **Dónde:** `docs/spec/60-backend.md`
+- **Motivo:** faltan códigos/formatos de error para validaciones y stock.
+- **Prioridad sugerida:** Alta
+- **Depende de:** OPENQ-002 (si hay pago cambia catálogo)
 
 ---
 
-### 3.5 ¿Se puede usar Mermaid?
+## 7) Ejemplo de trazabilidad mínima (fila)
 
-Sí, pero requiere:
-
-* habilitar `pymdownx.superfences` (normalmente ya)
-* y configurar Mermaid (según enfoque: plugin o JS extra)
-
-Recomendación:
-
-* solo activarlo si el equipo realmente lo va a usar,
-* y probar que renderiza bien en Material.
+| FR | UI | API/EVT | Datos | ADR |
+|---|---|---|---|---|
+| FR-001 | UI-010 | API-001 `POST /api/orders` | Order, OrderItem, Address | ADR-0003 |
 
 ---
 
-## 4) Organización de docs (spec vs kit)
+## 8) Ejemplo de “bloqueante” en review notes
 
-### 4.1 ¿Por qué separar `docs/spec/` y `docs/kit/`?
-
-Para evitar mezcla entre:
-
-* documentación del sistema (kit),
-* y documentación del proyecto (spec).
-
-Esto:
-
-* reduce ruido en la spec,
-* protege el kit de modificaciones accidentales,
-* y facilita navegación en MkDocs.
-
----
-
-### 4.2 El Writer me ha tocado `docs/kit/**`. ¿Qué hago?
-
-Primero:
-
-* revisar qué cambió (diff),
-* revertir si no era solicitado.
-
-Después:
-
-* reforzar instructions/prompt/agent:
-
-  * “No modificar docs/kit salvo solicitud explícita”.
-
----
-
-## 5) Calidad de la spec
-
-### 5.1 FR sin criterios verificables
-
-Solución:
-
-* reescribir FR con criterios de aceptación tipo “Dado/Cuando/Entonces”
-* añadir prioridad/estado
-* enlazar a UI/API si aplica
-
----
-
-### 5.2 NFR vagos (“rápido”, “seguro”, “escalable”)
-
-Solución:
-
-* convertirlos en métrica objetivo (SLO/umbral) o verificación explícita
-* asociar a drivers (seguridad, rendimiento, coste, compliance)
-
----
-
-### 5.3 Muchas DECISION sin ADR
-
-Solución:
-
-* ejecutar `/review-and-adr`
-* revisar que el reviewer enlaza ADR desde el punto de DECISION
-
----
-
-## 6) Si algo no encaja
-
-Si encuentras un caso que no cubre el kit:
-
-* registra una nota en `docs/spec/97-review-notes.md` (si aplica a una spec concreta)
-* o abre una issue/nota interna para mejorar el template
-* describe:
-
-  * qué intentabas hacer,
-  * qué pasó,
-  * qué esperabas,
-  * y cómo lo resolverías.
-
-Esto alimenta la evolución del spec-kit sin improvisar cambios.
+- **Severidad:** Alta  
+- **Dónde:** `60-backend.md` (API-001)  
+- **Por qué importa:** sin catálogo de errores, el frontend no puede implementar estados/errores coherentes.  
+- **Cambio sugerido:** definir errores 400/401/403/409/500 con payload estándar.  
+- **Relacionado:** TODO-004
