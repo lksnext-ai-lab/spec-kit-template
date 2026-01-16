@@ -48,7 +48,7 @@
 
 ## 7. Decisiones (ADRs)
 - DECISION: TODO (crear ADR)
-- Enlaces: `docs/adr/ADR-XXXX.md`
+- Enlaces: `docs/spec/adr/ADR-XXXX.md`
 
 ## 8. Riesgos y deuda técnica
 - RISK: TODO

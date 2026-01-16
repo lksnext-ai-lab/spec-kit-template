@@ -18,12 +18,12 @@ Plantilla interna para crear **especificaciones técnicas** en Markdown con VS C
 Guía completa de uso: **`USAGE.md`**.
 
 ## Estructura principal
-- Índice de la especificación: `docs/index.md`
-- Contexto: `docs/00-context.md`
-- Plan de iteración: `docs/01-plan.md`
-- Trazabilidad: `docs/02-trazabilidad.md`
-- Requisitos: `docs/10-...` y `docs/11-...`
-- Decisiones: `docs/adr/`
+- Índice de la especificación: `docs/spec/index.md`
+- Contexto: `docs/spec/00-context.md`
+- Plan de iteración: `docs/spec/01-plan.md`
+- Trazabilidad: `docs/spec/02-trazabilidad.md`
+- Requisitos: `docs/spec/10-...` y `docs/spec/11-...`
+- Decisiones: `docs/spec/adr/`
 
 ## Ajuste recomendado en VS Code
 - Activar (preview) `chat.useAgentSkills = true` para que Copilot cargue automáticamente los skills del repo.

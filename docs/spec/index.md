@@ -30,7 +30,7 @@
 | Requisitos no funcionales | `NFR-###` + objetivo/métrica cuando aplique | `11-requisitos-tecnicos-nfr.md` |
 | Pantallas / flujos UI | `UI-###` | `30-ui-spec.md` |
 | Endpoints / eventos | `API-###` (y/o `EVT-###` si aplica) | `60-backend.md` |
-| Decisiones | `ADR-####` | `docs/adr/` |
+| Decisiones | `ADR-####` | `docs/spec/adr/` |
 | Trazabilidad | FR ↔ UI ↔ API ↔ Datos ↔ ADR | `02-trazabilidad.md` |
 
 ## Cómo trabajar (método)

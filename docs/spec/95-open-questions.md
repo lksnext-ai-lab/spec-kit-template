@@ -15,7 +15,7 @@
 | OPENQ-001 | OPEN | TODO | Medio | T01 / 10-requisitos-funcionales | TODO | TODO | TODO |
 
 ## Notas
-- `OPEN` debe revisarse en cada iteración (ver `docs/01-plan.md`).
+- `OPEN` debe revisarse en cada iteración (ver `docs/spec/01-plan.md`).
 - Cuando una pregunta se resuelva:
   - Actualiza los documentos afectados,
   - Cambia a `ANSWERED`,

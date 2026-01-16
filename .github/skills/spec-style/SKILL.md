@@ -1,12 +1,12 @@
 ---
 name: spec-style
-description: Usa este skill cuando generes o edites cualquier documento de especificación en docs/*.md. Define estilo, convenciones de IDs, enlaces, y el uso correcto de TODO/OPENQ/RISK/DECISION.
+description: Usa este skill cuando generes o edites cualquier documento de especificación en docs/spec/*.md. Define estilo, convenciones de IDs, enlaces, y el uso correcto de TODO/OPENQ/RISK/DECISION.
 ---
 
 # spec-style — Estilo y convenciones del spec-kit
 
 ## Objetivo
-Asegurar que toda la documentación en `docs/` sea **consistente, ejecutable y fácil de revisar**.
+Asegurar que toda la documentación en `docs/spec/` sea **consistente, ejecutable y fácil de revisar**.
 
 ## Idioma y tono
 - Idioma principal: **español**.
@@ -33,13 +33,13 @@ Reglas:
 - Si dudas del siguiente ID: mira el último de la tabla correspondiente y suma 1.
 
 ## Marcadores permitidos durante elaboración
-- `TODO:` trabajo pendiente (si es relevante, también en `docs/96-todos.md`)
-- `OPENQ:` pregunta (si es relevante, también en `docs/95-open-questions.md`)
+- `TODO:` trabajo pendiente (si es relevante, también en `docs/spec/96-todos.md`)
+- `OPENQ:` pregunta (si es relevante, también en `docs/spec/95-open-questions.md`)
 - `RISK:` riesgo detectado
 - `DECISION:` decisión pendiente (normalmente debe acabar en un ADR)
 
 Buenas prácticas:
-- Si un `OPENQ` bloquea una iteración, debe aparecer también en `docs/01-plan.md`.
+- Si un `OPENQ` bloquea una iteración, debe aparecer también en `docs/spec/01-plan.md`.
 - Si un `DECISION` afecta a arquitectura/seguridad/integraciones/operación, debe terminar en ADR.
 
 ## Criterios de calidad (rápidos)
@@ -59,15 +59,15 @@ Buenas prácticas:
   - enfoque operativo (secretos, accesos, auditoría, backups/DR, observabilidad)
 
 ## Enlaces
-- Dentro de `docs/`: usa enlaces relativos.
-  - Ejemplo desde `docs/40-arquitectura.md` a un ADR: `./adr/ADR-0001-...md`
-- En `.github/agents` y `.github/prompts`: usa rutas explícitas `docs/...` (para evitar rutas relativas erróneas).
+- Dentro de `docs/spec/`: usa enlaces relativos.
+  - Ejemplo desde `docs/spec/40-arquitectura.md` a un ADR: `./adr/ADR-0001-...md`
+- En `.github/agents` y `.github/prompts`: usa rutas explícitas `docs/spec/...` (para evitar rutas relativas erróneas).
 
 ## Anti-patrones (evitar)
 - “El sistema será rápido / seguro / escalable” sin umbral o verificación.
 - Requisitos duplicados sin trazabilidad.
 - Decisiones escondidas dentro de texto sin ADR.
-- Cambios grandes sin reflejarlos en `docs/02-trazabilidad.md` y sin notas en review.
+- Cambios grandes sin reflejarlos en `docs/spec/02-trazabilidad.md` y sin notas en review.
 
 ## Mini-ejemplos
 ### Criterio de aceptación verificable (bien)

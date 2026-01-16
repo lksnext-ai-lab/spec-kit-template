@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: Usa este skill para definir o revisar arquitectura en docs/40-arquitectura.md: componentes/servicios, integraciones, comunicación sync/async, consistencia, observabilidad y decisiones (ADR).
+description: Usa este skill para definir o revisar arquitectura en docs/spec/40-arquitectura.md: componentes/servicios, integraciones, comunicación sync/async, consistencia, observabilidad y decisiones (ADR).
 ---
 
 # architecture — Arquitectura de la solución
@@ -15,9 +15,9 @@ Describir una arquitectura coherente con FR/NFR, cubriendo:
 - y decisiones en ADR.
 
 ## Dónde aplicar
-- `docs/40-arquitectura.md` (principal)
-- Referencias: `docs/11-requisitos-tecnicos-nfr.md`, `docs/60-backend.md`, `docs/90-infra.md`
-- Decisiones: `docs/adr/`
+- `docs/spec/40-arquitectura.md` (principal)
+- Referencias: `docs/spec/11-requisitos-tecnicos-nfr.md`, `docs/spec/60-backend.md`, `docs/spec/90-infra.md`
+- Decisiones: `docs/spec/adr/`
 
 ## Principios
 - Empieza por drivers (NFR y restricciones).

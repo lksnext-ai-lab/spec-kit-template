@@ -1,10 +1,10 @@
 ---
 name: intake
-description: Arranque del repo de especificación. Recoge contexto mínimo, completa docs/00-context.md, abre OPENQ iniciales y deja lista una propuesta de primera iteración para el Planner.
+description: Arranque del repo de especificación. Recoge contexto mínimo, completa docs/spec/00-context.md, abre OPENQ iniciales y deja lista una propuesta de primera iteración para el Planner.
 handoffs:
   - label: Planificar primera iteración
     agent: planner
-    prompt: Con el contexto ya recogido, crea/actualiza docs/01-plan.md con la primera iteración (tareas atómicas + DoD) y registra gates en OPENQ/TODO si aplica.
+    prompt: Con el contexto ya recogido, crea/actualiza docs/spec/01-plan.md con la primera iteración (tareas atómicas + DoD) y registra gates en OPENQ/TODO si aplica.
     send: false
 ---
 
@@ -14,15 +14,15 @@ handoffs:
 Arrancar una especificación nueva con **contexto mínimo real** para evitar inventar y permitir planificación.
 
 ## Salidas obligatorias
-- `docs/00-context.md` actualizado (mínimo viable):
+- `docs/spec/00-context.md` actualizado (mínimo viable):
   - Resumen ejecutivo
   - Objetivos
   - Alcance IN/OUT
   - Roles/stakeholders (alto nivel)
   - Restricciones y supuestos
   - Referencias (si existen)
-- `docs/95-open-questions.md` actualizado con OPENQ relevantes
-- Mantener coherencia del índice (`docs/index.md`) si detectas roturas (solo ajustes mínimos)
+- `docs/spec/95-open-questions.md` actualizado con OPENQ relevantes
+- Mantener coherencia del índice (`docs/spec/index.md`) si detectas roturas (solo ajustes mínimos)
 
 ## Modo de entrevista (máximo 8 preguntas)
 Orden de prioridad:
@@ -46,6 +46,6 @@ Si el usuario no puede responder:
 
 ## Criterio de salida
 Antes de finalizar, verifica:
-- `docs/00-context.md` tiene contenido real, aunque sea provisional.
-- Las dudas importantes están en `docs/95-open-questions.md` con impacto.
+- `docs/spec/00-context.md` tiene contenido real, aunque sea provisional.
+- Las dudas importantes están en `docs/spec/95-open-questions.md` con impacto.
 - No has “saltado” a redactar FR/NFR en profundidad.

@@ -1,6 +1,6 @@
 ---
 name: requirements-nfr
-description: Usa este skill para definir o revisar requisitos no funcionales (NFR) en docs/11-requisitos-tecnicos-nfr.md: métricas, verificación, categorías mínimas y baseline operativo.
+description: Usa este skill para definir o revisar requisitos no funcionales (NFR) en docs/spec/11-requisitos-tecnicos-nfr.md: métricas, verificación, categorías mínimas y baseline operativo.
 ---
 
 # requirements-nfr — Requisitos no funcionales (NFR)
@@ -9,9 +9,9 @@ description: Usa este skill para definir o revisar requisitos no funcionales (NF
 Definir NFR de forma **medible o verificable**, alineados con arquitectura, seguridad e infraestructura.
 
 ## Dónde aplicar
-- `docs/11-requisitos-tecnicos-nfr.md` (principal)
-- `docs/40-arquitectura.md`, `docs/80-seguridad.md`, `docs/90-infra.md` (impactos)
-- `docs/01-plan.md` (si un NFR bloquea una iteración)
+- `docs/spec/11-requisitos-tecnicos-nfr.md` (principal)
+- `docs/spec/40-arquitectura.md`, `docs/spec/80-seguridad.md`, `docs/spec/90-infra.md` (impactos)
+- `docs/spec/01-plan.md` (si un NFR bloquea una iteración)
 
 ## Convenciones
 - ID: `NFR-###` correlativo.

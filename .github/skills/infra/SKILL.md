@@ -1,6 +1,6 @@
 ---
 name: infra
-description: Usa este skill para definir o revisar infraestructura y operación en docs/90-infra.md: entornos, CI/CD, observabilidad, backups/DR, accesos, secretos y requisitos operativos.
+description: Usa este skill para definir o revisar infraestructura y operación en docs/spec/90-infra.md: entornos, CI/CD, observabilidad, backups/DR, accesos, secretos y requisitos operativos.
 ---
 
 # infra — Infraestructura y operación (dev / pre / prod)
@@ -15,10 +15,10 @@ Definir lo mínimo necesario para operar la solución con calidad:
 - y consideraciones de coste.
 
 ## Dónde aplicar
-- `docs/90-infra.md` (principal)
-- `docs/11-requisitos-tecnicos-nfr.md` (NFR de operación)
-- `docs/40-arquitectura.md` (topología)
-- `docs/80-seguridad.md` (seguridad operativa)
+- `docs/spec/90-infra.md` (principal)
+- `docs/spec/11-requisitos-tecnicos-nfr.md` (NFR de operación)
+- `docs/spec/40-arquitectura.md` (topología)
+- `docs/spec/80-seguridad.md` (seguridad operativa)
 
 ## Entornos (mínimo)
 - DEV: datos sintéticos, accesos amplios controlados

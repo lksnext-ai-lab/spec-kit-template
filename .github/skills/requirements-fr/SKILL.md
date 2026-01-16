@@ -1,6 +1,6 @@
 ---
 name: requirements-fr
-description: Usa este skill cuando tengas que definir, refinar o revisar requisitos funcionales (FR) en docs/10-requisitos-funcionales.md, incluyendo criterios de aceptación y priorización MVP.
+description: Usa este skill cuando tengas que definir, refinar o revisar requisitos funcionales (FR) en docs/spec/10-requisitos-funcionales.md, incluyendo criterios de aceptación y priorización MVP.
 ---
 
 # requirements-fr — Requisitos funcionales (FR)
@@ -13,9 +13,9 @@ Crear requisitos funcionales claros, no ambiguos y verificables, listos para:
 - trazabilidad.
 
 ## Dónde aplicar
-- `docs/10-requisitos-funcionales.md` (principal)
-- `docs/02-trazabilidad.md` (enlaces FR↔UI↔API↔Datos↔ADR)
-- `docs/01-plan.md` (si un FR bloquea una iteración o requiere decisión)
+- `docs/spec/10-requisitos-funcionales.md` (principal)
+- `docs/spec/02-trazabilidad.md` (enlaces FR↔UI↔API↔Datos↔ADR)
+- `docs/spec/01-plan.md` (si un FR bloquea una iteración o requiere decisión)
 
 ## Convenciones FR
 - ID: `FR-###` correlativo.
@@ -68,7 +68,7 @@ Antes de crear un FR nuevo:
 
 ## Trazabilidad mínima obligatoria
 Por cada FR (al menos MVP):
-- Añade una fila en `docs/02-trazabilidad.md`.
+- Añade una fila en `docs/spec/02-trazabilidad.md`.
 - Si aún no hay UI/API/Datos, deja `TODO` en esas columnas.
 
 ## Checklist rápido (revisión FR)

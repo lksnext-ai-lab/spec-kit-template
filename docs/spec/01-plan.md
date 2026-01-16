@@ -35,8 +35,8 @@ TODO: 1 párrafo que describa el resultado deseado.
 | T03 | TODO | `docs/...` | TODO |
 
 ## Decisiones y preguntas abiertas (gatean el plan)
-- DECISION: TODO (¿requiere ADR?) → si sí, crear `docs/adr/ADR-####.md`
-- OPENQ: TODO → registrar también en `docs/95-open-questions.md`
+- DECISION: TODO (¿requiere ADR?) → si sí, crear `docs/spec/adr/ADR-####.md`
+- OPENQ: TODO → registrar también en `docs/spec/95-open-questions.md`
 
 ## Criterios de salida (Definition of Done)
 - [ ] FR: definidos con criterios de aceptación verificables + prioridad.

@@ -1,10 +1,10 @@
 ﻿---
 name: plan-iteration
-description: Crea/actualiza docs/01-plan.md con una iteración ejecutable (tareas atómicas + DoD) y gates (OPENQ/DECISION).
+description: Crea/actualiza docs/spec/01-plan.md con una iteración ejecutable (tareas atómicas + DoD) y gates (OPENQ/DECISION).
 ---
 
 Objetivo
-Convertir el estado actual de `docs/` en un plan ejecutable en `docs/01-plan.md` (tipo “Plan → Write → Review”).
+Convertir el estado actual de `docs/spec/` en un plan ejecutable en `docs/spec/01-plan.md` (tipo “Plan → Write → Review”).
 
 Reglas
 - El plan debe ser breve y ejecutable (no un Jira).
@@ -14,12 +14,12 @@ Reglas
 - Si hay una elección relevante: marca DECISION (sin crear ADR aquí).
 
 Lectura previa obligatoria
-- `docs/00-context.md`
-- `docs/index.md`
-- Estado general de `docs/` (qué está vacío, qué contradice, qué falta)
-- `docs/95-open-questions.md` y `docs/96-todos.md` (para no duplicar)
+- `docs/spec/00-context.md`
+- `docs/spec/index.md`
+- Estado general de `docs/spec/` (qué está vacío, qué contradice, qué falta)
+- `docs/spec/95-open-questions.md` y `docs/spec/96-todos.md` (para no duplicar)
 
-Actualizar `docs/01-plan.md` (estructura obligatoria)
+Actualizar `docs/spec/01-plan.md` (estructura obligatoria)
 1) Metadatos:
    - Iteración (ej. I01)
    - Fecha inicio (YYYY-MM-DD)
@@ -27,7 +27,7 @@ Actualizar `docs/01-plan.md` (estructura obligatoria)
    - Estado (Draft/En curso/En revisión/Cerrado)
 2) Objetivo de iteración (1 párrafo).
 3) Alcance IN/OUT de la iteración.
-4) Entregables: lista de archivos `docs/` que deben quedar actualizados.
+4) Entregables: lista de archivos `docs/spec/` que deben quedar actualizados.
 5) Tareas (tabla): ID / Tarea / Archivos / Resultado-DoD
    - Cada tarea toca 1–3 archivos.
    - Resultado-DoD debe ser verificable (1–3 bullets).
@@ -35,14 +35,14 @@ Actualizar `docs/01-plan.md` (estructura obligatoria)
 
 Gates (OPENQ/DECISION)
 - Si detectas una incertidumbre que cambia contenido:
-  - crea/actualiza `docs/95-open-questions.md` con OPENQ-### (siguiente número libre)
+  - crea/actualiza `docs/spec/95-open-questions.md` con OPENQ-### (siguiente número libre)
   - enlázala desde la sección “Decisiones y preguntas abiertas” del plan.
 - Si detectas una decisión importante:
   - añade `DECISION:` en el plan (y/o en el doc correspondiente si ya está claro)
   - NO crees ADR aquí (lo hará el Reviewer).
 
 Opcional (solo si hace falta)
-- Si aparece trabajo pendiente fuera de esta iteración: crea `TODO-###` en `docs/96-todos.md` (siguiente número libre).
+- Si aparece trabajo pendiente fuera de esta iteración: crea `TODO-###` en `docs/spec/96-todos.md` (siguiente número libre).
 
 Salida en el chat (resumen)
 - Iteración definida (Ixx)

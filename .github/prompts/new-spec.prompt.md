@@ -23,7 +23,7 @@ Preguntas (máximo 8, priorizadas)
 8) Riesgos/limitaciones conocidas (tiempo, presupuesto, dependencias).
 
 Acciones tras obtener respuestas
-1) Actualiza `docs/00-context.md`:
+1) Actualiza `docs/spec/00-context.md`:
    - Resumen ejecutivo (5–10 líneas)
    - Problema/oportunidad
    - Objetivos (idealmente OBJ-01..)
@@ -32,7 +32,7 @@ Acciones tras obtener respuestas
    - Restricciones y supuestos
    - Integraciones conocidas
    - Riesgos iniciales
-2) Actualiza `docs/95-open-questions.md`:
+2) Actualiza `docs/spec/95-open-questions.md`:
    - Añade OPENQ-### para toda incertidumbre relevante.
    - Asigna Impacto (Bajo/Medio/Alto) y qué bloquea (doc o tarea futura).
    - ID: usa el siguiente número libre mirando la tabla (OPENQ-001, OPENQ-002…).

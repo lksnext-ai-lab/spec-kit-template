@@ -1,6 +1,6 @@
 ---
 name: ui-spec
-description: Usa este skill para definir o revisar especificaciones de interfaz (UI) en docs/30-ui-spec.md: mapa de pantallas, estados, acciones, validaciones, navegación y trazabilidad UI↔FR.
+description: Usa este skill para definir o revisar especificaciones de interfaz (UI) en docs/spec/30-ui-spec.md: mapa de pantallas, estados, acciones, validaciones, navegación y trazabilidad UI↔FR.
 ---
 
 # ui-spec — Especificación de interfaz (pantallas y flujos)
@@ -14,8 +14,8 @@ Describir la UI de forma implementable sin diseñar “pixel perfect”:
 - trazabilidad con FR.
 
 ## Dónde aplicar
-- `docs/30-ui-spec.md` (principal)
-- `docs/02-trazabilidad.md` (UI ↔ FR)
+- `docs/spec/30-ui-spec.md` (principal)
+- `docs/spec/02-trazabilidad.md` (UI ↔ FR)
 - Referencias a conceptualización (roles/permisos) y backend (API)
 
 ## Convenciones

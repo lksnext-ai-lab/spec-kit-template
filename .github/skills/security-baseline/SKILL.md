@@ -1,6 +1,6 @@
 ---
 name: security-baseline
-description: Usa este skill para definir o revisar seguridad en docs/80-seguridad.md (y NFR relacionados): auth, autorización, protección de datos, auditoría, amenazas y controles mínimos.
+description: Usa este skill para definir o revisar seguridad en docs/spec/80-seguridad.md (y NFR relacionados): auth, autorización, protección de datos, auditoría, amenazas y controles mínimos.
 ---
 
 # security-baseline — Baseline de seguridad
@@ -14,9 +14,9 @@ Definir un baseline de seguridad operativo y verificable:
 - y una evaluación ligera de amenazas.
 
 ## Dónde aplicar
-- `docs/80-seguridad.md` (principal)
-- `docs/11-requisitos-tecnicos-nfr.md` (NFR de seguridad)
-- `docs/40-arquitectura.md` y `docs/90-infra.md` (impactos)
+- `docs/spec/80-seguridad.md` (principal)
+- `docs/spec/11-requisitos-tecnicos-nfr.md` (NFR de seguridad)
+- `docs/spec/40-arquitectura.md` y `docs/spec/90-infra.md` (impactos)
 - ADR cuando haya decisiones fuertes
 
 ## Baseline mínimo (lo que no debe faltar)
