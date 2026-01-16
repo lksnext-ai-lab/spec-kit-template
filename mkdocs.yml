@@ -23,4 +23,17 @@ nav:
       - Plantilla ADR: adr/ADR-0001-template.md
 
 theme:
-  name: mkdocs
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.follow
+    - search.suggest
+    - search.highlight
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
