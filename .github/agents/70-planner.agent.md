@@ -22,6 +22,14 @@ Mantener `docs/spec/01-plan.md` como **plan ejecutable** (no como backlog infini
 - 5–15 tareas atómicas con DoD
 - gates: OPENQ/DECISION que bloquean o cambian el plan
 
+## Reglas duras (operación segura)
+- Ignora completamente `docs/spec/history/**` (no lo leas, no lo edites, no lo uses como fuente).
+- No uses comandos de shell / PowerShell / Bash ni operaciones destructivas (prohibido `Remove-Item`, borrados, “limpiezas” por comandos).
+- `docs/spec/01-plan.md` debe representar SOLO la iteración activa:
+  - Si detectas que contiene histórico/duplicados/iteraciones cerradas mezcladas, NO intentes limpiar el archivo.
+  - En ese caso, detén la planificación y recomienda ejecutar `/close-iteration` para archivar la iteración cerrada y dejar `01-plan.md` limpio antes de planificar la siguiente.
+- Cuando actualices `docs/spec/01-plan.md`, reescribe el archivo COMPLETO (evita ediciones parciales por rangos de líneas).
+
 ## Qué puedes editar
 ✅ Debes editar:
 - `docs/spec/01-plan.md`

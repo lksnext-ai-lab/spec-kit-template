@@ -14,6 +14,7 @@ Estructura típica:
 - `docs/`
   - `spec/` → **especificación del proyecto** (lo que generan/modifican agentes y equipo)
     - `adr/` → decisiones (ADR)
+    - `history/` → histórico de iteraciones (snapshots cerrados)
   - `kit/` → **guía del spec-kit** (documentación del template/sistema)
   - `assets/` → recursos compartidos (imágenes, diagramas, etc.)
 - `.github/`
@@ -40,11 +41,12 @@ Características:
 - Convenciones de IDs (FR/NFR/UI/API/OPENQ/TODO/ADR).
 - Trazabilidad mínima.
 - Decisiones explícitas como ADRs.
+- Trabajo por iteraciones (plan ejecutable por iteración).
 
 Archivos principales (orientativo):
 - `index.md` (índice / punto de entrada)
 - `00-context.md` (objetivo, alcance, restricciones)
-- `01-plan.md` (plan de iteración)
+- `01-plan.md` (plan de la iteración **activa**)
 - `02-trazabilidad.md` (mapa mínimo de vínculos)
 - `10-...` FR, `11-...` NFR
 - `20-...` conceptualización
@@ -55,7 +57,7 @@ Archivos principales (orientativo):
 - `70-...` frontend
 - `80-...` seguridad
 - `90-...` infra
-- `95-open-questions.md`, `96-todos.md`, `97-review-notes.md`
+- `95-open-questions.md`, `96-todos.md`, `97-review-notes.md` (estado “vivo”)
 
 #### `docs/spec/adr/` — ADRs (decisiones)
 Decisiones relevantes capturadas como registros, siguiendo un formato consistente.
@@ -64,6 +66,20 @@ Decisiones relevantes capturadas como registros, siguiendo un formato consistent
 - Los ADRs nuevos se crean cuando aparece `DECISION:` en la spec y el reviewer lo detecta.
 
 > Nota: dentro de `docs/spec/**` se permiten enlaces relativos (por ejemplo `adr/ADR-0002-...md`).
+
+#### `docs/spec/history/` — Histórico de iteraciones (snapshots)
+Carpeta para almacenar snapshots de iteraciones cerradas, con el objetivo de:
+- evitar que `01-plan.md` acumule iteraciones antiguas,
+- evitar que `95-open-questions.md`, `96-todos.md` y `97-review-notes.md` crezcan sin control,
+- y mantener un “estado vivo” pequeño y accionable para agentes y equipo.
+
+Convención:
+- Cada iteración cerrada se archiva en `docs/spec/history/<Ixx>/` (por ejemplo, `docs/spec/history/I01/`).
+
+Reglas de uso:
+- Por defecto, prompts y agentes deben **ignorar** `docs/spec/history/**` durante Plan/Write/Review.
+- Solo el prompt **`/close-iteration`** puede crear/actualizar contenido dentro de `docs/spec/history/**`.
+- El índice `docs/spec/index.md` debe enlazar el histórico para navegación y auditoría.
 
 ---
 
@@ -97,8 +113,9 @@ Buenas prácticas:
 Reglas globales de trabajo del repo:
 - alcance (qué tocar / qué no tocar)
 - calidad mínima por documento
-- proceso (Plan → Write → Review)
+- proceso (Plan → Write → Review → Iterate)
 - convenciones (IDs, OPENQ/TODO/ADR)
+- reglas sobre histórico (`docs/spec/history/**`) y quién puede escribir ahí
 
 Es el “contrato” que guía al asistente y ayuda a que el equipo trabaje homogéneamente.
 
@@ -112,8 +129,9 @@ Agentes con rol y responsabilidad definida. Normalmente:
 - `90-reviewer.agent.md` → revisión crítica + ADR
 
 Los agentes deben:
-- operar sobre `docs/spec/**`,
-- evitar enlaces relativos (usar rutas desde raíz: `docs/spec/...`).
+- operar sobre `docs/spec/**` (estado vivo),
+- **ignorar** `docs/spec/history/**`,
+- evitar enlaces relativos en `.github/**` (usar rutas desde raíz: `docs/spec/...`).
 
 ---
 
@@ -123,6 +141,7 @@ Comandos reutilizables que ejecutas en Copilot Chat, por ejemplo:
 - `/plan-iteration`
 - `/write-from-plan`
 - `/review-and-adr`
+- `/close-iteration`
 
 Los prompt files:
 - implementan el flujo recomendado,
@@ -179,5 +198,6 @@ Garantizan consistencia entre sistemas (especialmente Windows):
 - Mantener `docs/kit/` como manual del sistema y onboarding.
 - Evitar duplicar reglas: si algo es “norma”, mejor en `copilot-instructions.md` y referenciar desde otros documentos.
 - Usar PRs para cambios en `.github/**` y en la estructura del template.
+- Cerrar iteraciones de forma explícita: usar `/close-iteration` para archivar snapshots y mantener el plan activo limpio.
 
 Siguiente lectura recomendada: **`40-documentacion-generada.md`**.

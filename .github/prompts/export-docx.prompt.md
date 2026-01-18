@@ -15,6 +15,7 @@ Entrada (preguntas mínimas)
    - spec.docx / kit.docx / docs.docx
 3) Título del documento (opcional)
 4) ¿Incluir TOC (tabla de contenidos)? (sí/no; por defecto NO)
+5) (Solo si scope=spec o all) ¿Incluir histórico `docs/spec/history/**`? (sí/no; por defecto NO)
 
 Reglas
 - NO modifiques ningún archivo de docs/ (solo lectura).
@@ -24,6 +25,9 @@ Reglas
 - Por defecto: NO incluir `--toc`.
 - Por defecto: cada archivo .md debe comenzar en una nueva página (lo gestiona el script).
 - Si falta Pandoc, indica cómo verificar e instalar.
+- Por defecto, EXCLUYE `docs/spec/history/**`:
+  - Para `--scope spec`: no exportar histórico salvo petición explícita.
+  - Para `--scope all`: no exportar histórico salvo petición explícita (para evitar DOCX enormes y confusos).
 
 Salida (obligatoria)
 1) Un comando listo para copiar/pegar en PowerShell.
@@ -31,6 +35,7 @@ Salida (obligatoria)
 3) Nota breve con:
    - dónde quedará el DOCX generado
    - cómo verificar Pandoc (`pandoc --version`)
+   - si se excluye/incluye histórico, indicarlo explícitamente
 
 Plantilla de comando
 python tools\export_docx.py --scope <spec|kit|all> --output exports\<archivo>.docx --title "<titulo>"
@@ -39,3 +44,6 @@ Notas
 - Si el usuario pide TOC, añade `--toc`.
 - Si no hay título, omite `--title`.
 - Si el usuario pide explícitamente NO saltos de página, añade `--no-page-break`.
+- Si el usuario pide incluir histórico:
+  - añade el flag correspondiente del script (por ejemplo `--include-history`) si existe,
+  - y si no existe, indícalo como limitación y sugiere exportar `history` por separado o ampliar el script.

@@ -63,27 +63,29 @@ Opcional (pero muy útil):
 
 ## 4) Arranque controlado de una nueva especificación
 
-### Paso 1 — Ejecutar `/new-spec`
+### Paso 1 — Arrancar con Intake (`/new-spec` o agente Intake)
 
-En Copilot Chat:
+En Copilot Chat, tienes dos opciones equivalentes de arranque:
 
-* Ejecuta `/new-spec` y responde a la entrevista mínima.
-* El resultado debe actualizar/crear:
+**Opción A (rápida):** ejecuta `/new-spec` y responde a la entrevista mínima.
+**Opción B (recomendada en proyectos complejos):** selecciona el **agente Intake** y conversa (mismas reglas, preguntas adaptativas).
 
-  * `docs/spec/00-context.md`
-  * `docs/spec/index.md`
-  * `docs/spec/95-open-questions.md` (si aplica)
+El resultado debe actualizar/crear:
+
+* `docs/spec/00-context.md`
+* `docs/spec/index.md`
+* `docs/spec/95-open-questions.md` (si aplica)
 
 Objetivo:
 
 * dejar la spec “arrancada” con alcance y terminología mínima,
-* sin inventar datos.
+* sin inventar datos (si falta info → OPENQ).
 
 ---
 
-### Paso 2 — Planificar la primera iteración con `/plan-iteration`
+### Paso 2 — Planificar la primera iteración con `/plan-iteration` (o agente Planner)
 
-Ejecuta `/plan-iteration` para actualizar:
+Ejecuta `/plan-iteration` (o usa el agente Planner) para actualizar:
 
 * `docs/spec/01-plan.md`
 
@@ -92,11 +94,15 @@ Objetivo:
 * definir 5–15 tareas atómicas con DoD,
 * y una lista clara de entregables en `docs/spec/**`.
 
+Nota operativa:
+
+* `docs/spec/01-plan.md` representa **una única iteración activa**. Evita mezclar iteraciones en el mismo plan.
+
 ---
 
-### Paso 3 — Redactar siguiendo el plan con `/write-from-plan`
+### Paso 3 — Redactar siguiendo el plan con `/write-from-plan` (o agente Writer)
 
-Ejecuta `/write-from-plan` para:
+Ejecuta `/write-from-plan` (o usa el agente Writer) para:
 
 * completar las tareas,
 * actualizar trazabilidad (`docs/spec/02-trazabilidad.md`) al mínimo vivo,
@@ -104,13 +110,23 @@ Ejecuta `/write-from-plan` para:
 
 ---
 
-### Paso 4 — Revisión crítica con `/review-and-adr`
+### Paso 4 — Revisión crítica con `/review-and-adr` (o agente Reviewer)
 
-Ejecuta `/review-and-adr` para:
+Ejecuta `/review-and-adr` (o usa el agente Reviewer) para:
 
-* generar `docs/spec/97-review-notes.md`,
+* generar/actualizar `docs/spec/97-review-notes.md`,
 * crear OPENQ/TODO si procede,
 * y crear ADRs automáticamente cuando existan `DECISION:` sin ADR enlazado.
+
+---
+
+### Paso 5 — (Recomendado) Cerrar iteración con `/close-iteration`
+
+Cuando la iteración esté completada (o decidas cerrarla formalmente), ejecuta `/close-iteration` para:
+
+* archivar snapshots en `docs/spec/history/Ixx/`,
+* “limpiar” los archivos activos (`01-plan.md`, `95/96/97`) dejándolos como **estado vivo**,
+* preparar el repo para planificar la siguiente iteración sin mezclar planes ni inflar ficheros.
 
 ---
 
@@ -118,16 +134,20 @@ Ejecuta `/review-and-adr` para:
 
 Ciclo recomendado:
 
-1. `/plan-iteration` → plan corto y verificable
+1. `/plan-iteration` → plan corto y verificable (iteración activa)
 2. `/write-from-plan` → ejecutar tareas
 3. `/review-and-adr` → revisión + ADR
-4. Iterar (volver al Writer o planificar I02)
+4. (Opcional recomendado) `/close-iteration` → archivar y preparar siguiente iteración
+5. Repetir: planificar I02, ejecutar, revisar, cerrar…
 
 Buenas prácticas:
 
 * Mantener iteraciones pequeñas (mejor varias rondas cortas).
 * Evitar “reescrituras masivas”.
 * Mantener `OPENQ` y `TODO` al día.
+* Tratar `docs/spec/history/**` como **solo lectura** para el día a día:
+
+  * por defecto, prompts/agentes deben ignorarlo para planificar/redactar/revisar.
 
 ---
 
@@ -174,6 +194,10 @@ Antes de compartir una especificación:
 * Trazabilidad mínima actualizada.
 * `docs/spec/97-review-notes.md` sin bloqueantes abiertos.
 * `OPENQ` y `TODO` revisados (y marcados como aceptados si quedan abiertos).
+* (Recomendado) Iteración cerrada con `/close-iteration` si se va a iniciar una nueva iteración o a congelar un baseline:
+
+  * histórico generado en `docs/spec/history/Ixx/`
+  * archivos activos “limpios” y manejables.
 
 ---
 
@@ -190,24 +214,47 @@ Antes de compartir una especificación:
 Este repositorio permite exportar la documentación a un archivo **DOCX** (Word) para compartirla fuera del repo.
 
 ### Requisitos
-- Tener **Pandoc** instalado y disponible en PATH.
-- (Opcional) tener Python disponible para ejecutar el script del repo.
+
+* Tener **Pandoc** instalado y disponible en PATH.
+* Tener Python disponible para ejecutar el script del repo.
+* (Opcional) Puedes usar el prompt `/export-docx` para que Copilot te genere el comando exacto.
 
 ### Exportar SPEC (docs/spec/**)
+
+Por defecto:
+
+* **NO** se incluye TOC (tabla de contenidos),
+* cada archivo `.md` empieza en **una nueva página** (a través del script).
+
+```powershell
+python tools\export_docx.py --scope spec --output exports\spec.docx --title "Especificación técnica"
+```
+
+Si quieres TOC:
+
 ```powershell
 python tools\export_docx.py --scope spec --output exports\spec.docx --title "Especificación técnica" --toc
 ```
 
+Si NO quieres saltos de página entre ficheros:
+
+```powershell
+python tools\export_docx.py --scope spec --output exports\spec.docx --title "Especificación técnica" --no-page-break
+```
+
+---
+
 ### Exportar KIT (docs/kit/**)
 
 ```powershell
-python tools\export_docx.py --scope kit --output exports\kit.docx --title "Spec-kit: guía interna" --toc
+python tools\export_docx.py --scope kit --output exports\kit.docx --title "Spec-kit: guía interna"
 ```
 
-Notas:
+---
+
+### Notas
 
 * El resultado se genera en `exports/`.
-* Si no quieres TOC, elimina `--toc`.
 * Para comprobar Pandoc:
 
   ```powershell

@@ -40,7 +40,7 @@ Ejemplo:
 ```txt
 En docs/spec usa: adr/ADR-####-<slug>.md
 En .github usa: docs/spec/adr/ADR-####-<slug>.md
-````
+```
 
 ---
 
@@ -50,7 +50,7 @@ En la práctica, lo habitual es que:
 
 * tú selecciones el agente adecuado,
 * o ejecutes un prompt concreto,
-  y el “handoff” se haga como recomendación (“siguiente paso: usa Planner / ejecuta /plan-iteration”).
+* y el “handoff” se haga como recomendación (“siguiente paso: usa Planner / ejecuta /plan-iteration”).
 
 Si quieres automatizar encadenado de agentes, eso depende de las capacidades concretas del entorno (Copilot / VS Code / configuración disponible). El diseño del spec-kit ya está preparado para que el flujo se ejecute como:
 
@@ -66,10 +66,95 @@ Sí. La calidad de una spec mejora cuando:
 * las dudas están explícitas,
 * y se distinguen de afirmaciones.
 
-Una buena práctica es:
+Buenas prácticas:
 
 * resolver OPENQ por “bloque” (MVP primero),
-* y cerrar las OPENQ críticas antes de compartir una versión final.
+* cerrar OPENQ críticas antes de compartir una versión final,
+* diferir lo no bloqueante a iteraciones posteriores (I02, I03…).
+
+---
+
+### 1.6 El plan (`docs/spec/01-plan.md`) se ha hecho enorme o se mezclan I01/I02
+
+**Síntomas típicos:**
+
+* el plan contiene secciones duplicadas o tareas “arrastradas” de otra iteración,
+* Copilot intenta “reemplazar desde la sección X hasta el final” y acaba mezclando contenido,
+* el archivo crece tanto que planificar/redactar se vuelve lento y confuso.
+
+**Causa típica:**
+
+* se usa `01-plan.md` como histórico/backlog, en lugar de plan **único de la iteración activa**.
+
+**Solución recomendada:**
+
+1. Cierra la iteración anterior con `/close-iteration`:
+
+   * archiva snapshots en `docs/spec/history/Ixx/`,
+   * limpia `01-plan.md` para que represente **solo** la siguiente iteración.
+2. Mantén `01-plan.md` con 5–15 tareas por iteración (si hay más, divide en Iyy).
+
+**Si ya está mezclado y necesitas “desliarlo” manualmente:**
+
+* restaura el plan correcto desde `docs/spec/history/Ixx/01-plan.md` (si existe),
+* o reescribe `docs/spec/01-plan.md` dejando solo:
+
+  * Iteración Iyy (metadatos),
+  * objetivo + alcance IN/OUT,
+  * placeholder para regenerar con `/plan-iteration`.
+
+---
+
+### 1.7 Copilot propone borrar archivos o ejecutar `Remove-Item` y sale “Auto approval denied”
+
+**Síntoma típico:**
+Copilot intenta ejecutar un comando tipo `Remove-Item ...` y VS Code muestra algo como:
+
+* “Run pwsh command? Auto approval denied by rule Remove-Item (default)”
+* opciones: Allow / Skip
+
+**Contexto:**
+
+* Es normal que el entorno bloquee comandos destructivos por seguridad.
+* Además, en este repo **preferimos** que los prompts/agentes resuelvan con **edición de ficheros**, no con borrados.
+
+**Qué hacer:**
+
+* Elige **Skip**.
+* Pide (o aplica) una solución no destructiva:
+
+  * copiar contenido a `docs/spec/history/Ixx/...`,
+  * reescribir los archivos activos con plantillas limpias,
+  * y dejar el histórico como snapshots.
+
+**Recomendación:**
+
+* Usa `/close-iteration` para el cierre: está diseñado para **no depender** de borrados ni comandos shell.
+
+---
+
+### 1.8 ¿Ejecuto el plan o lo reviso primero? ¿Qué significa “revisar plan”?
+
+**Ejecuto el plan** cuando:
+
+* `docs/spec/01-plan.md` está claro, corto y verificable,
+* no hay bloqueantes evidentes,
+* las tareas tienen DoD comprobable y archivos acotados.
+
+**Reviso el plan** cuando:
+
+* el plan parece demasiado grande,
+* hay gates sin registrar,
+* el orden de tareas no es lógico,
+* o hay señales de mezcla con otra iteración.
+
+“Revisar plan” significa comprobar, como mínimo:
+
+* Iteración y estado correctos (Ixx, Draft/En curso/En revisión),
+* 5–15 tareas atómicas (no mini-Jira),
+* DoD verificable,
+* OPENQ/DECISION enlazadas si bloquean,
+* entregables claros (qué archivos deben cambiar en esta iteración).
 
 ---
 
@@ -127,7 +212,7 @@ Recomendaciones:
 
 1. asegúrate de activar el venv:
 
-   * prompt debe mostrar `(.venv)`
+   * el prompt debe mostrar `(.venv)`
 2. usa siempre:
 
    * `python -m pip install ...`
@@ -147,12 +232,12 @@ python -m mkdocs serve -a 127.0.0.1:8001
 
 Causas típicas:
 
-* rutas mal escritas en `mkdocs.yml`
-* archivos movidos/renombrados sin actualizar nav
+* rutas mal escritas en `mkdocs.yml`,
+* archivos movidos/renombrados sin actualizar nav.
 
 Solución:
 
-* revisar `mkdocs.yml`
+* revisar `mkdocs.yml`,
 * validar con:
 
 ```powershell
@@ -165,8 +250,8 @@ python -m mkdocs build --strict
 
 Sí, pero requiere:
 
-* habilitar `pymdownx.superfences` (normalmente ya)
-* y configurar Mermaid (según enfoque: plugin o JS extra)
+* habilitar `pymdownx.superfences` (normalmente ya),
+* y configurar Mermaid (según enfoque: plugin o JS extra).
 
 Recomendación:
 
@@ -207,15 +292,31 @@ Después:
 
 ---
 
+### 4.3 ¿Qué hago con `docs/spec/history/**`?
+
+`docs/spec/history/**` contiene snapshots por iteración (I01, I02…).
+
+Reglas recomendadas:
+
+* es **solo lectura** para el trabajo diario,
+* por defecto prompts/agentes deben **ignorar** el histórico para planificar/redactar/revisar,
+* solo `/close-iteration` crea/actualiza dentro de `history/**`.
+
+Si lo incluyes en MkDocs nav:
+
+* hazlo como sección “Histórico” para consulta, no como parte de la spec activa.
+
+---
+
 ## 5) Calidad de la spec
 
 ### 5.1 FR sin criterios verificables
 
 Solución:
 
-* reescribir FR con criterios de aceptación tipo “Dado/Cuando/Entonces”
-* añadir prioridad/estado
-* enlazar a UI/API si aplica
+* reescribir FR con criterios de aceptación tipo “Dado/Cuando/Entonces”,
+* añadir prioridad/estado,
+* enlazar a UI/API si aplica.
 
 ---
 
@@ -223,8 +324,8 @@ Solución:
 
 Solución:
 
-* convertirlos en métrica objetivo (SLO/umbral) o verificación explícita
-* asociar a drivers (seguridad, rendimiento, coste, compliance)
+* convertirlos en métrica objetivo (SLO/umbral) o verificación explícita,
+* asociar a drivers (seguridad, rendimiento, coste, compliance).
 
 ---
 
@@ -232,8 +333,8 @@ Solución:
 
 Solución:
 
-* ejecutar `/review-and-adr`
-* revisar que el reviewer enlaza ADR desde el punto de DECISION
+* ejecutar `/review-and-adr`,
+* revisar que el reviewer enlaza ADR desde el punto de DECISION.
 
 ---
 
@@ -241,8 +342,8 @@ Solución:
 
 Si encuentras un caso que no cubre el kit:
 
-* registra una nota en `docs/spec/97-review-notes.md` (si aplica a una spec concreta)
-* o abre una issue/nota interna para mejorar el template
+* registra una nota en `docs/spec/97-review-notes.md` (si aplica a una spec concreta),
+* o abre una issue/nota interna para mejorar el template,
 * describe:
 
   * qué intentabas hacer,
@@ -257,11 +358,15 @@ Esto alimenta la evolución del spec-kit sin improvisar cambios.
 ## 7) Exportación a DOCX
 
 ### 7.1 Error: “No se encuentra 'pandoc' en PATH”
+
 Síntoma:
-- el script falla indicando que no localiza `pandoc`.
+
+* el script falla indicando que no localiza `pandoc`.
 
 Solución:
-1) Verificar:
+
+1. Verificar:
+
 ```powershell
 pandoc --version
 ```
@@ -291,6 +396,23 @@ Recomendación:
 
 ---
 
+### 7.3 ¿Por qué no aparece TOC (tabla de contenidos)?
+
+Por defecto, el export está pensado para **no incluir TOC** salvo que lo pidas explícitamente.
+
+Solución:
+
+* ejecuta con `--toc` si quieres tabla de contenidos.
+
+Ejemplo:
+
+```powershell
+python tools\export_docx.py --scope spec --output exports\spec.docx --title "Especificación técnica" --toc
+```
+
+---
+
 Siguiente lectura recomendada:
 
-* FAQ/troubleshooting: `docs\kit\99-anexos-ejemplos.md`
+* Anexos y ejemplos: `docs/kit/99-anexos-ejemplos.md`
+

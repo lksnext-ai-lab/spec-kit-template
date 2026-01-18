@@ -58,6 +58,7 @@ Prompt files típicos:
 - `/plan-iteration` → crear/actualizar plan de iteración
 - `/write-from-plan` → ejecutar el plan
 - `/review-and-adr` → revisión crítica + ADRs automáticos
+- `/close-iteration` → cierre de iteración + archivado en histórico y limpieza de ficheros activos
 
 **Especificidad:** el prompt es “procedimiento”; el agente es “rol”. Un prompt puede usarse sin seleccionar agente.
 
@@ -112,9 +113,16 @@ Una forma útil de verlo:
 2) Ejecutar `/plan-iteration` (o agente Planner)  
 3) Ejecutar `/write-from-plan` (o agente Writer)  
 4) Ejecutar `/review-and-adr` (o agente Reviewer)  
-5) Volver al Writer (aplicar mejoras) o planificar nueva iteración
+5) (Opcional pero recomendado) Ejecutar `/close-iteration` al cerrar la iteración  
+6) Volver al Writer (aplicar mejoras) o planificar nueva iteración
 
 Este flujo se repite por iteraciones (I01, I02, …).
+
+### Nota operativa: estado vivo vs histórico
+- `docs/spec/01-plan.md` representa **una única iteración activa**.
+- `docs/spec/95-open-questions.md`, `96-todos.md` y `97-review-notes.md` deben mantenerse como **estado vivo** (solo lo relevante/pediente).
+- Las iteraciones cerradas se archivan en `docs/spec/history/Ixx/` para evitar planes mezclados y ficheros cada vez más grandes.
+- Por defecto, prompts y agentes deben **ignorar `docs/spec/history/**`** al planificar/redactar/revisar.
 
 ---
 
@@ -129,8 +137,10 @@ flowchart TD
   R -->|si DECISION| A[docs/spec/adr/ADR-####-<slug>.md]
   R -->|si faltan datos| Q[docs/spec/95-open-questions.md]
   R -->|si trabajo pendiente| T[docs/spec/96-todos.md]
-  R -->|Iterar| P
-````
+  R -->|cerrar iteración| X[/close-iteration]
+  X --> H[docs/spec/history/Ixx/* (snapshots)]
+  X -->|nueva iteración| P
+```
 
 (Nota: si Mermaid no se renderiza aún, se puede activar en MkDocs más adelante.)
 
@@ -143,14 +153,18 @@ flowchart TD
 * La IA (prompts/agentes) debe editar **solo** `docs/spec/**`.
 * `docs/kit/**` solo se modifica si el usuario lo solicita explícitamente.
 
-### 6.2 Rutas en `.github/**`
+### 6.2 Histórico de iteraciones (`docs/spec/history/**`)
 
-* En prompts/agentes (`.github/**`) usar siempre rutas desde raíz:
+* `docs/spec/history/**` contiene **snapshots cerrados por iteración**.
+* Por defecto, prompts y agentes deben **ignorar** este directorio para planificar/redactar/revisar.
+* Solo el prompt `/close-iteration` puede crear/actualizar contenido dentro de `docs/spec/history/**`.
 
-  * `docs/spec/...`
+### 6.3 Rutas en `.github/**`
+
+* En prompts/agentes (`.github/**`) usar siempre rutas desde raíz: `docs/spec/...`.
 * Evitar enlaces relativos tipo `./adr/...` en `.github/**` para no generar rutas rotas.
 
-### 6.3 Rutas en `docs/spec/**`
+### 6.4 Rutas en `docs/spec/**`
 
 * En la spec, enlaces relativos son correctos (por ejemplo `adr/ADR-0002-...md`).
 
@@ -164,6 +178,7 @@ flowchart TD
 * Decisiones visibles (ADR) y trazables.
 * Evita inventar: OPENQ como mecanismo de honestidad.
 * Evolución versionada (Git) y navegable (MkDocs).
+* Evita planes mezclados y “documentos bola de nieve”: histórico por iteración (`/close-iteration`).
 
 ---
 
@@ -175,3 +190,4 @@ flowchart TD
 * `54-skills.md` (skills core y cómo ampliarlos)
 
 Siguiente lectura recomendada: **`60-uso-del-template.md`**.
+

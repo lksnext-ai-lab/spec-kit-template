@@ -11,6 +11,12 @@ Reglas
 - Sí ediciones mínimas y seguras: marcar TODO/OPENQ/RISK/DECISION, enlazar ADRs, correcciones pequeñas.
 - El resultado principal es `docs/spec/97-review-notes.md`.
 - No modificar `docs/kit/**` salvo solicitud explícita del usuario.
+- Ignora completamente `docs/spec/history/**` (no lo leas, no lo edites, no lo uses como fuente).
+- No uses comandos de shell / PowerShell / Bash. Solo ediciones de archivos.
+- Si detectas mezcla de iteraciones en `docs/spec/01-plan.md` (histórico/duplicados):
+  - NO intentes limpiar ni borrar secciones.
+  - Registra la recomendación en `docs/spec/97-review-notes.md` (severidad Media/Alta según impacto).
+  - Sugiere ejecutar `/close-iteration` para archivar/cerrar la iteración previa y dejar `01-plan.md` limpio.
 
 Checklist de revisión (obligatorio)
 - Coherencia: `00-context` ↔ FR/NFR ↔ conceptualización ↔ UI ↔ arquitectura ↔ datos ↔ backend/frontend ↔ seguridad ↔ infra
@@ -33,7 +39,7 @@ Crear OPENQ/TODO si procede
 - Si hay trabajo pendiente concreto: añade `TODO-###` en `docs/spec/96-todos.md` (siguiente número libre).
 
 Auto-ADR (obligatorio)
-Para cada `DECISION:` detectada en documentos de la especificación (`docs/spec/*.md` excluyendo `docs/spec/adr/**`):
+Para cada `DECISION:` detectada en documentos de la especificación (`docs/spec/*.md` excluyendo `docs/spec/adr/**` y excluyendo `docs/spec/history/**`):
 1) Si ya hay referencia a un ADR en esa sección, NO crear otro (solo proponer completar si está incompleto).
 2) Si NO hay ADR asociado:
    - Determina el siguiente ID disponible mirando `docs/spec/adr/` (ADR-0001, ADR-0002…).
@@ -47,7 +53,6 @@ Para cada `DECISION:` detectada en documentos de la especificación (`docs/spec/
     DECISION: ... (ver ADR-#### en adr/ADR-####-<slug>.md)
     ```
   - Nunca uses rutas relativas dentro de `.github/**` (prompts/agentes): ahí siempre rutas desde raíz (`docs/spec/...`).
-
 
 Trazabilidad
 - Si la decisión afecta a FR/UI/API/Datos y se conoce el vínculo, actualiza `docs/spec/02-trazabilidad.md` columna ADR.

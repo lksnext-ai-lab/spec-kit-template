@@ -13,6 +13,11 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
 - `docs/kit/**` es documentación del template/sistema: **NO modificar** salvo solicitud explícita del usuario.
 - `docs/assets/**` puede ser usado por ambas (imágenes/recursos), pero evita cambios innecesarios.
 
+### Histórico de iteraciones (docs/spec/history)
+- `docs/spec/history/**` contiene snapshots cerrados por iteración (solo archivo histórico, no “fuente viva”).
+- Por defecto, agentes y prompts deben **ignorar** este directorio para planificar/redactar/revisar.
+- Solo el prompt `/close-iteration` puede crear/actualizar contenido dentro de `docs/spec/history/**`.
+
 ## Principios
 - **No inventar**: nunca completes con suposiciones no explícitas. Si falta información, crea una `OPENQ` y continúa.
 - **Consistencia**: si cambias un concepto (nombre de entidad, flujo, rol…), revisa impactos en documentos relacionados.
@@ -75,6 +80,14 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
 3) **Revisar**: actualizar `docs/spec/97-review-notes.md` con observaciones accionables.
 4) **Iterar**: convertir feedback en cambios, TODOs u OPENQs y repetir.
 
+## Arranque de especificación (Intake / new-spec)
+- El arranque se realiza en modo **conversacional**:
+  - **2 preguntas CORE por turno** (máximo 8 CORE en total).
+  - **0–2 repreguntas** solo si hay ambigüedad/contradicción, decisión de alto impacto o riesgo de inventar.
+  - Tras cada respuesta: **resumen breve + OPENQ si falta info + preguntar “¿Sigo con las siguientes 2 preguntas?”**
+  - Presupuesto anti “conversación infinita”: **máximo 12 preguntas** (8 CORE + hasta 4 aclaraciones). El resto → `OPENQ-###`.
+- El objetivo del intake es completar `docs/spec/00-context.md` y `docs/spec/95-open-questions.md` sin redactar aún FR/NFR completos.
+
 ## Gestión de dudas, trabajo pendiente y decisiones
 - Si falta información:
   - crea `OPENQ:` en el lugar donde aparezca,
@@ -87,5 +100,5 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
   - enlaza la ADR desde el punto donde se menciona la decisión.
 
 ## Enlaces
-- En documentos dentro de `docs/spec/` usa enlaces relativos (por ejemplo `./adr/ADR-0001-...md`).
+- En documentos dentro de `docs/spec/` usa enlaces relativos (por ejemplo `adr/ADR-0001-...md`) y evita `./`.
 - En agentes/prompts (en `.github/`) usa rutas explícitas tipo `docs/spec/...` para evitar rutas relativas incorrectas.

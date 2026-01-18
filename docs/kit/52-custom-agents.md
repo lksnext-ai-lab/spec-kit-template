@@ -15,6 +15,7 @@ En este repositorio, los agentes viven en:
 Los agentes deben operar bajo las **Copilot Instructions** del repo y, por defecto:
 - **editar solo** `docs/spec/**`
 - **no tocar** `docs/kit/**` salvo petición explícita
+- **ignorar** `docs/spec/history/**` (histórico de iteraciones; no es “fuente viva”)
 
 ---
 
@@ -43,18 +44,30 @@ El template define 4 agentes principales (nombres orientativos):
 
 Responsabilidades:
 - hacer preguntas clave (qué se construye, usuarios/roles, MVP, restricciones, datos sensibles, integraciones),
+- conducir una entrevista **conversacional** (no “formulario”):
+  - **2 preguntas CORE por turno** (orden estable por rondas),
+  - **repreguntas opcionales (0–2)** solo si hay ambigüedad, contradicción, decisión de alto impacto o riesgo de inventar,
+  - tras cada respuesta: **resumen breve + registro de OPENQ** y confirmación explícita para continuar,
+  - **presupuesto anti “conversación infinita”** (p. ej., 8 CORE + hasta 4 aclaraciones),
 - crear o actualizar:
   - `docs/spec/00-context.md`
-  - `docs/spec/index.md`
+  - `docs/spec/index.md` (solo ajustes mínimos si detecta roturas)
   - `docs/spec/95-open-questions.md` (si hay lagunas)
 
 Qué NO hace:
 - no define arquitectura en detalle,
-- no produce un plan de iteración completo (eso es del Planner).
+- no redacta FR/NFR completos,
+- no produce un plan de iteración completo (eso es del Planner),
+- no crea ADRs (si aparece una decisión, marca `DECISION:` y registra OPENQ si faltan drivers/datos),
+- no usa ni “rescata” contenido desde `docs/spec/history/**`.
 
 Cuándo usarlo:
-- al iniciar una nueva spec,
+- al iniciar una nueva spec (recomendado),
 - o cuando el contexto cambia significativamente.
+
+Relación con `/new-spec`:
+- `/new-spec` es un **atajo** para arrancar la conversación de intake (mismas reglas de “no inventar” y apertura de OPENQ),
+- en proyectos complejos, se recomienda priorizar el **agente Intake** por su capacidad de adaptar preguntas y aclaraciones.
 
 ---
 
@@ -71,11 +84,16 @@ Responsabilidades:
 
 Qué NO hace:
 - no redacta contenido profundo (FR/NFR/UI/arquitectura),
-- no crea ADRs (solo marca `DECISION:` para que el Reviewer lo formalice).
+- no crea ADRs (solo marca `DECISION:` para que el Reviewer lo formalice),
+- no intenta “limpiar” planes mezclados con ediciones destructivas o comandos.
+
+Nota operativa (planes mezclados):
+- Si detecta que `docs/spec/01-plan.md` contiene iteraciones mezcladas/duplicadas, debe recomendar ejecutar **`/close-iteration`** para archivar la iteración cerrada y dejar el plan activo limpio antes de continuar planificando.
 
 Cuándo usarlo:
 - al inicio de cada iteración,
-- tras una revisión crítica (para convertir feedback en plan).
+- tras una revisión crítica (para convertir feedback en plan),
+- tras cerrar una iteración con `/close-iteration`.
 
 ---
 
@@ -93,7 +111,10 @@ Responsabilidades:
 
 Qué NO hace:
 - no “resuelve” dudas inventando,
-- no crea ADRs (eso es trabajo del Reviewer).
+- no crea ADRs (eso es trabajo del Reviewer),
+- no replanifica: si necesita cambiar alcance/orden o introducir gates, debe registrarlo como TODO/OPENQ y volver a Planner,
+- no ejecuta “limpiezas” de ficheros ni usa comandos de shell,
+- no usa ni edita `docs/spec/history/**`.
 
 Cuándo usarlo:
 - después de planificar una iteración,
@@ -113,7 +134,9 @@ Responsabilidades:
 Qué NO hace:
 - no reescribe “todo”,
 - no convierte el review en una nueva especificación paralela,
-- no toma decisiones inventadas: si falta info, deja “Propuesto” + OPENQ.
+- no toma decisiones inventadas: si falta info, deja “Propuesto” + OPENQ,
+- no intenta “limpiar” planes mezclados; si ocurre, lo registra como hallazgo y sugiere `/close-iteration`,
+- no usa ni edita `docs/spec/history/**` (salvo enlazarlo desde el índice si procede).
 
 Cuándo usarlo:
 - al final de cada iteración,
@@ -129,7 +152,8 @@ Flujo típico:
 2) **Planner** → produce `01-plan.md`
 3) **Writer** → ejecuta plan y actualiza docs/spec
 4) **Reviewer** → genera review notes y ADRs
-5) Vuelta a **Writer** o nueva iteración con **Planner**
+5) (Opcional) **Close iteration** → `/close-iteration` archiva la iteración cerrada y limpia archivos activos
+6) Vuelta a **Planner** (nueva iteración) o **Writer** (aplicar mejoras)
 
 ---
 
@@ -138,6 +162,7 @@ Flujo típico:
 ### Alcance (cortafuegos)
 - Por defecto, editar solo `docs/spec/**`.
 - No tocar `docs/kit/**` salvo petición explícita.
+- Ignorar `docs/spec/history/**` en lectura/edición (solo snapshots).
 
 ### No inventar
 - Si falta info: `OPENQ-###`.
@@ -145,7 +170,7 @@ Flujo típico:
 
 ### Rutas y enlaces
 - En `.github/**` (agentes/prompts): usar rutas desde raíz (`docs/spec/...`).
-- En `docs/spec/**`: enlaces relativos son válidos (por ejemplo `adr/ADR-0002-...md`).
+- En `docs/spec/**`: enlaces relativos son válidos (por ejemplo `adr/ADR-0002-...md`) y evita `./`.
 
 ### Cambios mínimos, iterativos
 - No hacer refactors masivos del texto.

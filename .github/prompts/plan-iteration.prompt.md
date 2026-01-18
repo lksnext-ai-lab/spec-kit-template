@@ -12,14 +12,21 @@ Reglas
 - No redactes FR/NFR/arquitectura/UI en profundidad: solo planifica.
 - Si falta información: crea OPENQ.
 - Si hay una elección relevante: marca DECISION (sin crear ADR aquí).
+- Ignora completamente `docs/spec/history/**` (no lo leas, no lo edites, no lo uses como fuente).
+- `docs/spec/01-plan.md` debe contener SOLO la iteración activa:
+  - Si detectas que incluye histórico/iteraciones cerradas mezcladas o duplicadas, NO intentes “limpiar” ni borrar secciones.
+  - En ese caso, detén la generación y recomienda ejecutar `/close-iteration` para archivar y dejar `01-plan.md` limpio antes de planificar la siguiente iteración.
+- No uses comandos de shell / PowerShell / Bash (prohibido `Remove-Item` u operaciones destructivas). Solo ediciones de archivos.
 
 Lectura previa obligatoria
 - `docs/spec/00-context.md`
 - `docs/spec/index.md`
 - Estado general de `docs/spec/` (qué está vacío, qué contradice, qué falta)
 - `docs/spec/95-open-questions.md` y `docs/spec/96-todos.md` (para no duplicar)
+- (Excluye explícitamente `docs/spec/history/**`)
 
 Actualizar `docs/spec/01-plan.md` (estructura obligatoria)
+- Reescribe el archivo COMPLETO `docs/spec/01-plan.md` en cada ejecución (no intentes reemplazos parciales por rangos de líneas).
 1) Metadatos:
    - Iteración (ej. I01)
    - Fecha inicio (YYYY-MM-DD)

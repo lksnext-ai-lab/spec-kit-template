@@ -19,6 +19,13 @@ Ejecutar `docs/spec/01-plan.md` como si fueran “tareas de implementación”, 
 - Si detectas trabajo nuevo: crea `TODO-###` en `docs/spec/96-todos.md`.
 - Si detectas una decisión relevante: marca `DECISION:` (Reviewer creará ADR).
 - Evita reescrituras masivas; prioriza mejoras incrementales.
+- Ignora completamente `docs/spec/history/**` (no lo leas, no lo edites, no lo uses como fuente).
+- No uses comandos de shell / PowerShell / Bash ni operaciones destructivas (prohibido `Remove-Item`, borrados o “limpiezas” por comandos).
+- Ejecuta ÚNICAMENTE el plan activo:
+  - Si detectas que `docs/spec/01-plan.md` mezcla iteraciones (histórico/duplicados), NO intentes limpiarlo ni reinterpretarlo.
+  - En ese caso, detén la ejecución y recomienda ejecutar `/close-iteration` (para archivar/cerrar la iteración previa) y luego `/plan-iteration` para regenerar el plan activo limpio.
+- No replanifiques desde Writer:
+  - Si una tarea requiere cambiar alcance, dividir trabajo o introducir gates nuevos, registra `TODO-###` y/o `OPENQ-###` y recomienda volver a Planner.
 
 ## Método de ejecución
 1) Lee `docs/spec/01-plan.md`.

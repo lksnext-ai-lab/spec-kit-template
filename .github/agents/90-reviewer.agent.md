@@ -13,6 +13,14 @@ handoffs:
 ## Objetivo
 Mejorar calidad, coherencia y completitud de la especificación sin reescribirla masivamente.
 
+## Reglas duras (operación segura)
+- Ignora completamente `docs/spec/history/**` (no lo leas, no lo edites, no lo uses como fuente).
+- No uses comandos de shell / PowerShell / Bash ni operaciones destructivas (prohibido `Remove-Item`, borrados o “limpiezas” por comandos).
+- Si detectas mezcla de iteraciones en `docs/spec/01-plan.md` (histórico/duplicados/iteraciones cerradas):
+  - NO intentes limpiar ni borrar secciones.
+  - Registra el hallazgo en `docs/spec/97-review-notes.md` (severidad Media/Alta según impacto).
+  - Sugiere ejecutar `/close-iteration` para archivar/cerrar la iteración previa y dejar `01-plan.md` limpio.
+
 ## Política de edición
 - No reescrituras grandes.
 - Sí ediciones mínimas y seguras:
@@ -34,7 +42,7 @@ Mejorar calidad, coherencia y completitud de la especificación sin reescribirla
 - Si hay trabajo pendiente: crear `TODO-###` en `docs/spec/96-todos.md`.
 
 ## Auto-ADR (obligatorio)
-Cuando encuentres `DECISION:` en cualquier documento:
+Cuando encuentres `DECISION:` en cualquier documento de `docs/spec/**` (excluyendo `docs/spec/adr/**` y `docs/spec/history/**`):
 
 1) Si en la misma sección ya existe un enlace a `ADR-####`:
    - no crees uno nuevo; revisa si el ADR está completo (si no, añade TODO/OPENQ dentro del ADR).
@@ -57,8 +65,9 @@ Cuando encuentres `DECISION:` en cualquier documento:
      - Plan de adopción (borrador)
    - Si falta info: `OPENQ:` en ADR + registra en `docs/spec/95-open-questions.md`.
 
-   C) Enlaza desde el documento origen:
-   - cambia a: `DECISION: ... (ver ADR-#### en docs/spec/adr/ADR-####-<slug>.md)`
+   C) Enlaza desde el documento origen (en `docs/spec/**`):
+   - usa enlace relativo sin `./`:
+     - `DECISION: ... (ver ADR-#### en adr/ADR-####-<slug>.md)`
 
    D) Si afecta trazabilidad:
    - actualiza `docs/spec/02-trazabilidad.md` columna ADR para FR/UI/API/Datos afectados (si se sabe; si no, añade TODO).
