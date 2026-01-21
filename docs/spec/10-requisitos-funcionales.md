@@ -1,6 +1,7 @@
 ﻿# Requisitos funcionales (FR)
 
 > Reglas:
+>
 > - No inventar requisitos: si falta info usa `OPENQ:` y registra también en `docs/spec/95-open-questions.md`.
 > - Cada FR debe tener **criterios de aceptación verificables**.
 > - Mantén trazabilidad mínima en `docs/spec/02-trazabilidad.md` (FR ↔ UI ↔ API/Async ↔ Datos ↔ ADR).
@@ -16,6 +17,7 @@
 ---
 
 ## Tabla resumen (backlog)
+
 | ID | Título | Prioridad | Estado | Actores/Roles | Dependencias | Notas |
 |---|---|---|---|---|---|---|
 | FR-001 | TODO | MVP | Draft | TODO | TODO | TODO |

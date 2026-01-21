@@ -31,6 +31,7 @@ TODO: 1 párrafo que describa el resultado deseado.
 ## Tareas (atómicas)
 
 > Reglas:
+>
 > - cada tarea toca **pocos archivos**
 > - tiene un **resultado verificable**
 > - si depende de una decisión, se registra como `DECISION` y/o `OPENQ`

@@ -1,6 +1,7 @@
 ﻿# Requisitos técnicos / No funcionales (NFR)
 
 > Reglas:
+>
 > - Deben ser **medibles o verificables** cuando sea posible.
 > - En caso de no poder medir: define un método de verificación (prueba/certificación/revisión).
 > - Evitar vaguedades (“rápido”, “seguro”, “escalable”) sin umbrales.
@@ -15,6 +16,7 @@
 ---
 
 ## Tabla resumen
+
 | ID | Título | Categoría | Estado | Objetivo (métrica) | Verificación | Notas |
 |---|---|---|---|---|---|---|
 | NFR-001 | TODO | Seguridad | Draft | TODO | TODO | TODO |

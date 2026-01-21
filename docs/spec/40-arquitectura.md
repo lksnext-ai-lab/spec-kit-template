@@ -16,6 +16,7 @@
 - Diagrama (opcional): TODO (Mermaid/C4)
 
 ## 3. Componentes / servicios
+
 > Cada componente debe indicar: responsabilidad, interfaces (API/EVT), datos que gestiona, dependencias y NFR relevantes.
 
 | Componente | Tipo | Responsabilidad | Interfaces (API/EVT) | Datos (entidades) | Dependencias | NFR clave |

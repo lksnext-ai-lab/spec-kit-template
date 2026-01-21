@@ -36,6 +36,7 @@ TODO: lista de “cosas” importantes del dominio (aunque luego se concreten en
 - Entidad: TODO (qué es, ciclo de vida)
 
 ## 5. Flujos de trabajo principales
+
 > Recomendación: 3–7 flujos. Cada flujo enlaza FR relacionados.
 
 ### FLW-001 — TODO (Nombre del flujo)
