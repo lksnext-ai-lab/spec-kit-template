@@ -23,7 +23,7 @@ def _load_mkdocs_nav(repo_root: Path) -> list:
         _die("Falta PyYAML. Instala con: python -m pip install pyyaml")
 
     assert yaml is not None  # type narrowing para type checker
-    data = yaml.safe_load(mkdocs.read_text(encoding="utf-8"))
+    data = yaml.safe_load(mkdocs.read_text(encoding="utf-8-sig"))
     return data.get("nav", []) or []
 
 
@@ -250,37 +250,77 @@ def _collect_fallback(docs_dir: Path, want_scope: str, include_history: bool) ->
     return uniq
 
 
-_OPENXML_PAGEBREAK = """```{=openxml}
+_PAGEBREAK = """```{=openxml}
 <w:p><w:r><w:br w:type="page"/></w:r></w:p>
 ```"""
 
 
+def _create_pandoc_temp_with_pagebreaks(clean_md: Path, temp_md: Path) -> None:
+    """
+    Crea una versión temporal del MD limpio añadiendo saltos de página OpenXML
+    entre secciones de nivel 1 (# Título) para Pandoc.
+    """
+    text = clean_md.read_text(encoding="utf-8")
+    lines = text.split('\n')
+    result = []
+    
+    # Bandera para detectar el primer h1 (no añadir pagebreak antes del primero)
+    first_h1 = True
+    
+    for i, line in enumerate(lines):
+        # Detectar líneas que empiezan con "# " (h1)
+        if line.startswith('# ') and not line.startswith('## '):
+            if not first_h1:
+                # Añadir pagebreak antes de este h1 (excepto el primero)
+                result.append('')
+                result.append(_PAGEBREAK)
+                result.append('')
+            first_h1 = False
+        
+        result.append(line)
+    
+    temp_md.parent.mkdir(parents=True, exist_ok=True)
+    temp_md.write_text('\n'.join(result), encoding="utf-8")
+
+
 def _strip_yaml_frontmatter(text: str) -> str:
     """
-    Elimina bloques YAML frontmatter (---...---) al inicio del archivo.
+    Elimina bloques YAML frontmatter (---...---) solo si están al inicio del archivo.
+    YAML frontmatter debe estar en la primera línea (sin contenido previo).
     """
     lines = text.split("\n")
-    if not lines or lines[0].strip() != "---":
+    if not lines:
         return text
     
-    # Buscar el cierre del bloque YAML
-    for i in range(1, len(lines)):
-        if lines[i].strip() == "---":
-            # Retornar todo después del cierre
-            return "\n".join(lines[i+1:]).lstrip()
+    # Ignorar líneas en blanco iniciales
+    first_content_idx = 0
+    for i, line in enumerate(lines):
+        if line.strip():
+            first_content_idx = i
+            break
     
-    # Si no se encuentra cierre, retornar el texto original
+    # Solo es frontmatter YAML si la primera línea no vacía es exactamente "---"
+    if first_content_idx < len(lines) and lines[first_content_idx].strip() == "---":
+        # Buscar el cierre del bloque YAML (segundo "---")
+        for i in range(first_content_idx + 1, len(lines)):
+            if lines[i].strip() == "---":
+                # Retornar todo después del cierre
+                return "\n".join(lines[i+1:]).lstrip()
+    
+    # Si no se encuentra cierre o no es frontmatter válido, retornar el texto original
     return text
 
 
-def _build_combined_md(files: list[Path], out_md: Path, title: str | None, page_break_between_files: bool) -> None:
+def _build_combined_md(files: list[Path], out_md: Path, title: str | None) -> None:
+    """
+    Construye MD limpio combinado (sin saltos de página OpenXML).
+    """
     chunks = []
     if title:
         chunks.append(f"# {title}\n")
 
-    first = True
     for f in files:
-        text = f.read_text(encoding="utf-8", errors="ignore").strip()
+        text = f.read_text(encoding="utf-8-sig", errors="ignore").strip()
         if not text:
             continue
 
@@ -289,15 +329,22 @@ def _build_combined_md(files: list[Path], out_md: Path, title: str | None, page_
         if not text.strip():
             continue
 
-        # Cada archivo empieza en página nueva (excepto el primero)
-        if (not first) and page_break_between_files:
-            chunks.append(_OPENXML_PAGEBREAK)
-            chunks.append("")  # línea en blanco
+        # Reemplazar "---" decorativo solitario que causa problemas con Pandoc
+        # (Pandoc lo interpreta como separador de tabla y rompe el formato)
+        lines = text.split('\n')
+        cleaned_lines = []
+        for i, line in enumerate(lines):
+            # Si es una línea con solo "---" (decorativa), reemplazar por línea horizontal alternativa
+            if line.strip() == '---':
+                # Verificar que no es parte de frontmatter YAML (ya eliminado) ni de tabla
+                # Cambiar por * * * que Pandoc interpreta mejor
+                cleaned_lines.append('* * *')
+            else:
+                cleaned_lines.append(line)
+        text = '\n'.join(cleaned_lines)
 
         chunks.append(text)
         chunks.append("")  # línea en blanco
-
-        first = False
 
     out_md.parent.mkdir(parents=True, exist_ok=True)
     out_md.write_text("\n".join(chunks).strip() + "\n", encoding="utf-8")
@@ -337,32 +384,66 @@ def main():
     if not files:
         _die(f"No se han encontrado archivos Markdown para scope='{args.scope}'.")
 
-    combined_md = repo_root / "exports" / f"_combined_{args.scope}.md"
+    # Calcular nombre base del output (quitar .docx si existe)
+    out_docx = (repo_root / args.output).resolve()
+    if out_docx.suffix.lower() == '.docx':
+        out_base = out_docx.with_suffix('')
+    else:
+        out_base = out_docx
+        out_docx = out_docx.with_suffix('.docx')
+    
+    out_md_clean = out_base.with_suffix('.md')
+    out_md_temp = repo_root / "exports" / f"_combined_{args.scope}_temp.md"
+
+    # 1. Generar MD limpio (sin OpenXML pagebreaks)
     _build_combined_md(
         files=files,
-        out_md=combined_md,
+        out_md=out_md_clean,
         title=args.title,
-        page_break_between_files=(not args.no_page_break),
     )
 
-    out_docx = (repo_root / args.output).resolve()
+    # 2. Crear versión temporal con pagebreaks OpenXML para Pandoc
+    if not args.no_page_break:
+        _create_pandoc_temp_with_pagebreaks(out_md_clean, out_md_temp)
+        pandoc_input = out_md_temp
+    else:
+        # Si no se quieren pagebreaks, usar directamente el MD limpio
+        pandoc_input = out_md_clean
+
     out_docx.parent.mkdir(parents=True, exist_ok=True)
 
     cmd = [
         pandoc,
-        str(combined_md),
-        "-f", "markdown-yaml_metadata_block",  # Desactiva el parsing de bloques YAML
+        str(pandoc_input),
+        "-f", "markdown-yaml_metadata_block+raw_attribute",
         "-t", "docx",
         "-o", str(out_docx),
     ]
     if args.toc:
         cmd.append("--toc")
 
-    subprocess.run(cmd, check=True)
+    try:
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as e:
+        if "permission denied" in e.stderr.lower():
+            _die(
+                f"No se puede escribir el archivo '{out_docx}'.\n"
+                f"       Posibles causas:\n"
+                f"       - El archivo está abierto en Word u otra aplicación (ciérralo e intenta de nuevo)\n"
+                f"       - No tienes permisos de escritura en '{out_docx.parent}'\n"
+                f"       Solución rápida: cierra el archivo o usa otro nombre con --output"
+            )
+        else:
+            _die(f"Error al ejecutar Pandoc:\n{e.stderr}")
+
+    # 3. Limpiar archivo temporal
+    if out_md_temp.exists():
+        out_md_temp.unlink()
 
     print(f"[export-docx] OK")
     print(f"[export-docx] scope: {args.scope}")
-    print(f"[export-docx] output: {out_docx}")
+    print(f"[export-docx] markdown: {out_md_clean}")
+    print(f"[export-docx] docx: {out_docx}")
     print(f"[export-docx] files: {len(files)}")
     print(f"[export-docx] page_break_between_files: {not args.no_page_break}")
     print(f"[export-docx] toc: {args.toc}")
