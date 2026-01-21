@@ -4,10 +4,12 @@
 > Política recomendada: el revisor **no reescribe**; propone cambios y/o marca puntos con TODO/OPENQ/RISK/DECISION.
 
 ## Cómo usar este documento
+
 - Cada nota debe incluir: **Severidad**, **Qué ocurre**, **Por qué importa**, **Cambio sugerido**, **Dónde aplica**.
 - Si una nota deriva en trabajo: crear/actualizar un `TODO-###` o `OPENQ-###` y enlazarlo.
 
 ## Resumen de revisión
+
 - Iteración revisada: TODO (ej. I01)
 - Fecha: TODO (YYYY-MM-DD)
 - Revisor: TODO
@@ -41,5 +43,6 @@
 | REV-S-001 | TODO | TODO | TODO | docs/... |
 
 ## Cierre
+
 - Conclusión: TODO
 - Pendientes creados (TODO/OPENQ/ADR): TODO

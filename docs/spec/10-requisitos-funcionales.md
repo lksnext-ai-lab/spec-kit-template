@@ -6,6 +6,7 @@
 > - Mantén trazabilidad mínima en `docs/spec/02-trazabilidad.md` (FR ↔ UI ↔ API/Async ↔ Datos ↔ ADR).
 
 ## Convenciones
+
 - **ID**: `FR-###` (correlativo, sin reutilizar).
 - **Prioridad**: `MVP` / `Should` / `Could`.
 - **Estado**: `Draft` / `Validated` / `Deprecated`.
@@ -24,6 +25,7 @@
 ## Detalle de requisitos
 
 ### FR-001 — TODO: título breve y accionable
+
 - **Descripción**: TODO (qué capacidad aporta al usuario)
 - **Actores/Roles**: TODO
 - **Precondiciones**: TODO (si aplica)
@@ -48,6 +50,7 @@
 ---
 
 ## Checklist de calidad (para reviewer)
+
 - [ ] Todos los FR tienen CA verificables.
 - [ ] Los FR MVP están claramente marcados.
 - [ ] No hay FR duplicados o contradictorios.

@@ -6,6 +6,7 @@
 > - Evitar vaguedades (“rápido”, “seguro”, “escalable”) sin umbrales.
 
 ## Convenciones
+
 - **ID**: `NFR-###` (correlativo).
 - **Estado**: `Draft` / `Validated` / `Deprecated`.
 - **Categoría**: Seguridad / Disponibilidad / Rendimiento / Observabilidad / Privacidad&Legal / Mantenibilidad / Portabilidad / UX&Accesibilidad / Coste.
@@ -23,6 +24,7 @@
 ## Detalle de requisitos
 
 ### NFR-001 — TODO
+
 - **Categoría**: TODO
 - **Descripción**: TODO
 - **Objetivo / Métrica** (cuando aplique):
@@ -45,6 +47,7 @@
 ---
 
 ## NFR mínimos sugeridos (para no olvidarlos)
+
 - Seguridad: autenticación, autorización, protección de datos, auditoría.
 - Disponibilidad: backups/DR, tolerancia a fallos (si aplica), ventana de mantenimiento.
 - Observabilidad: logging estructurado, métricas clave, alertas básicas.

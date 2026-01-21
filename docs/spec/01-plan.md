@@ -4,25 +4,32 @@
 > Debe ser **breve, ejecutable y versionable**.
 
 ## Metadatos
+
 - Iteración: TODO (ej. I01)
 - Fecha inicio: TODO (YYYY-MM-DD)
 - Responsable: TODO
 - Estado: Draft / En curso / En revisión / Cerrado
 
 ## Objetivo de la iteración
+
 TODO: 1 párrafo que describa el resultado deseado.
 
 ## Alcance
+
 ### IN
+
 - TODO
 
 ### OUT
+
 - TODO
 
 ## Entregables (archivos objetivo)
+
 - TODO: lista de docs que deben quedar actualizados en esta iteración (ej. 10/11/20)
 
 ## Tareas (atómicas)
+
 > Reglas:
 > - cada tarea toca **pocos archivos**
 > - tiene un **resultado verificable**
@@ -35,10 +42,12 @@ TODO: 1 párrafo que describa el resultado deseado.
 | T03 | TODO | `docs/...` | TODO |
 
 ## Decisiones y preguntas abiertas (gatean el plan)
+
 - DECISION: TODO (¿requiere ADR?) → si sí, crear `docs/spec/adr/ADR-####.md`
 - OPENQ: TODO → registrar también en `docs/spec/95-open-questions.md`
 
 ## Criterios de salida (Definition of Done)
+
 - [ ] FR: definidos con criterios de aceptación verificables + prioridad.
 - [ ] NFR: al menos seguridad + disponibilidad + observabilidad con objetivos claros.
 - [ ] Trazabilidad mínima actualizada (FR ↔ UI/API/Datos/ADR).
@@ -46,7 +55,9 @@ TODO: 1 párrafo que describa el resultado deseado.
 - [ ] No hay contradicciones evidentes entre Contexto, FR/NFR y Conceptualización.
 
 ## Registro de cambios (opcional)
+
 - YYYY-MM-DD: TODO (cambios relevantes del plan)
 
 ---
+
 Anterior: [Contexto ←](./00-context.md) · Siguiente: [Trazabilidad →](./02-trazabilidad.md)
