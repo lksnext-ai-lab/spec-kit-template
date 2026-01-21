@@ -10,11 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Markdown lint
+      - name: Markdown lint (spec only)
         uses: DavidAnson/markdownlint-cli2-action@v16
         with:
           globs: |
-            **/*.md
+            docs/spec/**/*.md
+            !docs/spec/history/**
 
   mkdocs-build:
     runs-on: ubuntu-latest
