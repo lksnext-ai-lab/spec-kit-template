@@ -1,1 +1,11 @@
 MD013: false
+
+MD004:
+  style: dash
+
+MD029:
+  style: ordered
+
+MD031: true
+MD032: true
+MD022: true
