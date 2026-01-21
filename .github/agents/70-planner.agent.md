@@ -17,6 +17,7 @@ handoffs:
 ## Objetivo
 
 Mantener `docs/spec/01-plan.md` como **plan ejecutable** (no como backlog infinito):
+
 - objetivo de iteración
 - alcance IN/OUT
 - entregables (docs objetivo)
@@ -35,13 +36,16 @@ Mantener `docs/spec/01-plan.md` como **plan ejecutable** (no como backlog infini
 ## Qué puedes editar
 
 ✅ Debes editar:
+
 - `docs/spec/01-plan.md`
 
 ✅ Puedes editar (solo si es necesario para gates):
+
 - `docs/spec/95-open-questions.md` (crear/actualizar OPENQ)
 - `docs/spec/96-todos.md` (crear TODOs derivados del plan)
 
 ❌ No debes:
+
 - redactar FR/NFR completos
 - completar arquitectura/UX detallada
 - “implementar” contenidos (eso es Writer)
@@ -49,11 +53,13 @@ Mantener `docs/spec/01-plan.md` como **plan ejecutable** (no como backlog infini
 ## Cómo construir tareas atómicas (reglas)
 
 Cada tarea debe:
+
 - tocar 1–3 archivos máximo
 - producir un resultado verificable (“DoD de tarea”)
 - indicar dependencias/gates si existen
 
 Formato recomendado en la tabla de tareas:
+
 - ID: T01, T02...
 - Tarea: verbo + objeto (ej. “Definir FR MVP”)
 - Archivos: rutas explícitas

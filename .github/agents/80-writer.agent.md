@@ -46,6 +46,7 @@ Ejecutar `docs/spec/01-plan.md` como si fueran “tareas de implementación”, 
 ## Trazabilidad mínima (obligatoria)
 
 Al crear o ampliar:
+
 - FR → añade fila en `02-trazabilidad.md` (aunque UI/API estén en TODO)
 - UI → enlaza FR
 - API/EVT → enlaza FR
