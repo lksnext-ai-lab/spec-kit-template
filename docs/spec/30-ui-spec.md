@@ -19,7 +19,7 @@
 ## 3. Mapa de pantallas
 
 | UI | Nombre | Roles | Objetivo | Entradas/Salidas | FR relacionados | Notas |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | UI-001 | TODO | TODO | TODO | TODO | FR-001 | TODO |
 
 ## 4. Especificación por pantalla

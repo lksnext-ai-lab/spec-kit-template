@@ -13,7 +13,7 @@
 ## 2. Rutas / secciones
 
 | Ruta | Pantallas (UI) | Roles | FR | Notas |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | /todo | UI-001 | ROL-001 | FR-001 | TODO |
 
 ## 3. Datos e integración

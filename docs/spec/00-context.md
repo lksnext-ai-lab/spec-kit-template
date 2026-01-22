@@ -60,7 +60,7 @@ TODO: Qué se quiere construir, para quién y con qué propósito.
 ## 9. Glosario
 
 | Término | Definición |
-|---|---|
+| --- | --- |
 | TODO | TODO |
 
 ## 10. Riesgos iniciales (alto nivel)

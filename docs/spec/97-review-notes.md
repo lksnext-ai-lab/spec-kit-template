@@ -21,31 +21,31 @@
 ## 1) Bloqueantes (deben resolverse antes de cerrar iteración)
 
 | ID | Severidad | Observación | Impacto | Cambio sugerido | Dónde aplica | Link (TODO/OPENQ/ADR) |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | REV-B-001 | Alta | TODO | TODO | TODO | docs/... | TODO |
 
 ## 2) Inconsistencias / contradicciones
 
 | ID | Severidad | Observación | Evidencia (docs) | Cambio sugerido | Dónde aplica |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | REV-C-001 | Media | TODO | TODO | TODO | docs/... |
 
 ## 3) Ambigüedades / falta de definición
 
 | ID | Severidad | Observación | Riesgo si no se aclara | Pregunta/Cambio sugerido | Link (OPENQ) |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | REV-A-001 | Media | TODO | TODO | TODO | OPENQ-001 |
 
 ## 4) Riesgos
 
 | ID | Severidad | Riesgo | Mitigación sugerida | Dónde aplica | Link |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | REV-R-001 | Media | TODO | TODO | docs/80-seguridad.md | TODO |
 
 ## 5) Sugerencias de mejora (no bloqueantes)
 
 | ID | Observación | Beneficio | Cambio sugerido | Dónde aplica |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | REV-S-001 | TODO | TODO | TODO | docs/... |
 
 ## Cierre

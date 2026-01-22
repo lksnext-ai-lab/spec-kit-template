@@ -12,7 +12,7 @@
 ## 2. Entidades principales (catálogo)
 
 | Entidad | Propósito | Campos clave (alto nivel) | Ciclo de vida | FR relacionados | Notas |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | ENT-001 | TODO | TODO | TODO | FR-001 | TODO |
 
 ## 3. Relaciones (alto nivel)

@@ -18,7 +18,7 @@
 ## Tabla resumen
 
 | ID | Título | Categoría | Estado | Objetivo (métrica) | Verificación | Notas |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | NFR-001 | TODO | Seguridad | Draft | TODO | TODO | TODO |
 
 ---

@@ -328,7 +328,7 @@ TODO: describe en 1 párrafo el objetivo concreto de {iyy}.
 ## Tareas (tareas atómicas + DoD)
 
 | ID | Tarea | Archivos | Resultado / DoD |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | T01 | TODO | docs/spec/... | - TODO |
 
 ## Decisiones y preguntas abiertas (gates)

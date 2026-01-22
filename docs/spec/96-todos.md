@@ -14,7 +14,7 @@
 ## Tabla de TODOs
 
 | ID | Estado | Prioridad | Tipo | Descripción | Referencia (doc/sección) | Relacionado (FR/NFR/ADR/OPENQ) | Owner |
-|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | TODO-001 | OPEN | Media | Redacción | TODO | docs/spec/00-context.md#resumen-ejecutivo | OPENQ-001 | TODO |
 
 ## Reglas de uso

@@ -19,7 +19,7 @@
 ## Tabla resumen (backlog)
 
 | ID | Título | Prioridad | Estado | Actores/Roles | Dependencias | Notas |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | FR-001 | TODO | MVP | Draft | TODO | TODO | TODO |
 
 ---

@@ -20,7 +20,7 @@
 ## 3. Catálogo de endpoints
 
 | API | Método | Ruta | Descripción | Roles | FR | Request/Response | Notas |
-|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | API-001 | GET | /todo | TODO | ROL-001 | FR-001 | TODO | TODO |
 
 ## 4. Detalle por endpoint (cuando haga falta)
@@ -43,7 +43,7 @@
 ### Eventos
 
 | EVT | Evento | Productor | Consumidor | Payload (alto nivel) | FR | Garantías | Notas |
-|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | EVT-001 | todo.created | SVC-001 | SVC-002 | TODO | FR-001 | at-least-once | TODO |
 
 ### Reglas operativas

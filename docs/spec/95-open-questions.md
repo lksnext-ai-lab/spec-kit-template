@@ -13,7 +13,7 @@
 ## Tabla de preguntas
 
 | ID | Estado | Pregunta | Impacto | Bloquea (Txx/Doc) | Dueño | Fecha | Resolución / Enlace |
-|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | OPENQ-001 | OPEN | TODO | Medio | T01 / 10-requisitos-funcionales | TODO | TODO | TODO |
 
 ## Notas

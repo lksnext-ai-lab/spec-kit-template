@@ -10,7 +10,7 @@ TODO: 5–10 líneas sobre cómo se usará el sistema en el día a día.
 ## 2. Roles y responsabilidades
 
 | Rol | Descripción | Objetivos | FR principales |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | ROL-001 | TODO | TODO | FR-001 |
 
 > Nota: usa IDs `ROL-###` si quieres mantener trazabilidad.
@@ -20,13 +20,13 @@ TODO: 5–10 líneas sobre cómo se usará el sistema en el día a día.
 ### 3.1 Lista de permisos (catálogo)
 
 | Permiso | Descripción |
-|---|---|
+| --- | --- |
 | PERM-001 | TODO |
 
 ### 3.2 Matriz rol ↔ permisos
 
 | Rol \ Permiso | PERM-001 | PERM-002 |
-|---|---:|---:|
+| --- | ---: | ---: |
 | ROL-001 | ✅ | ❌ |
 
 ## 4. Entidades de negocio (conceptuales)

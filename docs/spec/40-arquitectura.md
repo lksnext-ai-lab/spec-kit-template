@@ -20,7 +20,7 @@
 > Cada componente debe indicar: responsabilidad, interfaces (API/EVT), datos que gestiona, dependencias y NFR relevantes.
 
 | Componente | Tipo | Responsabilidad | Interfaces (API/EVT) | Datos (entidades) | Dependencias | NFR clave |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | SVC-001 | TODO | TODO | API-001, EVT-001 | EntidadX | TODO | NFR-001 |
 
 ### Detalle (si aplica)
@@ -37,7 +37,7 @@
 ## 4. Integraciones
 
 | Sistema externo | Propósito | Método | Contrato | Autenticación | NFR | Notas |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | EXT-001 | TODO | Sync/Async | TODO | TODO | NFR-XXX | TODO |
 
 ## 5. Comunicación y consistencia

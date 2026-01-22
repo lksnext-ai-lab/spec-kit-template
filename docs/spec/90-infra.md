@@ -6,7 +6,7 @@
 ## 1. Entornos
 
 | Entorno | Propósito | Datos | Accesos | Observaciones |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | DEV | TODO | Sintéticos | TODO | TODO |
 | PRE | TODO | Anonimizados (si aplica) | TODO | TODO |
 | PROD | TODO | Reales | TODO | TODO |

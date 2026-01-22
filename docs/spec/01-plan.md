@@ -37,7 +37,7 @@ TODO: 1 párrafo que describa el resultado deseado.
 > - si depende de una decisión, se registra como `DECISION` y/o `OPENQ`
 
 | ID | Tarea | Archivos | Resultado / DoD |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | T01 | TODO | `docs/...` | TODO |
 | T02 | TODO | `docs/...` | TODO |
 | T03 | TODO | `docs/...` | TODO |

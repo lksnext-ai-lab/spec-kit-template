@@ -47,7 +47,7 @@
 ## 7. Amenazas y mitigaciones (ligero)
 
 | Amenaza | Riesgo | Mitigación | Evidencia/Verificación |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | TODO | TODO | TODO | TODO |
 
 ## 8. Requisitos de cumplimiento

@@ -28,7 +28,7 @@
 ## Convenciones clave
 
 | Elemento | Convención | Dónde vive |
-|---|---|---|
+| --- | --- | --- |
 | Requisitos funcionales | `FR-###` + criterios de aceptación verificables | `10-requisitos-funcionales.md` |
 | Requisitos no funcionales | `NFR-###` + objetivo/métrica cuando aplique | `11-requisitos-tecnicos-nfr.md` |
 | Pantallas / flujos UI | `UI-###` | `30-ui-spec.md` |
