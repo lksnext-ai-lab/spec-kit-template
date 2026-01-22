@@ -4,7 +4,7 @@ description: Revisa con ojos críticos y crea ADRs automáticamente cuando detec
 handoffs:
   - label: Aplicar mejoras sugeridas
     agent: writer
-    prompt: Aplica las mejoras del reviewer: resuelve bloqueantes, actualiza documentos afectados, trazabilidad y gestiona TODO/OPENQ/ADR.
+    prompt: Aplica las mejoras del reviewer. Resuelve bloqueantes, actualiza documentos afectados, trazabilidad y gestiona TODO/OPENQ/ADR.
     send: false
 ---
 

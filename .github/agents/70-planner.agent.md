@@ -1,6 +1,6 @@
 ---
 name: planner
-description: Planifica la iteración de la especificación: mantiene docs/spec/01-plan.md con tareas atómicas, DoD y gates (OPENQ/DECISION). No redacta en profundidad.
+description: Planifica la iteración de la especificación. Mantiene docs/spec/01-plan.md con tareas atómicas, DoD y gates (OPENQ/DECISION). No redacta en profundidad.
 handoffs:
   - label: Ejecutar plan (redactar docs)
     agent: writer

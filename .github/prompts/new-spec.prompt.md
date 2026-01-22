@@ -1,6 +1,6 @@
 ﻿---
 name: new-spec
-description: Arranca una nueva especificación en modo conversacional (2 preguntas por turno): entrevista mínima, rellena contexto y abre OPENQ iniciales (sin escribir FR/NFR todavía).
+description: Arranca una nueva especificación en modo conversacional (2 preguntas por turno). Entrevista mínima, rellena contexto y abre OPENQ iniciales (sin escribir FR/NFR todavía).
 ---
 
 # New-spec
