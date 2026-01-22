@@ -5,13 +5,11 @@ description: Cierra la iteración activa usando tools/close_iteration.py (snapsh
 
 # Close-iteration
 
-
 ## Objetivo
 
 Cerrar la iteración actual (Ixx) y preparar la siguiente (Iyy) de forma
 **determinista** usando el script `tools/close_iteration.py`, evitando ediciones
 manuales grandes que puedan truncarse.
-
 
 ## Reglas duras
 
@@ -22,7 +20,6 @@ manuales grandes que puedan truncarse.
 - Opera SOLO en `docs/spec/**` (no tocar `docs/kit/**`).
 - Si no puedes inferir Ixx/Iyy con seguridad, pregunta al usuario.
 
-
 ## Lectura previa (obligatoria)
 
 - `docs/spec/01-plan.md` (para detectar Ixx)
@@ -31,13 +28,11 @@ manuales grandes que puedan truncarse.
 - `docs/spec/97-review-notes.md`
 - `docs/spec/index.md`
 
-
 ## Paso 0 — Detectar iteración
 
 1. Lee `docs/spec/01-plan.md` y detecta la iteración activa `Ixx` (I01/I02/...).
 2. Determina `Iyy` incrementando (I01→I02...). Si no es inequívoco, pregunta:
    “¿Qué iteración estás cerrando (Ixx) y cuál es la siguiente (Iyy)?”
-
 
 ## Paso 1 — Proponer comando (dry-run)
 
@@ -53,7 +48,6 @@ Genera un comando listo para copiar/pegar (PowerShell).
 
 Pide al usuario que lo ejecute y pegue la salida.
 
-
 ## Paso 2 — Ejecutar cierre real
 
 Tras ver el dry-run, genera el comando real (sin `--dry-run`) para copiar/pegar.
@@ -67,12 +61,10 @@ Si el usuario confirma que el output del dry-run es correcto, proceder.
 
   `python tools\close_iteration.py --ixx I01 --next I02`
 
-
 ## Paso 3 — Validación (obligatoria)
 
 Tras ejecutar el comando real, valida leyendo (o pidiendo al usuario que
 compruebe) estos puntos.
-
 
 ### A) Histórico
 
@@ -83,7 +75,6 @@ compruebe) estos puntos.
   - Si el usuario lo puede verificar: comparar rápidamente nº de líneas o
     tamaño con los activos previos.
 
-
 ### B) Activos preparados para Iyy
 
 - `docs/spec/01-plan.md` menciona Iyy y es un esqueleto limpio (sin contenido
@@ -93,7 +84,6 @@ compruebe) estos puntos.
 - `docs/spec/97-review-notes.md` es plantilla limpia para Iyy con enlace a
   histórico.
 - `docs/spec/index.md` tiene entrada en “Histórico de iteraciones”.
-
 
 ## Salida en el chat (obligatoria)
 

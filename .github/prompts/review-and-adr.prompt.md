@@ -5,12 +5,10 @@ description: Revisión crítica + creación automática de ADRs al detectar DECI
 
 # Review-and-adr
 
-
 ## Objetivo
 
 Revisar la especificación con ojos críticos, dejar feedback accionable y crear
 ADRs automáticamente para decisiones pendientes.
-
 
 ## Reglas
 
@@ -31,7 +29,6 @@ ADRs automáticamente para decisiones pendientes.
   - Sugiere ejecutar `/close-iteration` para archivar/cerrar la iteración previa
     y dejar `01-plan.md` limpio.
 
-
 ## Checklist de revisión (obligatorio)
 
 - Coherencia: `00-context` ↔ FR/NFR ↔ conceptualización ↔ UI ↔ arquitectura ↔
@@ -40,7 +37,6 @@ ADRs automáticamente para decisiones pendientes.
 - Calidad NFR: objetivos medibles o verificación definida
 - Trazabilidad: `docs/spec/02-trazabilidad.md` actualizado mínimamente
 - Operación: observabilidad, backups/DR, secretos, accesos, auditoría
-
 
 ## Actualizar `docs/spec/97-review-notes.md`
 
@@ -53,14 +49,12 @@ ADRs automáticamente para decisiones pendientes.
   - Cambio sugerido
   - Enlace a TODO/OPENQ/ADR si se crea
 
-
 ## Crear OPENQ/TODO si procede
 
 - Si falta información clave: añade `OPENQ-###` en `docs/spec/95-open-questions.md`
   (siguiente número libre).
 - Si hay trabajo pendiente concreto: añade `TODO-###` en `docs/spec/96-todos.md`
   (siguiente número libre).
-
 
 ## Auto-ADR (obligatorio)
 
@@ -89,14 +83,12 @@ Para cada `DECISION:` detectada en documentos de la especificación
   - Nunca uses rutas relativas dentro de `.github/**` (prompts/agentes): ahí
     siempre rutas desde raíz (`docs/spec/...`).
 
-
 ## Trazabilidad
 
 - Si la decisión afecta a FR/UI/API/Datos y se conoce el vínculo, actualiza
   `docs/spec/02-trazabilidad.md` columna ADR.
 - Si no se conoce, añade TODO en la fila correspondiente o crea TODO en
   `docs/spec/96-todos.md`.
-
 
 ## Salida en el chat (resumen)
 

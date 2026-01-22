@@ -5,12 +5,10 @@ description: Crea/actualiza docs/spec/01-plan.md con una iteración ejecutable (
 
 # Plan-iteration
 
-
 ## Objetivo
 
 Convertir el estado actual de `docs/spec/` en un plan ejecutable en
 `docs/spec/01-plan.md` (tipo “Plan → Write → Review”).
-
 
 ## Reglas
 
@@ -32,7 +30,6 @@ Convertir el estado actual de `docs/spec/` en un plan ejecutable en
 - No uses comandos de shell / PowerShell / Bash (prohibido `Remove-Item` u
   operaciones destructivas). Solo ediciones de archivos.
 
-
 ## Lectura previa obligatoria
 
 - `docs/spec/00-context.md`
@@ -40,7 +37,6 @@ Convertir el estado actual de `docs/spec/` en un plan ejecutable en
 - Estado general de `docs/spec/` (qué está vacío, qué contradice, qué falta)
 - `docs/spec/95-open-questions.md` y `docs/spec/96-todos.md` (para no duplicar)
 - (Excluye explícitamente `docs/spec/history/**`)
-
 
 ## Actualizar `docs/spec/01-plan.md` (estructura obligatoria)
 
@@ -64,7 +60,6 @@ Convertir el estado actual de `docs/spec/` en un plan ejecutable en
    - Si una tarea depende de info, enlaza la OPENQ en el DoD o en “Decisiones y
      preguntas”.
 
-
 ## Gates (OPENQ/DECISION)
 
 - Si detectas una incertidumbre que cambia contenido:
@@ -78,12 +73,10 @@ Convertir el estado actual de `docs/spec/` en un plan ejecutable en
   - añade `DECISION:` en el plan (y/o en el doc correspondiente si ya está claro)
   - NO crees ADR aquí (lo hará el Reviewer).
 
-
 ## Opcional (solo si hace falta)
 
 - Si aparece trabajo pendiente fuera de esta iteración: crea `TODO-###` en
   `docs/spec/96-todos.md` (siguiente número libre).
-
 
 ## Salida en el chat (resumen)
 

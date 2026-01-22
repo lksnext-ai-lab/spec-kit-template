@@ -5,7 +5,6 @@ description: Genera el comando de exportación a DOCX (spec/kit/all) usando tool
 
 # Export-docx
 
-
 ## Objetivo
 
 Ayudar al usuario a exportar documentación Markdown a DOCX eligiendo el alcance.
@@ -13,7 +12,6 @@ Ayudar al usuario a exportar documentación Markdown a DOCX eligiendo el alcance
 - spec: `docs/spec/**`
 - kit: `docs/kit/**`
 - all: `docs/**`
-
 
 ## Entrada (preguntas mínimas)
 
@@ -26,7 +24,6 @@ Ayudar al usuario a exportar documentación Markdown a DOCX eligiendo el alcance
 4. ¿Incluir TOC (tabla de contenidos)? (sí/no; por defecto **NO**)
 5. (Solo si scope=`spec` o `all`) ¿Incluir histórico `docs/spec/history/**`?
    (sí/no; por defecto **NO**)
-
 
 ## Reglas
 
@@ -44,7 +41,6 @@ Ayudar al usuario a exportar documentación Markdown a DOCX eligiendo el alcance
   - Para `--scope all`: no exportar histórico salvo petición explícita (para
     evitar DOCX enormes y confusos).
 
-
 ## Salida (obligatoria)
 
 1. Un comando listo para copiar/pegar en PowerShell.
@@ -55,11 +51,9 @@ Ayudar al usuario a exportar documentación Markdown a DOCX eligiendo el alcance
    - cómo verificar Pandoc (`pandoc --version`)
    - si se excluye/incluye histórico, indicarlo explícitamente
 
-
 ## Plantilla de comando
 
 `python tools\export_docx.py --scope <spec|kit|all> --output exports\<archivo>.docx --title "<titulo>"`
-
 
 ## Notas
 

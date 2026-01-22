@@ -5,12 +5,10 @@ description: Ejecuta docs/spec/01-plan.md (redacción/actualización de docs), m
 
 # Write-from-plan
 
-
 ## Objetivo
 
 Ejecutar `docs/spec/01-plan.md` como “tareas de implementación” y materializarlo
 en cambios concretos dentro de `docs/spec/`.
-
 
 ## Reglas duras
 
@@ -35,7 +33,6 @@ en cambios concretos dentro de `docs/spec/`.
 
 - No uses comandos de shell / PowerShell / Bash. Solo ediciones de archivos.
 
-
 ## Método
 
 1. Lee `docs/spec/01-plan.md` (tareas + DoD de iteración).
@@ -53,13 +50,11 @@ en cambios concretos dentro de `docs/spec/`.
    - si identificas entidades: enlaza FR
    - si existe ADR asociado: ponlo en la columna ADR (si se conoce)
 
-
 ## Gestión de IDs (OPENQ/TODO)
 
 - OPENQ: usa el siguiente número libre en `docs/spec/95-open-questions.md`.
 - TODO: usa el siguiente número libre en `docs/spec/96-todos.md`.
 - No reutilices IDs.
-
 
 ## Control de cambios (cuando algo no encaja con el plan)
 
@@ -70,7 +65,6 @@ en cambios concretos dentro de `docs/spec/`.
   - registra el hallazgo como `TODO-###` y/o `OPENQ-###` (según corresponda),
   - y recomienda volver a `/plan-iteration` (o al agente Planner) para ajustar
     el plan.
-
 
 ## Salida en el chat (resumen)
 

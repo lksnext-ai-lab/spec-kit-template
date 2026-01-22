@@ -5,13 +5,11 @@ description: Arranca una nueva especificación en modo conversacional (2 pregunt
 
 # New-spec
 
-
 ## Objetivo
 
 Arrancar una especificación nueva con contexto real mínimo, sin inventar, y
 dejando abiertas las preguntas que condicionan requisitos/arquitectura, **en una
 conversación natural** (2 preguntas por turno).
-
 
 ## Reglas duras
 
@@ -33,7 +31,6 @@ conversación natural** (2 preguntas por turno).
 - Ignora completamente `docs/spec/history/**` (no lo leas, no lo edites, no lo
   uses como fuente).
 
-
 ## Modo conversacional (obligatorio)
 
 Después de cada respuesta del usuario:
@@ -46,9 +43,7 @@ Después de cada respuesta del usuario:
 
 Solo si el usuario confirma, continúa a la siguiente ronda.
 
-
 ## Rondas CORE (orden estable, wording adaptable)
-
 
 ### Ronda 1 — Marco + éxito
 
@@ -56,30 +51,26 @@ Solo si el usuario confirma, continúa a la siguiente ronda.
 2. ¿Qué problema resuelve y cómo sabremos que va bien (señales o métricas, si
    existen)?
 
-
 ### Ronda 2 — Alcance + roles/decisión
 
-3. ¿Qué entra en el MVP y qué queda explícitamente fuera (OUT), y qué sería “más
-   adelante”?
-4. ¿Cuáles son los roles principales (alto nivel) y quién toma decisiones
+1. ¿Qué entra en el MVP y qué queda explícitamente fuera (OUT), y qué sería "más
+   adelante"?
+2. ¿Cuáles son los roles principales (alto nivel) y quién toma decisiones
    cuando haya dudas?
-
 
 ### Ronda 3 — Datos/compliance + integraciones
 
-5. ¿Qué datos se tratarán y hay datos sensibles/compliance (RGPD, auditoría,
+1. ¿Qué datos se tratarán y hay datos sensibles/compliance (RGPD, auditoría,
    etc.)?
-6. ¿Qué integraciones externas son obligatorias y hay restricciones (APIs, SFTP,
+2. ¿Qué integraciones externas son obligatorias y hay restricciones (APIs, SFTP,
    mensajería, etc.)?
-
 
 ### Ronda 4 — Restricciones técnicas + riesgos
 
-7. ¿Hay restricciones técnicas (cloud/on-prem, lenguaje, stack, proveedor
+1. ¿Hay restricciones técnicas (cloud/on-prem, lenguaje, stack, proveedor
    preferido)?
-8. ¿Riesgos o limitaciones conocidas (tiempo, presupuesto, dependencias,
+2. ¿Riesgos o limitaciones conocidas (tiempo, presupuesto, dependencias,
    equipo)?
-
 
 ## Acciones tras obtener respuestas (al finalizar el intake)
 
@@ -110,7 +101,6 @@ Solo si el usuario confirma, continúa a la siguiente ronda.
      (contexto/seguridad/arquitectura),
    - y crea una OPENQ si falta información.
    - NO crees ADR aquí.
-
 
 ## Salida en el chat (al cerrar)
 
