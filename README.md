@@ -1,7 +1,29 @@
 ﻿# Spec Kit Template
 
-Plantilla interna para crear **especificaciones técnicas** en Markdown con VS Code + Copilot, siguiendo un flujo “agentic”:
+Plantilla para crear **especificaciones técnicas** en Markdown con VS Code + Copilot, siguiendo un flujo “agentic”:
 **Plan → Redacción → Revisión → Iteración**, versionado con Git.
+
+## Ownership & attribution
+
+Spec Kit Template (spec-kit-template) is developed and maintained by **LKS Next**.
+
+See: [NOTICE](NOTICE)
+
+## License
+
+This project is licensed under the **Apache License 2.0**.
+
+See: [LICENSE](LICENSE)
+
+## Output licensing (projects generated from this template)
+
+Using this repository as a template may generate a new project. The generated project can choose its own license and is not required to be Apache-2.0 solely because it was generated from this template.
+
+See: [OUTPUT.md](OUTPUT.md)
+
+## Trademarks
+
+See: [TRADEMARKS.md](TRADEMARKS.md)
 
 ## Qué incluye
 - Estructura de documentación en `docs/` (contexto, requisitos, UI, arquitectura, datos, backend, seguridad, infra, ADRs).
@@ -12,7 +34,7 @@ Plantilla interna para crear **especificaciones técnicas** en Markdown con VS C
 - `mkdocs.yml` para navegación y vista en navegador (opcional).
 
 ## Cómo usar esta plantilla (crear una nueva especificación)
-1) En GitHub, abre este repo y pulsa **Use this template** para crear un repositorio nuevo (normalmente privado).  
+1) En GitHub, abre este repo y pulsa **Use this template** para crear un repositorio nuevo (privado o público, según tus necesidades).  
 2) Clona el repositorio nuevo y ábrelo en VS Code.
 
 Guía completa de uso: **`USAGE.md`**.
@@ -30,13 +52,18 @@ Guía completa de uso: **`USAGE.md`**.
 
 ## Vista en navegador (opcional)
 El repo incluye `mkdocs.yml`. Si quieres servirlo localmente:
-```powershell
-python -m venv .venv
-.\.venv\Scripts\activate
-pip install mkdocs mkdocs-material
-mkdocs serve
-````
+
+    python -m venv .venv
+    .\.venv\Scripts\activate
+    pip install mkdocs mkdocs-material
+    mkdocs serve
 
 ---
 
 Nota: Este repo es una **plantilla**. Los contenidos en `docs/` son placeholders para iniciar una especificación real en un repo creado desde aquí.
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+
+> Note: Project governance may require maintainer approval for changes.
