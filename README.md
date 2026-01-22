@@ -1,4 +1,4 @@
-﻿# spec-kit-template
+﻿# Spec Kit Template
 
 Plantilla interna para crear **especificaciones técnicas** en Markdown con VS Code + Copilot, siguiendo un flujo “agentic”:
 **Plan → Redacción → Revisión → Iteración**, versionado con Git.
