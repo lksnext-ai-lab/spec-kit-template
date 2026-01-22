@@ -19,6 +19,12 @@ Mejorar calidad, coherencia y completitud de la especificación sin reescribirla
 - Ignora completamente `docs/spec/history/**` (no lo leas, no lo edites, no lo uses como fuente).
 - No uses comandos de shell / PowerShell / Bash ni operaciones destructivas (prohibido `Remove-Item`, borrados o “limpiezas” por comandos).
 - Al revisar o editar Markdown en `docs/spec/**`, aplica siempre el skill `spec-style` (línea en blanco tras encabezados, sublistas con 4 espacios por nivel y fences de código correctamente indentados en listas/cajas para evitar roturas de render).
+- **Navegación externa (obligatoria cuando sea necesario)**: si para revisar sin inventar necesitas verificar información externa
+  (integraciones, SDKs/APIs, licencias, compatibilidades, límites, pasos de instalación, prácticas de seguridad),
+  **navega y verifica usando `chrome-devtools-mcp`**.
+  - Si no se puede verificar o el acceso está bloqueado → registra `OPENQ-###` y refleja el hallazgo en `docs/spec/97-review-notes.md` (severidad según impacto).
+  - Verifica que, cuando se haya usado información externa, existe `### Fuentes` (URL + fecha YYYY-MM-DD + 1 línea) en el documento afectado; si falta, registra una nota y solicita añadirla.
+  - Para repos GitHub: revisar como mínimo README, docs/, examples/, releases/tags, LICENSE, SECURITY.md e issues/discussions (si aplica).
 - Si detectas mezcla de iteraciones en `docs/spec/01-plan.md` (histórico/duplicados/iteraciones cerradas):
   - NO intentes limpiar ni borrar secciones.
   - Registra el hallazgo en `docs/spec/97-review-notes.md` (severidad Media/Alta según impacto).
@@ -42,6 +48,7 @@ Mejorar calidad, coherencia y completitud de la especificación sin reescribirla
 - Gates: preguntas abiertas y decisiones están registradas (OPENQ/ADR)
 - Operación: observabilidad, backups, secretos, accesos
 - Formato: Markdown robusto conforme a `spec-style` (headers con línea en blanco, listas/sublistas 4 espacios, fences sin roturas, evitar fences en tablas)
+- Evidencias: si hay integraciones o afirmaciones externas, existen `### Fuentes` o `OPENQ` (nada “asumido”).
 
 ## Salidas obligatorias
 
@@ -83,6 +90,33 @@ Cuando encuentres `DECISION:` en cualquier documento de `docs/spec/**` (excluyen
 - Ambigüedades
 - Riesgos
 - Sugerencias no bloqueantes
+
+### Regla de severidad — “Fuentes ausentes” (### Fuentes)
+
+Cuando detectes afirmaciones basadas en información externa (Internet/GitHub) sin `### Fuentes` (o sin `OPENQ` si no era verificable), clasifica así:
+
+- **Severidad Alta (bloqueante)** si falta `### Fuentes` y el contenido afecta a:
+  - **Seguridad**: auth, permisos, secretos, cifrado, mTLS/OAuth/API keys, hardening, etc.
+  - **Licencia/Compliance**: LICENSE, restricciones de uso, RGPD, requisitos legales.
+  - **Compatibilidad/viabilidad**: versiones soportadas (runtime/SDK), breaking changes, requisitos de sistema, EOL.
+  - **Contratos/SLA/límites**: rate limits, cuotas, restricciones de API, costes o planes.
+  - **Decisiones de arquitectura** tomadas “por hecho” (p.ej., “este SDK soporta X”, “este servicio permite Y”).
+
+- **Severidad Media** si falta `### Fuentes` y el contenido afecta a:
+  - pasos de integración/instalación (sin implicaciones críticas),
+  - comportamiento funcional esperado de un SDK/API,
+  - configuraciones recomendadas (timeouts, retries) sin ser bloqueantes.
+
+- **Severidad Baja** si:
+  - existe `### Fuentes` pero está incompleta (falta fecha o resumen de 1 línea),
+  - la afirmación es puramente contextual/introductoria y no condiciona decisiones,
+  - el dato es “nice-to-have” y no afecta al plan ni a la arquitectura.
+
+Acción obligatoria asociada:
+
+- **Alta**: registrar nota en `97-review-notes.md` + crear `OPENQ-###` si el dato es necesario y no se puede verificar en la revisión.
+- **Media**: registrar nota en `97-review-notes.md` solicitando añadir `### Fuentes` o convertir a `OPENQ`.
+- **Baja**: registrar nota “mejora” solicitando completar `### Fuentes` (sin bloquear).
 
 Cada nota debe indicar:
 

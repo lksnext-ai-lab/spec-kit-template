@@ -1,158 +1,255 @@
+# SKILL — spec-style (Markdown robusto y consistente)
+
+## Propósito
+
+Asegurar que todos los documentos Markdown en `docs/spec/**` rendericen de forma
+robusta y consistente (GitHub / VS Code / MkDocs), evitando roturas por
+encabezados sin separación, listas pegadas, fences mal indentados, tablas mal
+formadas o espacios en blanco excesivos.
+
+## Alcance
+
+- Aplica a **cualquier edición** de Markdown dentro de `docs/spec/**`.
+- Se usa como criterio de aceptación de calidad para Writer y Reviewer.
+- Si una corrección de formato implica reestructurar grandes bloques, prioriza
+  cambios mínimos y seguros. Si el arreglo no es trivial sin riesgo, deja un
+  `TODO:` local y crea `TODO-###` en `docs/spec/96-todos.md`.
+
+## Reglas duras (SIEMPRE)
+
+### 1) Línea en blanco tras encabezados (H1–H4)
+
+**Siempre** debe haber **exactamente 1 línea en blanco** después de cualquier
+encabezado `#`, `##`, `###`, `####`.
+
+✅ Correcto:
+
+```md
+### Título
+
+Texto...
+````
+
+❌ Incorrecto:
+
+```md
+### Título
+Texto...
+```
+
 ---
-name: spec-style
-description: Usa este skill cuando generes o edites cualquier documento de especificación en docs/spec/*.md. Define estilo, convenciones de IDs, enlaces, y el uso correcto de TODO/OPENQ/RISK/DECISION.
+
+### 2) Listas: línea en blanco antes y después
+
+**Siempre** debe haber **1 línea en blanco antes y 1 después** de cualquier
+lista (`-`, `*`, `1.`), incluyendo listas dentro de secciones.
+
+✅ Correcto:
+
+```md
+Texto previo.
+
+- Item A
+- Item B
+
+Texto posterior.
+```
+
+❌ Incorrecto (sin línea en blanco antes):
+
+```md
+Texto previo.
+- Item A
+- Item B
+```
+
+❌ Incorrecto (sin línea en blanco después):
+
+```md
+- Item A
+- Item B
+Texto posterior.
+```
+
+#### Sublistas: indentación de 4 espacios por nivel
+
+Cada nivel de sublista añade **4 espacios**.
+
+✅ Correcto:
+
+```md
+- Item
+    - Subitem
+        - Subsubitem
+```
+
+❌ Incorrecto:
+
+```md
+- Item
+  - Subitem
+    - Subsubitem
+```
+
 ---
 
-# Spec-style — Estilo y convenciones del spec-kit
+### 3) Bloques de código (fences) siempre bien formados e indentados
 
-## Objetivo
+Reglas:
 
-Asegurar que toda la documentación en `docs/spec/` sea **consistente, ejecutable
-y fácil de revisar**.
+- Los bloques de código usan siempre triple backtick: ```.
+- Si el bloque está **dentro de una lista**, debe ir **indentado con 4 espacios**
+  por nivel de lista.
+- Debe existir **1 línea en blanco antes y 1 después** del bloque.
 
-## Idioma y tono
+✅ Bloque fuera de lista:
 
-- Idioma principal: **español**.
-- Tono: **profesional**, orientado a ejecución.
-- Prioriza claridad sobre “prosa bonita”.
+````md
+Texto previo.
 
-## Estructura recomendada
+```json
+{ "a": 1 }
+```
 
-- Usa encabezados claros (H2/H3) y listas.
-- Para catálogos (FR, NFR, UI, API, entidades): **tablas** + sección de detalle
-  cuando sea necesario.
-- Evita párrafos largos: divide en bullets.
+Texto posterior.
 
-## Markdown robusto (render/export)
+````
 
-### Encabezados
+✅ Bloque dentro de lista (1 nivel):
 
-- Tras cualquier encabezado (`#`, `##`, `###`, ...) deja **una línea en blanco**.
-- Excepción: si el siguiente contenido es otro encabezado inmediatamente.
+````md
+- Ejemplo:
 
-### Listas y sublistas
+    ```json
+    { "a": 1 }
+    ```
+````
 
-- Usa `-` para bullets (no mezclar con `*`).
-- Sublistas con **4 espacios por nivel**.
+✅ Bloque dentro de sublista (2 niveles):
+
+````md
+- Item:
+    - Ejemplo:
+
+        ```json
+        { "a": 1 }
+        ```
+````
+
+❌ Incorrecto (sin indentación dentro de lista):
+
+````md
+- Ejemplo:
+```json
+{ "a": 1 }
+```
+
+````
+
+---
+
+### 4) No puede haber dos líneas en blanco seguidas (en ningún sitio)
+
+Regla global:
+
+- Nunca debe existir un bloque con **dos líneas en blanco seguidas**.
+- En términos de saltos de línea, evita `\n\n\n` en cualquier parte del archivo.
+- Entre bloques (párrafo/lista/tabla/fence/encabezado) usa **exactamente 1**
+  línea en blanco.
+
+✅ Correcto: 1 línea en blanco entre bloques.
+
+❌ Incorrecto: 2 o más líneas en blanco seguidas.
+
+---
+
+### 5) Tablas: fila separadora con espacios y guiones correctos
+
+Reglas:
+
+- La fila separadora debe tener **espacios** alrededor de los guiones y las
+  barras verticales.
+- Formato obligatorio: `| --- | --- |` (tantas columnas como cabecera).
+- No usar nunca `|---|---|` (sin espacios).
+
+✅ Correcto:
+
+```md
+| Col A | Col B |
+| --- | --- |
+| A1 | B1 |
+````
+
+❌ Incorrecto:
+
+```md
+| Col A | Col B |
+|---|---|
+| A1 | B1 |
+```
+
+---
+
+## Reglas de ubicación y consistencia
+
+### Ubicación de `### Fuentes`
+
+- Añade `### Fuentes` **al final del bloque/sección** donde se use la
+  información verificada.
+- Si la verificación afecta a varias secciones o a todo el documento, coloca
+  `### Fuentes` **al final del documento**.
+- En `### Fuentes`, cada entrada debe tener: **URL + fecha (YYYY-MM-DD) + 1
+  línea** de qué se extrajo.
 
 Ejemplo:
 
-- Nivel 0
-  - Nivel 1
-    - Nivel 2
-
-### Bloques de código (```)
-
-Regla anti-roturas: si el bloque está dentro de una lista o “caja” (admonition),
-debe ir:1) precedido por **línea en blanco**, y
-2) con el fence **indentado al nivel del contenedor**.
-
-Ejemplo dentro de bullet:
-
-- **Ejemplo:**
-
-    ```json
-    { "status": "CREATED" }
-    ```
-
-Ejemplo dentro de admonition (MkDocs Material):
-
-```markdown
-!!! note
-    Texto.
-
-    ```json
-    { "status": "CREATED" }
-    ```
+```md
+### Fuentes
+- https://example.com — consultado 2026-01-22 — describe límites de la API y auth.
 ```
 
-### Tablas
+---
 
-- Evita fences (```json/```bash) dentro de celdas: puede romper el render.
-- Alternativas: mover el ejemplo fuera de la tabla o usar inline code corto.
+## Higiene de archivo
 
-## Convenciones de IDs
+### Final de archivo (EOF)
 
-- FR: `FR-###` (correlativo, no reutilizable)
-- NFR: `NFR-###`
-- UI: `UI-###`
-- API: `API-###`
-- EVT (asíncrono): `EVT-###`
-- OPENQ: `OPENQ-###`
-- TODO: `TODO-###`
-- ADR: `ADR-####`
+- El archivo debe terminar con **un único salto de línea**.
+- No dejar líneas en blanco extra al final.
+- **Nunca** dejar 2 líneas en blanco seguidas al final del archivo.
 
-### Reglas
+---
 
-- No reutilices IDs.
-- Si dudas del siguiente ID: mira el último de la tabla correspondiente y suma
-  1.
+## Checklist de validación (antes de dar por bueno un doc)
 
-## Marcadores permitidos durante elaboración
+1. ¿Cada `#..####` tiene una línea en blanco después?
+2. ¿Cada lista tiene línea en blanco antes y después?
+3. ¿Todos los fences dentro de listas están indentados (4 espacios por nivel)?
+4. ¿No hay ningún tramo con 2 líneas en blanco seguidas?
+5. ¿Todas las tablas usan `| --- |` con espacios y la fila separadora coincide
+   en nº de columnas?
+6. ¿El archivo termina con un único salto de línea (sin líneas en blanco extra)?
 
-- `TODO:` trabajo pendiente (si es relevante, también en `docs/spec/96-todos.md`)
-- `OPENQ:` pregunta (si es relevante, también en `docs/spec/95-open-questions.md`)
-- `RISK:` riesgo detectado
-- `DECISION:` decisión pendiente (normalmente debe acabar en un ADR)
+---
 
-### Buenas prácticas
+## Autofix mental rápido (patrones típicos)
 
-- Si un `OPENQ` bloquea una iteración, debe aparecer también en
-  `docs/spec/01-plan.md`.
-- Si un `DECISION` afecta a arquitectura/seguridad/integraciones/operación, debe
-  terminar en ADR.
+- Si ves `### Título` y la siguiente línea empieza con texto → inserta una línea
+  en blanco.
+- Si ves texto seguido inmediatamente de `- item` → inserta una línea en blanco
+  antes.
+- Si ves una lista seguida inmediatamente de texto → inserta una línea en blanco
+  después.
+- Si ves un bloque ``` dentro de `- ...` sin indentación → indenta 4 espacios
+  (por nivel de lista).
+- Si ves dos líneas en blanco seguidas → reduce a una.
+- Si ves `|---|---|` → reemplaza por `| --- | --- |`.
 
-## Criterios de calidad (rápidos)
+---
 
-- FR:
+## Nota operativa
 
-  - criterios de aceptación **verificables**
-  - prioridad (MVP/Should/Could)
-  - trazabilidad (UI/API/Datos/ADR si aplica)
-
-- NFR:
-
-  - objetivo medible (SLO/SLI/umbral) o verificación explícita (prueba/evidencia)
-
-- UI:
-
-  - estados: cargando/vacío/error/sin permisos
-  - reglas por rol
-
-- Backend:
-
-  - errores, validaciones, authz
-  - síncrono/asíncrono claro
-
-- Seguridad/Infra:
-
-  - enfoque operativo (secretos, accesos, auditoría, backups/DR, observabilidad)
-
-## Enlaces
-
-- Dentro de `docs/spec/`: usa enlaces relativos.
-
-  - Ejemplo desde `docs/spec/40-arquitectura.md` a un ADR:
-    `./adr/ADR-0001-...md`
-
-- En `.github/agents` y `.github/prompts`: usa rutas explícitas `docs/spec/...`
-  (para evitar rutas relativas erróneas).
-
-## Anti-patrones (evitar)
-
-- “El sistema será rápido / seguro / escalable” sin umbral o verificación.
-- Requisitos duplicados sin trazabilidad.
-- Decisiones escondidas dentro de texto sin ADR.
-- Cambios grandes sin reflejarlos en `docs/spec/02-trazabilidad.md` y sin notas
-  en review.
-
-## Mini-ejemplos
-
-### Criterio de aceptación verificable (bien)
-
-- “Dado X, cuando el usuario hace Y, entonces el sistema muestra Z en menos de
-  2s (p95).”
-
-### Vago (mal)
-
-- “La pantalla debe ser intuitiva y rápida.”
+Si no puedes aplicar una corrección sin riesgo (p. ej. tabla muy grande o
+bloques complejos), deja un `TODO:` local y crea `TODO-###` en
+`docs/spec/96-todos.md`, pero **no** aceptes un render roto si es fácil de
+corregir.

@@ -23,6 +23,16 @@ inventar y permitir planificación.
   (prohibido `Remove-Item`, borrados o “limpiezas” por comandos).
 - No inventes requisitos ni decisiones. Si falta información, crea `OPENQ-###`
   y continúa.
+- **Navegación externa (obligatoria cuando sea necesario)**: si para evitar
+  inventar necesitas información externa (integraciones, SDKs/APIs, licencias,
+  compatibilidades, límites, pasos de instalación, prácticas de seguridad),
+  **navega y verifica usando `chrome-devtools-mcp`**.
+  - Si no se puede verificar o el acceso está bloqueado → registra `OPENQ-###`
+    y continúa sin inventar.
+  - Registra siempre `### Fuentes` en el documento afectado: URL + fecha
+    (YYYY-MM-DD) + 1 línea de qué se extrajo.
+  - Para repos GitHub: revisar como mínimo README, docs/, examples/, releases/tags,
+    LICENSE, SECURITY.md e issues/discussions (si aplica).
 - No redactes FR/NFR completos todavía.
 
 ## Salidas obligatorias (al finalizar el intake)
@@ -92,6 +102,9 @@ inventar y permitir planificación.
    etc.)?
 2. ¿Qué integraciones externas son obligatorias y hay restricciones (APIs, SFTP,
    mensajería, etc.)?
+    - Si el usuario aporta un enlace (docs o repo GitHub) o menciona una librería/servicio,
+     y faltan detalles mínimos, usa `chrome-devtools-mcp` para verificar lo esencial
+     (versión, pasos, auth, licencia) o registra `OPENQ-###`.
 
 #### Ronda 4 — Restricciones técnicas + riesgos
 

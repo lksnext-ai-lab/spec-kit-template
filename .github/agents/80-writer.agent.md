@@ -17,7 +17,14 @@ Ejecutar `docs/spec/01-plan.md` como si fueran “tareas de implementación”, 
 ## Reglas duras
 
 - No inventes requisitos ni detalles técnicos.
-- Al redactar o editar Markdown en `docs/spec/**`, aplica siempre el skill `spec-style` (línea en blanco tras encabezados, sublistas con 4 espacios por nivel y fences de código como ` ```json ` correctamente indentados dentro de listas/cajas para evitar roturas de render).
+- **Navegación externa (obligatoria cuando sea necesario)**: si para redactar sin inventar necesitas información externa
+  (integraciones, SDKs/APIs, licencias, compatibilidades, límites, pasos de instalación, prácticas de seguridad),
+  **navega y verifica usando `chrome-devtools-mcp`**.
+  - Si no se puede verificar o el acceso está bloqueado → registra `OPENQ-###` y continúa sin inventar.
+  - Registra siempre una subsección `### Fuentes` en el documento afectado con: URL + fecha (YYYY-MM-DD) + 1 línea de qué se extrajo.
+  - Para repos GitHub: revisar como mínimo README, docs/, examples/, releases/tags, LICENSE, SECURITY.md e issues/discussions (si aplica).
+- **Ubicación de `### Fuentes`**: añade `### Fuentes` al final del bloque/sección donde se usa la información verificada; si afecta a varias secciones, colócala al final del documento.
+- Al redactar o editar Markdown en `docs/spec/**`, aplica siempre el skill `spec-style` (línea en blanco tras encabezados, línea en blanco antes y despues de las listas, tablas correctamente formateadas, sublistas con 4 espacios por nivel y fences de código como ` ```json ` correctamente indentados dentro de listas/cajas para evitar roturas de render).
 - Si falta info: marca `OPENQ:` en el lugar y registra `OPENQ-###` en `docs/spec/95-open-questions.md`.
 - Si detectas trabajo nuevo: crea `TODO-###` en `docs/spec/96-todos.md`.
 - Si detectas una decisión relevante: marca `DECISION:` (Reviewer creará ADR).
@@ -37,9 +44,12 @@ Ejecutar `docs/spec/01-plan.md` como si fueran “tareas de implementación”, 
 3. Por cada tarea:
    - modifica solo los archivos indicados (o el mínimo imprescindible)
    - asegúrate de cumplir el DoD de esa tarea
+   - si la tarea requiere verificación externa, usa `chrome-devtools-mcp` y añade `### Fuentes` (URL + fecha + extracción)
    - valida el formato Markdown según `spec-style` (encabezados con línea en blanco, listas/sublistas con 4 espacios y fences de código bien indendados y sin roturas)
    - añade enlaces (FR/UI/API/ADR) cuando existan
+
 4. Al final:
+   - Revisa que los documentos editados cumplen el formato Markdown según `spec-style` y si es necesario corrigelos.
    - actualiza trazabilidad mínima (`docs/spec/02-trazabilidad.md`)
    - actualiza `docs/spec/index.md` si se añaden docs nuevos (normalmente no ocurrirá)
 

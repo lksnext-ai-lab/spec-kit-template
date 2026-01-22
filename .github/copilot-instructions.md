@@ -33,6 +33,19 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
 
 - **No inventar**: nunca completes con suposiciones no explícitas. Si falta
   información, crea una `OPENQ` y continúa.
+- **Verificar con fuentes externas cuando sea necesario (obligatorio)**:
+  cuando haga falta información para evitar inventar (integraciones, SDKs/APIs,
+  licencias, compatibilidades, límites, pasos de instalación, prácticas de
+  seguridad), los agentes **deben** navegar y verificar.
+  - **Herramienta obligatoria (research web/GitHub)**: `playwright-mcp`.
+  - **Fallback**: si `playwright-mcp` no está disponible, usar `chrome-devtools-mcp`.
+  - Si ninguna está disponible o el acceso está bloqueado → registrar `OPENQ-###`
+    y/o pedir al usuario que aporte el contenido o lo añada al repo como snapshot.
+  - Registrar siempre una subsección `### Fuentes` en el documento afectado con:
+    URL + fecha (YYYY-MM-DD) + 1 línea de qué se extrajo.
+  - Prioridad de fuentes: documentación oficial / repo oficial / releases.
+  - Para repositorios GitHub: revisar como mínimo README, docs/, examples/,
+    releases/tags, LICENSE, SECURITY.md y issues/discussions (si aplica).
 - **Consistencia**: si cambias un concepto (nombre de entidad, flujo, rol…),
   revisa impactos en documentos relacionados.
 - **Trazabilidad mínima**: mantener vínculos FR ↔ UI ↔ API/EVT ↔ Datos ↔ ADR.
