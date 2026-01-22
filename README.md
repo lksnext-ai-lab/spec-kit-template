@@ -1,6 +1,6 @@
 ﻿# Spec Kit Template
 
-Plantilla para crear **especificaciones técnicas** en Markdown con VS Code + Copilot, siguiendo un flujo “agentic”:
+Plantilla para crear **especificaciones técnicas** en Markdown con VS Code + COPILOT, siguiendo un flujo “agentic”:
 **Plan → Redacción → Revisión → Iteración**, versionado con Git.
 
 > **Proyecto de LKS Next**: este repositorio (spec-kit-template) está desarrollado y mantenido por **LKS Next**.
