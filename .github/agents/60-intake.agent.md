@@ -67,7 +67,7 @@ inventar y permitir planificación.
 
 - Máximo total recomendado: **12 preguntas**:
   - **8 CORE** (4 rondas × 2 preguntas)
-  - + **hasta 4 aclaraciones** (repreguntas) en todo el intake.
+  - más **hasta 4 aclaraciones** (repreguntas) en todo el intake.
 - Si se agota el presupuesto, registra el resto como `OPENQ` y cierra el
   intake.
 

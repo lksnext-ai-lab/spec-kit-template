@@ -5,7 +5,6 @@ description: Usa este skill para definir o revisar especificaciones de interfaz 
 
 # Ui-spec — Especificación de interfaz (pantallas y flujos)
 
-
 ## Objetivo
 
 Describir la UI de forma implementable sin diseñar “pixel perfect”:
@@ -16,13 +15,11 @@ Describir la UI de forma implementable sin diseñar “pixel perfect”:
 - reglas por rol y validaciones,
 - trazabilidad con FR.
 
-
 ## Dónde aplicar
 
 - `docs/spec/30-ui-spec.md` (principal)
 - `docs/spec/02-trazabilidad.md` (UI ↔ FR)
 - Referencias a conceptualización (roles/permisos) y backend (API)
-
 
 ## Convenciones
 
@@ -36,10 +33,9 @@ Describir la UI de forma implementable sin diseñar “pixel perfect”:
   - Error (fallo)
   - Sin permisos
 
-
 ## Plantilla recomendada por pantalla
 
-**UI-### — Nombre**
+### UI-### — Nombre
 
 - Propósito (qué resuelve)
 - Roles (quién puede verla/operarla)
@@ -53,18 +49,15 @@ Describir la UI de forma implementable sin diseñar “pixel perfect”:
 - FR relacionados
 - Notas (`OPENQ/RISK/DECISION/TODO`)
 
-
 ## Mapa de pantallas (tabla)
 
 Debe existir una tabla tipo:
 
 - UI | Nombre | Roles | Objetivo | Entradas/Salidas | FR relacionados | Notas
 
-
 ### Regla
 
 - Cada pantalla debe enlazar al menos 1 FR (o justificar por qué no).
-
 
 ## Cómo describir flujos sin dibujar pantallas
 
@@ -75,7 +68,6 @@ Para cada flujo relevante:
 - Variantes (por rol, por error, por datos vacíos)
 - FR relacionados
 
-
 ## Buenas prácticas
 
 - Evita “pantallas monstruo”: si una pantalla tiene demasiadas acciones,
@@ -85,7 +77,6 @@ Para cada flujo relevante:
 - Si una pantalla depende de datos o endpoints no definidos aún:
 
   - crea `TODO` o `OPENQ` y enlázalo en trazabilidad.
-
 
 ## Checklist rápido (revisión UI)
 

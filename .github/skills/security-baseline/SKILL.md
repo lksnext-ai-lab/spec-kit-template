@@ -5,7 +5,6 @@ description: Usa este skill para definir o revisar seguridad en docs/spec/80-seg
 
 # Security-baseline — Baseline de seguridad
 
-
 ## Objetivo
 
 Definir un baseline de seguridad operativo y verificable:
@@ -16,7 +15,6 @@ Definir un baseline de seguridad operativo y verificable:
 - controles de API,
 - y una evaluación ligera de amenazas.
 
-
 ## Dónde aplicar
 
 - `docs/spec/80-seguridad.md` (principal)
@@ -24,9 +22,7 @@ Definir un baseline de seguridad operativo y verificable:
 - `docs/spec/40-arquitectura.md` y `docs/spec/90-infra.md` (impactos)
 - ADR cuando haya decisiones fuertes
 
-
 ## Baseline mínimo (lo que no debe faltar)
-
 
 ### Autenticación
 
@@ -37,13 +33,11 @@ Definir un baseline de seguridad operativo y verificable:
 
 Si hay alternativas: `DECISION:` (→ ADR).
 
-
 ### Autorización
 
 - Modelo RBAC/ABAC
 - Permisos por rol (referencia a conceptualización)
 - Reglas de acceso a recursos (por entidad/proyecto/tenant)
-
 
 ### Protección de datos
 
@@ -53,7 +47,6 @@ Si hay alternativas: `DECISION:` (→ ADR).
 - Retención y borrado (RGPD si aplica)
 - Anonimización en pre si se usan datos reales
 
-
 ### Auditoría y logging
 
 - Acciones auditadas (crear/editar/borrar, accesos, cambios de permisos)
@@ -61,14 +54,12 @@ Si hay alternativas: `DECISION:` (→ ADR).
   correlation-id
 - Retención y acceso a logs (quién puede verlos)
 
-
 ### Seguridad de API e integraciones
 
 - Validación de inputs (server-side siempre)
 - Rate limiting / throttling
 - CORS/CSRF si aplica
 - Gestión de claves (rotación, scopes)
-
 
 ## Amenazas (ligero, “threat-lite”)
 
@@ -84,14 +75,12 @@ Ejemplos típicos:
 - Exfiltración de datos → cifrado + control de accesos + auditoría
 - Abuso de API → rate limiting + detección + alertas
 
-
 ## Evidencias / verificación (recomendado)
 
 - Checklist de configuración
 - Revisión de código/políticas
 - Pentest (si aplica)
 - Pruebas automatizadas de permisos (cuando aplique)
-
 
 ## Checklist rápido (revisión seguridad)
 

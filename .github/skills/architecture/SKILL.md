@@ -5,7 +5,6 @@ description: Usa este skill para definir o revisar arquitectura en docs/spec/40-
 
 # Architecture — Arquitectura de la solución
 
-
 ## Objetivo
 
 Describir una arquitectura coherente con FR/NFR, cubriendo:
@@ -17,7 +16,6 @@ Describir una arquitectura coherente con FR/NFR, cubriendo:
 - observabilidad,
 - y decisiones en ADR.
 
-
 ## Dónde aplicar
 
 - `docs/spec/40-arquitectura.md` (principal)
@@ -25,13 +23,11 @@ Describir una arquitectura coherente con FR/NFR, cubriendo:
   `docs/spec/60-backend.md`, `docs/spec/90-infra.md`
 - Decisiones: `docs/spec/adr/`
 
-
 ## Principios
 
 - Empieza por drivers (NFR y restricciones).
 - Diseña responsabilidades claras (evita “servicios que hacen de todo”).
 - Si una decisión cambia la arquitectura: marca `DECISION:` → ADR.
-
 
 ## Plantilla de componente/servicio (mínimo)
 
@@ -44,7 +40,6 @@ Para cada componente (SVC-### o similar):
 - NFR clave (seguridad, disponibilidad, observabilidad, rendimiento)
 - Riesgos y mitigaciones
 
-
 ## Integraciones
 
 Para cada integración externa:
@@ -56,7 +51,6 @@ Para cada integración externa:
 - Limitaciones (rate limits, ventanas, SLAs)
 - Riesgos
 
-
 ## Sync vs Async (cuándo usar)
 
 - Sync: lectura/consulta, baja latencia, dependencia directa aceptable.
@@ -66,7 +60,6 @@ Si dudas:
 
 - crea `OPENQ` o `DECISION` y sugiere 2 alternativas.
 
-
 ## Consistencia e idempotencia
 
 - Define si hay consistencia fuerte vs eventual.
@@ -75,14 +68,12 @@ Si dudas:
   - al menos “at-least-once” y consumidores idempotentes
   - reintentos y DLQ (si aplica)
 
-
 ## Observabilidad (mínimo)
 
 - Correlation-id end-to-end (frontend→backend→servicios)
 - Logs estructurados
 - Métricas (errores, latencia, throughput)
 - Alertas mínimas
-
 
 ## ADR (decisiones arquitectónicas)
 
@@ -94,7 +85,6 @@ Crea/actualiza ADR cuando:
 - se decide base de datos o particionado
 
 Marca `DECISION:` donde se detecte (Reviewer genera ADR si falta).
-
 
 ## Checklist rápido (revisión arquitectura)
 

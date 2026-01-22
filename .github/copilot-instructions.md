@@ -1,6 +1,5 @@
 ﻿# Instrucciones globales del repo (spec-kit)
 
-
 ## Propósito
 
 Este repositorio contiene:
@@ -12,7 +11,6 @@ Este repositorio contiene:
 El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo:
 **Plan → Redacción → Revisión → Iteración**, versionado con Git.
 
-
 ## Reglas de alcance (CRÍTICO)
 
 - Los agentes/prompts **solo deben crear/editar** documentación de especificación
@@ -22,7 +20,6 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
 - `docs/assets/**` puede ser usado por ambas (imágenes/recursos), pero evita
   cambios innecesarios.
 
-
 ### Histórico de iteraciones (docs/spec/history)
 
 - `docs/spec/history/**` contiene snapshots cerrados por iteración (solo archivo
@@ -31,7 +28,6 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
   planificar/redactar/revisar.
 - Solo el prompt `/close-iteration` puede crear/actualizar contenido dentro de
   `docs/spec/history/**`.
-
 
 ## Principios
 
@@ -43,14 +39,13 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
 - **Decisiones visibles**: cualquier decisión relevante
   (arquitectura/seguridad/integración/operación) debe acabar en un ADR.
 
-
 ## Artefactos y responsabilidades (SPEC)
 
 - `docs/spec/index.md`: índice de la especificación (punto de entrada).
 - `docs/spec/00-context.md`: marco del problema, objetivos, alcance y
   restricciones.
 - `docs/spec/01-plan.md`: plan ejecutable de la iteración actual (tareas atómicas
-  + DoD). **Manda el plan**.
+  \+ DoD). **Manda el plan**.
 - `docs/spec/02-trazabilidad.md`: tabla mínima de trazabilidad (no es un Jira).
 - `docs/spec/10-requisitos-funcionales.md`: FR con criterios de aceptación
   verificables.
@@ -72,7 +67,6 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
 - `docs/spec/97-review-notes.md`: revisión crítica y sugerencias accionables.
 - `docs/spec/adr/`: decisiones (ADR) con contexto, alternativas y consecuencias.
 
-
 ## Convenciones de IDs
 
 - Requisitos funcionales: `FR-###` (correlativo, no reutilizable)
@@ -85,7 +79,6 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
 - TODOs: `TODO-###`
 - ADRs: `ADR-####`
 
-
 ## Marcadores permitidos durante elaboración
 
 - `TODO:` trabajo pendiente (idealmente reflejado también en
@@ -95,7 +88,6 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
 - `RISK:` riesgo detectado
 - `DECISION:` decisión pendiente (normalmente → ADR)
 
-
 ## Reglas de escritura
 
 - Idioma principal: **español**.
@@ -103,7 +95,6 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
 - Preferir estructura clara, listas y tablas.
 - Evitar vaguedades (“rápido”, “seguro”, “escalable”) sin umbrales o método de
   verificación.
-
 
 ## Reglas de calidad por documento
 
@@ -116,7 +107,6 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
 - Seguridad/Infra: incluir operación real (secretos, accesos, auditoría,
   backups/DR, observabilidad).
 
-
 ## Proceso de trabajo (obligatorio)
 
 1. **Planificar**: actualizar `docs/spec/01-plan.md` con tareas atómicas y DoD.
@@ -124,7 +114,6 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
 3. **Revisar**: actualizar `docs/spec/97-review-notes.md` con observaciones
    accionables.
 4. **Iterar**: convertir feedback en cambios, TODOs u OPENQs y repetir.
-
 
 ## Arranque de especificación (Intake / new-spec)
 
@@ -140,7 +129,6 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
 
 - El objetivo del intake es completar `docs/spec/00-context.md` y
   `docs/spec/95-open-questions.md` sin redactar aún FR/NFR completos.
-
 
 ## Gestión de dudas, trabajo pendiente y decisiones
 
@@ -159,7 +147,6 @@ El objetivo es producir documentación coherente y ejecutable siguiendo el ciclo
   - marca `DECISION:` en el documento relevante,
   - y registra ADR en `docs/spec/adr/` (por el revisor o cuando corresponda).
   - enlaza la ADR desde el punto donde se menciona la decisión.
-
 
 ## Enlaces
 

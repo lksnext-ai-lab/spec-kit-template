@@ -5,7 +5,6 @@ description: Usa este skill cuando tengas que definir, refinar o revisar requisi
 
 # Requirements-fr — Requisitos funcionales (FR)
 
-
 ## Objetivo
 
 Crear requisitos funcionales claros, no ambiguos y verificables, listos para:
@@ -15,13 +14,11 @@ Crear requisitos funcionales claros, no ambiguos y verificables, listos para:
 - backend (API/eventos),
 - trazabilidad.
 
-
 ## Dónde aplicar
 
 - `docs/spec/10-requisitos-funcionales.md` (principal)
 - `docs/spec/02-trazabilidad.md` (enlaces FR↔UI↔API↔Datos↔ADR)
 - `docs/spec/01-plan.md` (si un FR bloquea una iteración o requiere decisión)
-
 
 ## Convenciones FR
 
@@ -29,10 +26,9 @@ Crear requisitos funcionales claros, no ambiguos y verificables, listos para:
 - Prioridad: `MVP` / `Should` / `Could`
 - Estado: `Draft` / `Validated` / `Deprecated`
 
-
 ## Plantilla recomendada por FR
 
-**FR-### — Título**
+### FR-### — Título
 
 - Descripción (qué capacidad aporta)
 - Actores/Roles
@@ -43,7 +39,6 @@ Crear requisitos funcionales claros, no ambiguos y verificables, listos para:
 - Prioridad y estado
 - Trazabilidad (UI/API/Datos/ADR si existe)
 - Observaciones (`OPENQ/RISK/DECISION/TODO`)
-
 
 ## Cómo escribir buenos criterios de aceptación
 
@@ -58,7 +53,6 @@ Formato útil:
 - **Dado** [contexto], **cuando** [acción], **entonces** [resultado].
 - Incluye errores esperados cuando sea crítico.
 
-
 ## Ejemplos
 
 ✅ Bien:
@@ -71,7 +65,6 @@ Formato útil:
 
 - “El usuario podrá crear registros fácilmente.”
 
-
 ## Priorización MVP (reglas prácticas)
 
 - MVP: imprescindible para usar el sistema de punta a punta.
@@ -81,7 +74,6 @@ Formato útil:
 Consejo:
 
 - Si hay desacuerdo, crea `OPENQ` y propone 2 alternativas de MVP.
-
 
 ## Detección de duplicados y solapamientos
 
@@ -94,14 +86,12 @@ Antes de crear un FR nuevo:
   - separar por casos de uso
   - o marcar dependencias
 
-
 ## Trazabilidad mínima obligatoria
 
 Por cada FR (al menos MVP):
 
 - Añade una fila en `docs/spec/02-trazabilidad.md`.
 - Si aún no hay UI/API/Datos, deja `TODO` en esas columnas.
-
 
 ## Checklist rápido (revisión FR)
 

@@ -5,12 +5,10 @@ description: Usa este skill para definir o revisar requisitos no funcionales (NF
 
 # Requirements-nfr — Requisitos no funcionales (NFR)
 
-
 ## Objetivo
 
 Definir NFR de forma **medible o verificable**, alineados con arquitectura,
 seguridad e infraestructura.
-
 
 ## Dónde aplicar
 
@@ -19,7 +17,6 @@ seguridad e infraestructura.
   `docs/spec/90-infra.md` (impactos)
 - `docs/spec/01-plan.md` (si un NFR bloquea una iteración)
 
-
 ## Convenciones
 
 - ID: `NFR-###` correlativo.
@@ -27,10 +24,9 @@ seguridad e infraestructura.
 - Categoría: Seguridad / Disponibilidad / Rendimiento / Observabilidad /
   Privacidad&Legal / Mantenibilidad / Portabilidad / UX&Accesibilidad / Coste.
 
-
 ## Plantilla recomendada por NFR
 
-**NFR-### — Título**
+### NFR-### — Título
 
 - Categoría
 - Descripción
@@ -40,9 +36,7 @@ seguridad e infraestructura.
 - Implicaciones (arquitectura/operación/coste)
 - Observaciones (`OPENQ/RISK/DECISION/TODO`)
 
-
 ## Cómo expresar “medible” vs “verificable”
-
 
 ### Medible (preferido)
 
@@ -51,7 +45,6 @@ seguridad e infraestructura.
   - Ej: “p95 tiempo de respuesta < 2s en endpoint API-001 con 200 RPS”
   - Ej: “Disponibilidad mensual >= 99.9% (SLO)”
 
-
 ### Verificable (cuando medir no aplique)
 
 - Define método y evidencia
@@ -59,9 +52,7 @@ seguridad e infraestructura.
   - Ej: “Revisión de configuración + informe de pentest”
   - Ej: “Checklist de hardening + captura de configuración”
 
-
 ## NFR mínimos sugeridos (baseline)
-
 
 ### Seguridad
 
@@ -70,13 +61,11 @@ seguridad e infraestructura.
 - Gestión de secretos (rotación/almacenamiento seguro)
 - Auditoría de acciones relevantes
 
-
 ### Disponibilidad / Continuidad
 
 - Backups, retención, pruebas de restore
 - RTO/RPO si aplica
 - Ventanas de mantenimiento y estrategia de rollback
-
 
 ### Observabilidad
 
@@ -84,13 +73,11 @@ seguridad e infraestructura.
 - Métricas clave y alertas mínimas
 - Trazas (si aplica) o al menos correlation-id end-to-end
 
-
 ### Rendimiento / Escalabilidad
 
 - Supuestos de carga y límites (aunque sean aproximados)
 - Paginación/filtrado para listados grandes
 - Estrategia para picos (si aplica)
-
 
 ### Privacidad & Legal (si aplica)
 
@@ -98,13 +85,11 @@ seguridad e infraestructura.
 - Accesos a datos personales
 - Anonimización en pre
 
-
 ## Antipatrones (evitar)
 
 - “Será escalable” sin escenario de carga y límites.
 - “Será seguro” sin controles concretos.
 - “Alta disponibilidad” sin definir cómo (topología, DR, backups, etc.).
-
 
 ## Checklist rápido (revisión NFR)
 

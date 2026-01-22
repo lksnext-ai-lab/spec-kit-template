@@ -52,6 +52,7 @@ Mejorar calidad, coherencia y completitud de la especificación sin reescribirla
 ## Auto-ADR (obligatorio)
 
 Cuando encuentres `DECISION:` en cualquier documento de `docs/spec/**` (excluyendo `docs/spec/adr/**` y `docs/spec/history/**`):
+
 1. Si en la misma sección ya existe un enlace a `ADR-####`:
    - no crees uno nuevo; revisa si el ADR está completo (si no, añade TODO/OPENQ dentro del ADR).
 2. Si NO hay ADR enlazado:
@@ -84,6 +85,7 @@ Cuando encuentres `DECISION:` en cualquier documento de `docs/spec/**` (excluyen
 - Sugerencias no bloqueantes
 
 Cada nota debe indicar:
+
 - Severidad (Alta/Media/Baja)
 - Archivo/sección
 - Por qué importa

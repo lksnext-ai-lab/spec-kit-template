@@ -1,6 +1,5 @@
 # SKILL: export-docx (Markdown → DOCX)
 
-
 ## Propósito
 
 Convertir documentación Markdown del repositorio a un archivo DOCX, pudiendo
@@ -10,19 +9,16 @@ elegir el alcance:
 - `kit`: documentación del propio template/guía (`docs/kit/**`)
 - `all`: todo `docs/**`
 
-
 ## Cuándo usarlo
 
 - Cuando se necesite compartir la documentación en formato Word.
 - Para entregar una versión “exportable” fuera del repositorio.
 - Para revisiones externas donde DOCX sea requisito.
 
-
 ## Dependencias
 
 - Requiere **Pandoc** instalado y disponible en PATH.
 - Requiere Python con `PyYAML` si se usa el script del repo.
-
 
 ## Entrada que debes pedir al usuario
 
@@ -31,7 +27,6 @@ elegir el alcance:
 3. Ruta de salida (opcional; por defecto en `exports/`)
 4. Si quiere TOC (por defecto: sí)
 
-
 ## Reglas
 
 - No modificar `docs/kit/**` ni `docs/spec/**` durante el export (solo leer).
@@ -39,7 +34,6 @@ elegir el alcance:
 - Respetar el orden de navegación definido en `mkdocs.yml` (si existe).
 - Si falta Pandoc, devolver instrucciones de instalación y alternativa de
   ejecución.
-
 
 ## Procedimiento recomendado (Windows / PowerShell)
 
@@ -55,7 +49,6 @@ elegir el alcance:
 
    - `python tools\export_docx.py --scope <spec|kit|all> --output exports\<nombre>.docx --title "<titulo>" --toc`
 
-
 ## Salida esperada
 
 - Un archivo DOCX en `exports/`.
@@ -64,7 +57,6 @@ elegir el alcance:
   - scope usado
   - ruta del DOCX generado
   - lista (opcional) de ficheros incluidos
-
 
 ## Notas / limitaciones
 

@@ -5,7 +5,6 @@ description: Usa este skill para definir o revisar infraestructura y operación 
 
 # Infra — Infraestructura y operación (dev / pre / prod)
 
-
 ## Objetivo
 
 Definir lo mínimo necesario para operar la solución con calidad:
@@ -17,14 +16,12 @@ Definir lo mínimo necesario para operar la solución con calidad:
 - accesos y secretos,
 - y consideraciones de coste.
 
-
 ## Dónde aplicar
 
 - `docs/spec/90-infra.md` (principal)
 - `docs/spec/11-requisitos-tecnicos-nfr.md` (NFR de operación)
 - `docs/spec/40-arquitectura.md` (topología)
 - `docs/spec/80-seguridad.md` (seguridad operativa)
-
 
 ## Entornos (mínimo)
 
@@ -39,7 +36,6 @@ Para cada entorno define:
 - accesos/roles
 - diferencias con otros entornos
 
-
 ## CI/CD (mínimo)
 
 - estrategia de despliegue (rolling/blue-green/manual gates)
@@ -47,14 +43,12 @@ Para cada entorno define:
 - migraciones de datos (cómo y cuándo)
 - “Definition of Ready” para deploy a PROD (pruebas mínimas)
 
-
 ## Observabilidad operativa (mínimo)
 
 - logs centralizados y estructurados (retención)
 - métricas clave (latencia, errores, throughput, colas si aplica)
 - alertas mínimas (error rate, disponibilidad, saturación)
 - dashboards de operación
-
 
 ## Backups / DR (mínimo)
 
@@ -64,7 +58,6 @@ Para cada entorno define:
 - RTO/RPO si aplica
 - pruebas periódicas de restore (recomendado)
 
-
 ## Seguridad operativa
 
 - gestión de secretos (almacenamiento, rotación)
@@ -72,12 +65,10 @@ Para cada entorno define:
 - hardening y parches
 - segregación de redes si aplica
 
-
 ## Coste (opcional, pero útil)
 
 - drivers principales (tráfico, almacenamiento, observabilidad, licencias)
 - límites y alertas de coste si aplica
-
 
 ## Checklist rápido (revisión infra)
 
