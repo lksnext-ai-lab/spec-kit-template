@@ -7,7 +7,7 @@ Plantilla para crear **especificaciones técnicas** en Markdown con VS Code + Co
 
 ## Ownership & attribution
 
-Spec Kit Template (spec-kit-template) is developed and maintained by **LKS Next**.
+**Spec Kit Template** (spec-kit-template) is developed and maintained by **LKS Next**.
 
 See: [NOTICE](NOTICE)
 
