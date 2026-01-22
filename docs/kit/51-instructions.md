@@ -13,6 +13,7 @@ En este template viven en:
 - `.github/copilot-instructions.md`
 
 Actúan como el “marco de trabajo” del sistema:
+
 - definen el **alcance** (qué se puede modificar y qué no),
 - establecen **principios** (no inventar, consistencia, trazabilidad),
 - fijan **convenciones** (IDs y marcadores),
@@ -23,12 +24,14 @@ Actúan como el “marco de trabajo” del sistema:
 ## Qué problema resuelven
 
 Sin un conjunto de reglas globales, la salida de IA tiende a ser:
+
 - inconsistente entre sesiones/autores,
 - demasiado creativa (inventar detalles),
 - poco operativa (texto largo y poco verificable),
 - y con riesgo de tocar archivos que no deberían tocarse.
 
 Las instructions resuelven esto imponiendo:
+
 - un estándar único de calidad,
 - un lenguaje y tono profesional,
 - un mecanismo explícito de dudas (OPENQ) y trabajo pendiente (TODO),
@@ -103,19 +106,23 @@ Regla práctica:
 ## Buenas prácticas de mantenimiento
 
 ### Cambios pequeños y versionados
+
 - Cambiar instructions debe considerarse un cambio “de sistema”.
 - Preferir PRs y revisión por otra persona.
 - Explicar el “por qué” del cambio en el commit/PR.
 
 ### Evitar duplicidad
+
 - No repetir reglas en muchos sitios.
 - Referenciar instructions desde otros documentos (kit) si hace falta.
 
 ### Mantenerlo accionable
+
 - Reglas claras, operativas y comprobables.
 - Evitar lenguaje ambiguo (“mejor”, “bonito”, “correcto”) sin criterio.
 
 ### Mantener estable el “estado vivo”
+
 - El plan activo debe vivir en `docs/spec/01-plan.md` (una sola iteración activa).
 - OPENQ/TODO/review notes deben mantenerse como **listados vivos** (solo lo pendiente/relevante).
 - El detalle histórico debe archivarse por iteración en `docs/spec/history/Ixx/` (idealmente con `/close-iteration`).
@@ -133,6 +140,7 @@ Regla práctica:
 ---
 
 ## Referencias internas
+
 - Archivo real de reglas: `.github/copilot-instructions.md`
 - Visión general del sistema: `docs/kit/50-sistema-ia.md`
 - Prompts: `docs/kit/53-prompts.md`

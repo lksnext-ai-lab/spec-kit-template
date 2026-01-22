@@ -1,6 +1,7 @@
 ﻿# Estructura del repositorio
 
 Este documento describe la organización del repositorio `spec-kit-template`, separando claramente:
+
 - la **especificación** que se redacta para un proyecto (`docs/spec/`)
 - y la **guía del sistema** (`docs/kit/`)
 además de los componentes de soporte IA (agentes, prompts y skills).
@@ -34,9 +35,11 @@ Estructura típica:
 ## Carpeta `docs/`
 
 ### `docs/spec/` — Especificación del proyecto
+
 Aquí vive el contenido que describe el sistema a construir. Es el área de trabajo “normal” del equipo y de los agentes.
 
 Características:
+
 - Markdown “modular” por secciones.
 - Convenciones de IDs (FR/NFR/UI/API/OPENQ/TODO/ADR).
 - Trazabilidad mínima.
@@ -44,6 +47,7 @@ Características:
 - Trabajo por iteraciones (plan ejecutable por iteración).
 
 Archivos principales (orientativo):
+
 - `index.md` (índice / punto de entrada)
 - `00-context.md` (objetivo, alcance, restricciones)
 - `01-plan.md` (plan de la iteración **activa**)
@@ -60,6 +64,7 @@ Archivos principales (orientativo):
 - `95-open-questions.md`, `96-todos.md`, `97-review-notes.md` (estado “vivo”)
 
 #### `docs/spec/adr/` — ADRs (decisiones)
+
 Decisiones relevantes capturadas como registros, siguiendo un formato consistente.
 
 - `ADR-0001-template.md` sirve como plantilla.
@@ -68,15 +73,19 @@ Decisiones relevantes capturadas como registros, siguiendo un formato consistent
 > Nota: dentro de `docs/spec/**` se permiten enlaces relativos (por ejemplo `adr/ADR-0002-...md`).
 
 #### `docs/spec/history/` — Histórico de iteraciones (snapshots)
+
 Carpeta para almacenar snapshots de iteraciones cerradas, con el objetivo de:
+
 - evitar que `01-plan.md` acumule iteraciones antiguas,
 - evitar que `95-open-questions.md`, `96-todos.md` y `97-review-notes.md` crezcan sin control,
 - y mantener un “estado vivo” pequeño y accionable para agentes y equipo.
 
 Convención:
+
 - Cada iteración cerrada se archiva en `docs/spec/history/<Ixx>/` (por ejemplo, `docs/spec/history/I01/`).
 
 Reglas de uso:
+
 - Por defecto, prompts y agentes deben **ignorar** `docs/spec/history/**` durante Plan/Write/Review.
 - Solo el prompt **`/close-iteration`** puede crear/actualizar contenido dentro de `docs/spec/history/**`.
 - El índice `docs/spec/index.md` debe enlazar el histórico para navegación y auditoría.
@@ -84,23 +93,28 @@ Reglas de uso:
 ---
 
 ### `docs/kit/` — Guía del spec-kit (manual del sistema)
+
 Documentación interna del template y su uso.
 
 Propósito:
+
 - explicar cómo funciona el sistema (IA + estructura),
 - definir el flujo recomendado,
 - documentar configuración y troubleshooting,
 - y permitir onboarding del equipo.
 
 Regla crítica:
+
 - `docs/kit/**` no debe ser modificado por prompts/agentes salvo petición explícita.
 
 ---
 
 ### `docs/assets/` — Recursos compartidos
+
 Carpeta común para imágenes/diagramas que se referencian desde `spec` o `kit`.
 
 Buenas prácticas:
+
 - nombrado claro (ej. `arch-overview.png`, `ui-flow-checkout.svg`)
 - evitar assets duplicados
 - mantener tamaño razonable
@@ -110,7 +124,9 @@ Buenas prácticas:
 ## Carpeta `.github/` (soporte IA y gobierno)
 
 ### `.github/copilot-instructions.md`
+
 Reglas globales de trabajo del repo:
+
 - alcance (qué tocar / qué no tocar)
 - calidad mínima por documento
 - proceso (Plan → Write → Review → Iterate)
@@ -122,13 +138,16 @@ Es el “contrato” que guía al asistente y ayuda a que el equipo trabaje homo
 ---
 
 ### `.github/agents/` — Custom agents
+
 Agentes con rol y responsabilidad definida. Normalmente:
+
 - `60-intake.agent.md` → arranque/entrevista
 - `70-planner.agent.md` → planificación de iteraciones
 - `80-writer.agent.md` → redacción según plan
 - `90-reviewer.agent.md` → revisión crítica + ADR
 
 Los agentes deben:
+
 - operar sobre `docs/spec/**` (estado vivo),
 - **ignorar** `docs/spec/history/**`,
 - evitar enlaces relativos en `.github/**` (usar rutas desde raíz: `docs/spec/...`).
@@ -136,7 +155,9 @@ Los agentes deben:
 ---
 
 ### `.github/prompts/` — Prompt files
+
 Comandos reutilizables que ejecutas en Copilot Chat, por ejemplo:
+
 - `/new-spec`
 - `/plan-iteration`
 - `/write-from-plan`
@@ -144,19 +165,23 @@ Comandos reutilizables que ejecutas en Copilot Chat, por ejemplo:
 - `/close-iteration`
 
 Los prompt files:
+
 - implementan el flujo recomendado,
 - producen cambios en archivos (principalmente en `docs/spec/**`),
 - y proporcionan consistencia de salida.
 
 Regla práctica:
+
 - en `.github/**` evitar enlaces relativos como `./...` (provoca rutas erróneas).
 
 ---
 
 ### `.github/skills/` — Skills
+
 “Bloques de conocimiento” reutilizables para producir contenido consistente.
 
 Ejemplos:
+
 - requisitos FR / NFR
 - UI spec
 - arquitectura
@@ -164,6 +189,7 @@ Ejemplos:
 - infra
 
 Los skills ayudan a:
+
 - normalizar estructura y vocabulario,
 - asegurar que FR/NFR/UI se redactan con calidad mínima,
 - acelerar redacción sin perder coherencia.
@@ -171,7 +197,9 @@ Los skills ayudan a:
 ---
 
 ### `.github/workflows/` — CI
+
 Automatizaciones que ayudan a calidad:
+
 - lint de Markdown
 - build de MkDocs (`mkdocs build --strict`)
 
@@ -180,13 +208,17 @@ Automatizaciones que ayudan a calidad:
 ## Archivos de configuración (raíz)
 
 ### `mkdocs.yml`
+
 Define:
+
 - navegación (secciones Spec y Kit)
 - tema (Material)
 - extensiones Markdown
 
 ### `.editorconfig` y `.gitattributes`
+
 Garantizan consistencia entre sistemas (especialmente Windows):
+
 - line endings (LF)
 - encoding
 - espacios finales, etc.
@@ -194,6 +226,7 @@ Garantizan consistencia entre sistemas (especialmente Windows):
 ---
 
 ## Recomendaciones de organización
+
 - Mantener `docs/spec/` “limpio” y orientado a especificación.
 - Mantener `docs/kit/` como manual del sistema y onboarding.
 - Evitar duplicar reglas: si algo es “norma”, mejor en `copilot-instructions.md` y referenciar desde otros documentos.

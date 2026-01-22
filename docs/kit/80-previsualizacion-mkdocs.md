@@ -13,6 +13,7 @@ MkDocs renderiza el contenido de `docs/` (incluye `docs/spec/` y `docs/kit/`) us
 - `mkdocs.yml`
 
 Salida típica:
+
 - en local: servidor de desarrollo (hot reload)
 - opcional: publicación en GitHub Pages (si se habilita)
 
@@ -53,7 +54,7 @@ python -m mkdocs serve
 
 Por defecto, verás algo como:
 
-* `http://127.0.0.1:8000/`
+- `http://127.0.0.1:8000/`
 
 Abre esa URL en el navegador.
 
@@ -75,17 +76,17 @@ Si hay enlaces rotos o entradas de navegación inválidas, `--strict` fallará.
 
 ### 6.1 Funcionalidades útiles
 
-* búsqueda integrada
-* navegación lateral
-* modo oscuro (si se habilita)
-* bloques admonition (`!!! note`, `!!! warning`, etc.)
-* tablas y código con buen render
+- búsqueda integrada
+- navegación lateral
+- modo oscuro (si se habilita)
+- bloques admonition (`!!! note`, `!!! warning`, etc.)
+- tablas y código con buen render
 
 ### 6.2 Recomendación de estilo
 
-* mantener títulos cortos y claros
-* usar listas y tablas
-* usar admonitions para notas operativas
+- mantener títulos cortos y claros
+- usar listas y tablas
+- usar admonitions para notas operativas
 
 Ejemplo:
 
@@ -102,11 +103,11 @@ Ejemplo:
 
 Solución:
 
-* usar `python -m mkdocs serve` en lugar de `mkdocs serve`.
+- usar `python -m mkdocs serve` en lugar de `mkdocs serve`.
 
 Causa habitual:
 
-* scripts instalados fuera del PATH (especialmente con Python de Microsoft Store).
+- scripts instalados fuera del PATH (especialmente con Python de Microsoft Store).
 
 ---
 
@@ -114,19 +115,18 @@ Causa habitual:
 
 Síntoma:
 
-* “Defaulting to user installation…”
+- "Defaulting to user installation…"
 
 Causas posibles:
 
-* venv no activado correctamente,
-* restricción del entorno de Python,
-* instalación de Python desde Microsoft Store.
+- venv no activado correctamente,
+- restricción del entorno de Python,
+- instalación de Python desde Microsoft Store.
 
 Soluciones recomendadas:
 
 1. verificar que el venv está activo:
-
-   * el prompt debe mostrar `(.venv)`
+   - el prompt debe mostrar `(.venv)`
 2. usar siempre `python -m pip ...`
 3. si persiste, considerar instalar Python desde python.org (si la política corporativa lo permite)
 
@@ -146,12 +146,12 @@ python -m mkdocs serve -a 127.0.0.1:8001
 
 Si MkDocs falla al arrancar o al construir:
 
-* revisar rutas en `mkdocs.yml`
-* verificar que los archivos existen en `docs/`
+- revisar rutas en `mkdocs.yml`
+- verificar que los archivos existen en `docs/`
 
 Recomendación:
 
-* correr `python -m mkdocs build --strict` para detectar inconsistencias.
+- correr `python -m mkdocs build --strict` para detectar inconsistencias.
 
 ---
 
@@ -159,26 +159,25 @@ Recomendación:
 
 Se puede añadir un workflow que:
 
-* construya el sitio
-* publique en Pages
+- construya el sitio
+- publique en Pages
 
 Recomendación:
 
-* activarlo solo cuando el equipo quiera compartir specs de forma más amplia
-* y revisar permisos/privacidad (si las specs son sensibles)
+- activarlo solo cuando el equipo quiera compartir specs de forma más amplia
+- y revisar permisos/privacidad (si las specs son sensibles)
 
 ---
 
 ## 9) Checklist de previsualización (rápida)
 
-* venv activo: `(.venv)`
-* instalación ok: `python -m mkdocs --version`
-* servidor ok: `python -m mkdocs serve`
-* build estricto pasa: `python -m mkdocs build --strict`
+- venv activo: `(.venv)`
+- instalación ok: `python -m mkdocs --version`
+- servidor ok: `python -m mkdocs serve`
+- build estricto pasa: `python -m mkdocs build --strict`
 
 ---
 
 Siguiente lectura recomendada:
 
-* FAQ/troubleshooting: `docs\kit\90-mantenimiento-y-evolucion.md`
-
+- FAQ/troubleshooting: `docs/kit/95-faq-y-troubleshooting.md`

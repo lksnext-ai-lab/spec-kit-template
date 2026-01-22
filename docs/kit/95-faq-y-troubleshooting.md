@@ -7,9 +7,11 @@ Este documento recoge dudas frecuentes y problemas habituales al usar `spec-kit-
 ## 1) Copilot / agentes / prompts
 
 ### 1.1 ¿Tengo que seleccionar un agente para ejecutar un prompt como `/new-spec`?
+
 No necesariamente. Los prompt files pueden ejecutarse sin seleccionar un agente.
 
 Recomendación:
+
 - usar prompts como “procedimientos”
 - y agentes como “roles” cuando quieras un comportamiento más guiado.
 
@@ -17,11 +19,13 @@ Si un equipo está empezando, es totalmente válido trabajar solo con prompts.
 
 ---
 
-### 1.2 Error: “File './adr/ADR-####-<slug>.md' not found at '.github/prompts/...'”
+### 1.2 Error: "File './adr/ADR-####-SLUG.md' not found at '.github/prompts/...'"
+
 **Causa típica:** hay un enlace relativo en un archivo dentro de `.github/**` (prompts/agentes).  
 VS Code/Copilot resuelve rutas relativas desde esa carpeta, no desde `docs/spec/`.
 
 **Solución:**
+
 - dentro de `.github/**` usar rutas desde la raíz del repo:
   - ✅ `docs/spec/adr/ADR-0001-template.md`
   - ❌ `./adr/ADR-0001-template.md`
@@ -30,13 +34,16 @@ VS Code/Copilot resuelve rutas relativas desde esa carpeta, no desde `docs/spec/
 ---
 
 ### 1.3 Warning en VS Code: “Link … not found” en un prompt/agent
+
 **Causa:** el validador de Markdown intenta resolver el link relativo desde `.github/prompts/` o `.github/agents/`.
 
 **Solución recomendada:**
+
 - en prompts/agentes evita links Markdown relativos.
 - escribe rutas como texto o en bloque de código.
 
 Ejemplo:
+
 ```txt
 En docs/spec usa: adr/ADR-####-<slug>.md
 En .github usa: docs/spec/adr/ADR-####-<slug>.md
@@ -48,14 +55,14 @@ En .github usa: docs/spec/adr/ADR-####-<slug>.md
 
 En la práctica, lo habitual es que:
 
-* tú selecciones el agente adecuado,
-* o ejecutes un prompt concreto,
-* y el “handoff” se haga como recomendación (“siguiente paso: usa Planner / ejecuta /plan-iteration”).
+- tú selecciones el agente adecuado,
+- o ejecutes un prompt concreto,
+- y el "handoff" se haga como recomendación ("siguiente paso: usa Planner / ejecuta /plan-iteration").
 
 Si quieres automatizar encadenado de agentes, eso depende de las capacidades concretas del entorno (Copilot / VS Code / configuración disponible). El diseño del spec-kit ya está preparado para que el flujo se ejecute como:
 
-* prompts encadenables,
-* o agentes por rol.
+- prompts encadenables,
+- o agentes por rol.
 
 ---
 
@@ -63,14 +70,14 @@ Si quieres automatizar encadenado de agentes, eso depende de las capacidades con
 
 Sí. La calidad de una spec mejora cuando:
 
-* las dudas están explícitas,
-* y se distinguen de afirmaciones.
+- las dudas están explícitas,
+- y se distinguen de afirmaciones.
 
 Buenas prácticas:
 
-* resolver OPENQ por “bloque” (MVP primero),
-* cerrar OPENQ críticas antes de compartir una versión final,
-* diferir lo no bloqueante a iteraciones posteriores (I02, I03…).
+- resolver OPENQ por "bloque" (MVP primero),
+- cerrar OPENQ críticas antes de compartir una versión final,
+- diferir lo no bloqueante a iteraciones posteriores (I02, I03…).
 
 ---
 
@@ -78,30 +85,30 @@ Buenas prácticas:
 
 **Síntomas típicos:**
 
-* el plan contiene secciones duplicadas o tareas “arrastradas” de otra iteración,
-* Copilot intenta “reemplazar desde la sección X hasta el final” y acaba mezclando contenido,
-* el archivo crece tanto que planificar/redactar se vuelve lento y confuso.
+- el plan contiene secciones duplicadas o tareas "arrastradas" de otra iteración,
+- Copilot intenta "reemplazar desde la sección X hasta el final" y acaba mezclando contenido,
+- el archivo crece tanto que planificar/redactar se vuelve lento y confuso.
 
 **Causa típica:**
 
-* se usa `01-plan.md` como histórico/backlog, en lugar de plan **único de la iteración activa**.
+- se usa `01-plan.md` como histórico/backlog, en lugar de plan **único de la iteración activa**.
 
 **Solución recomendada:**
 
 1. Cierra la iteración anterior con `/close-iteration`:
 
-   * archiva snapshots en `docs/spec/history/Ixx/`,
-   * limpia `01-plan.md` para que represente **solo** la siguiente iteración.
+   - archiva snapshots en `docs/spec/history/Ixx/`,
+   - limpia `01-plan.md` para que represente **solo** la siguiente iteración.
 2. Mantén `01-plan.md` con 5–15 tareas por iteración (si hay más, divide en Iyy).
 
 **Si ya está mezclado y necesitas “desliarlo” manualmente:**
 
-* restaura el plan correcto desde `docs/spec/history/Ixx/01-plan.md` (si existe),
-* o reescribe `docs/spec/01-plan.md` dejando solo:
+- restaura el plan correcto desde `docs/spec/history/Ixx/01-plan.md` (si existe),
+- o reescribe `docs/spec/01-plan.md` dejando solo:
 
-  * Iteración Iyy (metadatos),
-  * objetivo + alcance IN/OUT,
-  * placeholder para regenerar con `/plan-iteration`.
+  - Iteración Iyy (metadatos),
+  - objetivo + alcance IN/OUT,
+  - placeholder para regenerar con `/plan-iteration`.
 
 ---
 
@@ -110,26 +117,26 @@ Buenas prácticas:
 **Síntoma típico:**
 Copilot intenta ejecutar un comando tipo `Remove-Item ...` y VS Code muestra algo como:
 
-* “Run pwsh command? Auto approval denied by rule Remove-Item (default)”
-* opciones: Allow / Skip
+- "Run pwsh command? Auto approval denied by rule Remove-Item (default)"
+- opciones: Allow / Skip
 
 **Contexto:**
 
-* Es normal que el entorno bloquee comandos destructivos por seguridad.
-* Además, en este repo **preferimos** que los prompts/agentes resuelvan con **edición de ficheros**, no con borrados.
+- Es normal que el entorno bloquee comandos destructivos por seguridad.
+- Además, en este repo **preferimos** que los prompts/agentes resuelvan con **edición de ficheros**, no con borrados.
 
 **Qué hacer:**
 
-* Elige **Skip**.
-* Pide (o aplica) una solución no destructiva:
+- Elige **Skip**.
+- Pide (o aplica) una solución no destructiva:
 
-  * copiar contenido a `docs/spec/history/Ixx/...`,
-  * reescribir los archivos activos con plantillas limpias,
-  * y dejar el histórico como snapshots.
+  - copiar contenido a `docs/spec/history/Ixx/...`,
+  - reescribir los archivos activos con plantillas limpias,
+  - y dejar el histórico como snapshots.
 
 **Recomendación:**
 
-* Usa `/close-iteration` para el cierre: está diseñado para **no depender** de borrados ni comandos shell.
+- Usa `/close-iteration` para el cierre: está diseñado para **no depender** de borrados ni comandos shell.
 
 ---
 
@@ -137,24 +144,24 @@ Copilot intenta ejecutar un comando tipo `Remove-Item ...` y VS Code muestra alg
 
 **Ejecuto el plan** cuando:
 
-* `docs/spec/01-plan.md` está claro, corto y verificable,
-* no hay bloqueantes evidentes,
-* las tareas tienen DoD comprobable y archivos acotados.
+- `docs/spec/01-plan.md` está claro, corto y verificable,
+- no hay bloqueantes evidentes,
+- las tareas tienen DoD comprobable y archivos acotados.
 
 **Reviso el plan** cuando:
 
-* el plan parece demasiado grande,
-* hay gates sin registrar,
-* el orden de tareas no es lógico,
-* o hay señales de mezcla con otra iteración.
+- el plan parece demasiado grande,
+- hay gates sin registrar,
+- el orden de tareas no es lógico,
+- o hay señales de mezcla con otra iteración.
 
 “Revisar plan” significa comprobar, como mínimo:
 
-* Iteración y estado correctos (Ixx, Draft/En curso/En revisión),
-* 5–15 tareas atómicas (no mini-Jira),
-* DoD verificable,
-* OPENQ/DECISION enlazadas si bloquean,
-* entregables claros (qué archivos deben cambiar en esta iteración).
+- Iteración y estado correctos (Ixx, Draft/En curso/En revisión),
+- 5–15 tareas atómicas (no mini-Jira),
+- DoD verificable,
+- OPENQ/DECISION enlazadas si bloquean,
+- entregables claros (qué archivos deben cambiar en esta iteración).
 
 ---
 
@@ -166,8 +173,8 @@ No. Crear un repo desde un template copia el contenido en ese momento, pero no s
 
 Opciones:
 
-* mantener cada repo “congelado” con la versión usada,
-* o hacer upgrades manuales (por PR) copiando cambios en `.github/**` y configuración.
+- mantener cada repo "congelado" con la versión usada,
+- o hacer upgrades manuales (por PR) copiando cambios en `.github/**` y configuración.
 
 ---
 
@@ -177,9 +184,9 @@ Opciones:
 
 Soluciones recomendadas:
 
-* añadir `.gitattributes` y fijar line endings (LF),
-* usar `git add --renormalize .` tras añadir `.gitattributes`,
-* acordar una norma de equipo.
+- añadir `.gitattributes` y fijar line endings (LF),
+- usar `git add --renormalize .` tras añadir `.gitattributes`,
+- acordar una norma de equipo.
 
 ---
 
@@ -212,10 +219,10 @@ Recomendaciones:
 
 1. asegúrate de activar el venv:
 
-   * el prompt debe mostrar `(.venv)`
+   - el prompt debe mostrar `(.venv)`
 2. usa siempre:
 
-   * `python -m pip install ...`
+   - `python -m pip install ...`
 3. si persiste, considerar instalar Python desde python.org (si política lo permite).
 
 ---
@@ -232,13 +239,13 @@ python -m mkdocs serve -a 127.0.0.1:8001
 
 Causas típicas:
 
-* rutas mal escritas en `mkdocs.yml`,
-* archivos movidos/renombrados sin actualizar nav.
+- rutas mal escritas en `mkdocs.yml`,
+- archivos movidos/renombrados sin actualizar nav.
 
 Solución:
 
-* revisar `mkdocs.yml`,
-* validar con:
+- revisar `mkdocs.yml`,
+- validar con:
 
 ```powershell
 python -m mkdocs build --strict
@@ -250,13 +257,13 @@ python -m mkdocs build --strict
 
 Sí, pero requiere:
 
-* habilitar `pymdownx.superfences` (normalmente ya),
-* y configurar Mermaid (según enfoque: plugin o JS extra).
+- habilitar `pymdownx.superfences` (normalmente ya),
+- y configurar Mermaid (según enfoque: plugin o JS extra).
 
 Recomendación:
 
-* solo activarlo si el equipo realmente lo va a usar,
-* y probar que renderiza bien en Material.
+- solo activarlo si el equipo realmente lo va a usar,
+- y probar que renderiza bien en Material.
 
 ---
 
@@ -266,14 +273,14 @@ Recomendación:
 
 Para evitar mezcla entre:
 
-* documentación del sistema (kit),
-* y documentación del proyecto (spec).
+- documentación del sistema (kit),
+- y documentación del proyecto (spec).
 
 Esto:
 
-* reduce ruido en la spec,
-* protege el kit de modificaciones accidentales,
-* y facilita navegación en MkDocs.
+- reduce ruido en la spec,
+- protege el kit de modificaciones accidentales,
+- y facilita navegación en MkDocs.
 
 ---
 
@@ -281,14 +288,14 @@ Esto:
 
 Primero:
 
-* revisar qué cambió (diff),
-* revertir si no era solicitado.
+- revisar qué cambió (diff),
+- revertir si no era solicitado.
 
 Después:
 
-* reforzar instructions/prompt/agent:
+- reforzar instructions/prompt/agent:
 
-  * “No modificar docs/kit salvo solicitud explícita”.
+  - "No modificar docs/kit salvo solicitud explícita".
 
 ---
 
@@ -298,13 +305,13 @@ Después:
 
 Reglas recomendadas:
 
-* es **solo lectura** para el trabajo diario,
-* por defecto prompts/agentes deben **ignorar** el histórico para planificar/redactar/revisar,
-* solo `/close-iteration` crea/actualiza dentro de `history/**`.
+- es **solo lectura** para el trabajo diario,
+- por defecto prompts/agentes deben **ignorar** el histórico para planificar/redactar/revisar,
+- solo `/close-iteration` crea/actualiza dentro de `history/**`.
 
 Si lo incluyes en MkDocs nav:
 
-* hazlo como sección “Histórico” para consulta, no como parte de la spec activa.
+- hazlo como sección "Histórico" para consulta, no como parte de la spec activa.
 
 ---
 
@@ -314,9 +321,9 @@ Si lo incluyes en MkDocs nav:
 
 Solución:
 
-* reescribir FR con criterios de aceptación tipo “Dado/Cuando/Entonces”,
-* añadir prioridad/estado,
-* enlazar a UI/API si aplica.
+- reescribir FR con criterios de aceptación tipo "Dado/Cuando/Entonces",
+- añadir prioridad/estado,
+- enlazar a UI/API si aplica.
 
 ---
 
@@ -324,8 +331,8 @@ Solución:
 
 Solución:
 
-* convertirlos en métrica objetivo (SLO/umbral) o verificación explícita,
-* asociar a drivers (seguridad, rendimiento, coste, compliance).
+- convertirlos en métrica objetivo (SLO/umbral) o verificación explícita,
+- asociar a drivers (seguridad, rendimiento, coste, compliance).
 
 ---
 
@@ -333,8 +340,8 @@ Solución:
 
 Solución:
 
-* ejecutar `/review-and-adr`,
-* revisar que el reviewer enlaza ADR desde el punto de DECISION.
+- ejecutar `/review-and-adr`,
+- revisar que el reviewer enlaza ADR desde el punto de DECISION.
 
 ---
 
@@ -342,14 +349,14 @@ Solución:
 
 Si encuentras un caso que no cubre el kit:
 
-* registra una nota en `docs/spec/97-review-notes.md` (si aplica a una spec concreta),
-* o abre una issue/nota interna para mejorar el template,
-* describe:
+- registra una nota en `docs/spec/97-review-notes.md` (si aplica a una spec concreta),
+- o abre una issue/nota interna para mejorar el template,
+- describe:
 
-  * qué intentabas hacer,
-  * qué pasó,
-  * qué esperabas,
-  * y cómo lo resolverías.
+  - qué intentabas hacer,
+  - qué pasó,
+  - qué esperabas,
+  - y cómo lo resolverías.
 
 Esto alimenta la evolución del spec-kit sin improvisar cambios.
 
@@ -361,24 +368,25 @@ Esto alimenta la evolución del spec-kit sin improvisar cambios.
 
 Síntoma:
 
-* el script falla indicando que no localiza `pandoc`.
+- el script falla indicando que no localiza `pandoc`.
 
 Solución:
 
 1. Verificar:
 
-```powershell
-pandoc --version
-```
+   ```powershell
+   pandoc --version
+   ```
 
 2. Instalar Pandoc y reintentar (según política de tu equipo):
 
-* Windows (Chocolatey):
+   - Windows (Chocolatey):
 
-  ```powershell
-  choco install pandoc
-  ```
-* O instalador oficial de Pandoc.
+     ```powershell
+     choco install pandoc
+     ```
+
+   - O instalador oficial de Pandoc.
 
 ---
 
@@ -386,13 +394,13 @@ pandoc --version
 
 Limitaciones típicas:
 
-* Mermaid/diagramas pueden no renderizar sin configuración adicional.
-* Tablas complejas o HTML embebido pueden perder fidelidad.
+- Mermaid/diagramas pueden no renderizar sin configuración adicional.
+- Tablas complejas o HTML embebido pueden perder fidelidad.
 
 Recomendación:
 
-* preferir Markdown “simple” (tablas razonables, headings claros),
-* revisar el resultado y ajustar contenido si el DOCX es un entregable formal.
+- preferir Markdown "simple" (tablas razonables, headings claros),
+- revisar el resultado y ajustar contenido si el DOCX es un entregable formal.
 
 ---
 
@@ -402,7 +410,7 @@ Por defecto, el export está pensado para **no incluir TOC** salvo que lo pidas 
 
 Solución:
 
-* ejecuta con `--toc` si quieres tabla de contenidos.
+- ejecuta con `--toc` si quieres tabla de contenidos.
 
 Ejemplo:
 
@@ -414,5 +422,4 @@ python tools\export_docx.py --scope spec --output exports\spec.docx --title "Esp
 
 Siguiente lectura recomendada:
 
-* Anexos y ejemplos: `docs/kit/99-anexos-ejemplos.md`
-
+- Anexos y ejemplos: `docs/kit/99-anexos-ejemplos.md`

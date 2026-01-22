@@ -13,11 +13,13 @@ En este template, los prompt files viven en:
 - `.github/prompts/*.prompt.md`
 
 Características:
+
 - Son “playbooks”: describen objetivo, reglas, lectura previa y salidas obligatorias.
 - Normalizan el flujo entre diferentes personas y sesiones.
 - Se pueden usar **sin seleccionar un agente** (aunque combinan muy bien con los agentes).
 
 Reglas importantes:
+
 - Por defecto, deben operar sobre `docs/spec/**`.
 - No deben tocar `docs/kit/**` salvo petición explícita.
 - Dentro de `.github/**`, usar rutas desde raíz (`docs/spec/...`) y evitar enlaces relativos tipo `./...`.
@@ -28,9 +30,11 @@ Reglas importantes:
 ## Prompts core incluidos
 
 ### 1) `/new-spec`
+
 **Propósito:** arrancar una nueva especificación en `docs/spec/`.
 
 Qué hace:
+
 - guía una entrevista mínima **en modo conversacional** (no “formulario”):
   - realiza **2 preguntas CORE por turno** (máximo 8 CORE),
   - puede hacer **0–2 repreguntas** solo si hay ambigüedad/contradicción, decisión de alto impacto o riesgo de inventar,
@@ -42,23 +46,28 @@ Qué hace:
   - `docs/spec/95-open-questions.md` (OPENQ iniciales)
 
 Cuándo usarlo:
+
 - al inicio de un proyecto/spec,
 - cuando el contexto/alcance cambia de forma relevante.
 
 Salida esperada:
+
 - contexto e índice iniciales listos,
 - open questions registradas con impacto,
 - siguiente paso recomendado: `/plan-iteration` (o usar el agente Planner).
 
 Notas:
+
 - En proyectos complejos, el **agente Intake** suele ofrecer una experiencia más natural (mismas reglas, preguntas adaptativas). `/new-spec` actúa como atajo de arranque.
 
 ---
 
 ### 2) `/plan-iteration`
+
 **Propósito:** crear/actualizar un plan ejecutable de iteración en `docs/spec/01-plan.md`.
 
 Qué hace:
+
 - lee el estado actual de `docs/spec/**` (ignorando `docs/spec/history/**`),
 - detecta huecos/contradicciones,
 - propone 5–15 tareas atómicas con DoD verificable,
@@ -67,24 +76,29 @@ Qué hace:
   - `DECISION:` si hay elecciones relevantes (sin crear ADR aquí)
 
 Cuándo usarlo:
+
 - al inicio de cada iteración,
 - después de un review (para convertir feedback en plan),
 - después de cerrar una iteración con `/close-iteration` (para planificar la siguiente).
 
 Salida esperada:
+
 - `docs/spec/01-plan.md` actualizado,
 - lista de tareas y entregables,
 - siguiente paso recomendado: `/write-from-plan`.
 
 Nota importante:
+
 - Si `docs/spec/01-plan.md` contiene iteraciones mezcladas/duplicadas, no debe “limpiarse” manualmente: se recomienda ejecutar `/close-iteration` para archivar y dejar el plan activo limpio.
 
 ---
 
 ### 3) `/write-from-plan`
+
 **Propósito:** ejecutar el plan (`docs/spec/01-plan.md`) redactando/actualizando la spec.
 
 Qué hace:
+
 - recorre las tareas del plan,
 - edita documentos `docs/spec/**` según DoD,
 - actualiza trazabilidad (`docs/spec/02-trazabilidad.md`) al mínimo vivo,
@@ -94,24 +108,29 @@ Qué hace:
   - `DECISION:` si aparece decisión relevante (sin crear ADR aquí)
 
 Cuándo usarlo:
+
 - después de planificar una iteración,
 - tras un review para aplicar mejoras.
 
 Salida esperada:
+
 - documentos actualizados según plan,
 - trazabilidad mínima ajustada,
 - próximos pasos: `/review-and-adr`.
 
 Notas:
+
 - Ignora `docs/spec/history/**`.
 - Si el plan está mezclado o no representa claramente una única iteración activa, detente y ejecuta `/close-iteration` + `/plan-iteration`.
 
 ---
 
 ### 4) `/review-and-adr`
+
 **Propósito:** revisión crítica de la spec y creación automática de ADRs cuando proceda.
 
 Qué hace:
+
 - revisa coherencia y calidad de `docs/spec/**` (ignorando `docs/spec/history/**`),
 - deja feedback accionable en `docs/spec/97-review-notes.md`,
 - añade `OPENQ-###` y `TODO-###` si procede,
@@ -121,10 +140,12 @@ Qué hace:
 - actualiza trazabilidad (columna ADR) cuando aplique
 
 Cuándo usarlo:
+
 - al final de una iteración,
 - antes de compartir/validar formalmente una spec.
 
 Salida esperada:
+
 - review notes con hallazgos,
 - ADRs creados/enlazados,
 - siguiente acción: volver a Writer o planificar nueva iteración.
@@ -132,9 +153,11 @@ Salida esperada:
 ---
 
 ### 5) `/close-iteration`
+
 **Propósito:** cerrar la iteración activa archivando el estado en `docs/spec/history/Ixx/` y dejando limpios los ficheros “activos” para iniciar la siguiente iteración.
 
 Qué hace:
+
 - detecta la iteración activa (`Ixx`) desde `docs/spec/01-plan.md`,
 - crea `docs/spec/history/<Ixx>/` con snapshots:
   - `01-plan.md`, `95-open-questions.md`, `96-todos.md`, `97-review-notes.md`
@@ -147,11 +170,13 @@ Qué hace:
 - actualiza `docs/spec/index.md` añadiendo enlaces al histórico de iteraciones.
 
 Cuándo usarlo:
+
 - al cerrar una iteración (I01, I02…),
 - cuando el plan se ha mezclado con iteraciones anteriores y quieres “resetear” el plan activo sin perder trazabilidad,
 - antes de arrancar una nueva iteración para evitar archivos enormes y confusos.
 
 Salida esperada:
+
 - histórico creado y enlazado desde el índice,
 - activos limpios para la siguiente iteración,
 - lista explícita de OPENQ/TODO que pasan a Iyy,
@@ -160,10 +185,12 @@ Salida esperada:
 ---
 
 ### 6) `/export-docx`
+
 **Propósito:** generar el comando de exportación a DOCX para `spec`, `kit` o `all`.  
 **Salida esperada:** comando listo para copiar/pegar en PowerShell y notas de verificación (Pandoc, ubicación del output).
 
 Notas:
+
 - Por defecto, al exportar `spec` o `all` se recomienda EXCLUIR `docs/spec/history/**` para evitar DOCX enormes y confusos.
 - Si el usuario quiere incluir histórico, debe indicarlo explícitamente y el comando debe reflejarlo (según opciones soportadas por `tools/export_docx.py`).
 
@@ -180,6 +207,7 @@ Puedes usar prompts sin seleccionar agente. Aun así, la combinación típica es
 - (Cierre) → `/close-iteration` cuando una iteración queda cerrada
 
 En equipos, es útil acordar:
+
 - “siempre planificamos con `/plan-iteration`”
 - “siempre revisamos con `/review-and-adr`”
 - “siempre cerramos iteración con `/close-iteration`”
@@ -189,23 +217,29 @@ para mantener consistencia.
 
 ## Buenas prácticas al ejecutar prompts
 
-1) **Contexto mínimo primero**
-- Si el repo está vacío o hay poca info, empieza por `/new-spec` (o por el agente Intake).
+1. **Contexto mínimo primero**
 
-2) **Iteraciones cortas**
-- Evita planes gigantes. Mejor 5–15 tareas.
+   - Si el repo está vacío o hay poca info, empieza por `/new-spec` (o por el agente Intake).
 
-3) **No inventar**
-- Si falta info, OPENQ. Es preferible un hueco explícito a una suposición.
+2. **Iteraciones cortas**
 
-4) **Mantener trazabilidad**
-- No obsesionarse con el 100%, pero sí mantener el “mínimo vivo”.
+   - Evita planes gigantes. Mejor 5–15 tareas.
 
-5) **Usar review como control de calidad**
-- El reviewer debe encontrar inconsistencias y “forzar” ADRs para decisiones relevantes.
+3. **No inventar**
 
-6) **Cerrar iteraciones para evitar mezcla**
-- Al finalizar una iteración, ejecuta `/close-iteration` antes de arrancar la siguiente. Evita planes mezclados y archivos cada vez más grandes.
+   - Si falta info, OPENQ. Es preferible un hueco explícito a una suposición.
+
+4. **Mantener trazabilidad**
+
+   - No obsesionarse con el 100%, pero sí mantener el "mínimo vivo".
+
+5. **Usar review como control de calidad**
+
+   - El reviewer debe encontrar inconsistencias y "forzar" ADRs para decisiones relevantes.
+
+6. **Cerrar iteraciones para evitar mezcla**
+
+   - Al finalizar una iteración, ejecuta `/close-iteration` antes de arrancar la siguiente. Evita planes mezclados y archivos cada vez más grandes.
 
 ---
 
@@ -221,6 +255,7 @@ para mantener consistencia.
 ---
 
 ## Referencias
+
 - Visión general del sistema IA: `docs/kit/50-sistema-ia.md`
 - Custom agents: `docs/kit/52-custom-agents.md`
 - Skills: `docs/kit/54-skills.md`

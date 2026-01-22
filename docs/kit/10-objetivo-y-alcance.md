@@ -22,6 +22,7 @@ En la práctica, el objetivo es que la especificación resultante sea **“ejecu
 ## Alcance funcional (qué cubre)
 
 ### 1) Generación y mantenimiento de especificaciones
+
 El template cubre el ciclo completo de creación y evolución de la documentación técnica de un proyecto:
 
 - Contexto, alcance y restricciones
@@ -40,6 +41,7 @@ El template cubre el ciclo completo de creación y evolución de la documentaci�
 - Trazabilidad mínima entre artefactos
 
 ### 2) Soporte IA integrado al repositorio
+
 Incluye una “capa operativa” para trabajar con Copilot:
 
 - **Copilot Instructions**: reglas globales del repo
@@ -48,7 +50,9 @@ Incluye una “capa operativa” para trabajar con Copilot:
 - **Skills**: patrones reutilizables para producir contenido consistente
 
 ### 3) Previsualización y navegación
+
 Incluye configuración de MkDocs para:
+
 - navegar la spec por secciones,
 - previsualizar en navegador,
 - y facilitar revisión/lectura por terceros.
@@ -66,18 +70,22 @@ Incluye configuración de MkDocs para:
 ## Fuera de alcance (qué NO cubre)
 
 ### 1) Gestión de proyecto / ejecución
+
 - No sustituye a Jira, Azure DevOps, etc.
 - No gestiona tiempos, dependencias externas, costes, hitos o asignación formal.
 
 ### 2) Diseño visual y entrega UX
+
 - No crea prototipos ni maquetas (Figma, etc.).
 - Sí define especificaciones de UI: pantallas, estados, flujos y reglas.
 
 ### 3) Implementación y scaffolding de código
+
 - No genera un repositorio de aplicación ni código base.
 - No es un generador de microservicios ni un framework.
 
 ### 4) Validación contractual o normativa completa
+
 - Puede ayudar a documentar requisitos RGPD, seguridad, etc.,
   pero no sustituye auditorías, DPO, revisiones legales, pentesting u homologaciones.
 

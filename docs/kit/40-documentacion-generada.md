@@ -47,15 +47,18 @@ La especificación se organiza en:
 Para que los agentes no mezclen iteraciones ni generen archivos enormes, la spec se gestiona con dos “capas”:
 
 ### Estado vivo (lo que usan prompts/agentes a diario)
+
 - `docs/spec/01-plan.md` → **solo la iteración activa**
 - `docs/spec/95-open-questions.md` → **solo OPENQ abiertas/relevantes**
 - `docs/spec/96-todos.md` → **solo TODOs pendientes**
 - `docs/spec/97-review-notes.md` → **review notes de la iteración activa** (o el último review vivo)
 
 Regla práctica:
+
 - Prompts y agentes deben **ignorar `docs/spec/history/**`** al planificar/redactar/revisar.
 
 ### Histórico (snapshots cerrados, para auditoría y navegación)
+
 - `docs/spec/history/<Ixx>/` contiene una foto completa del cierre de una iteración, más un resumen.
 - Solo el prompt **`/close-iteration`** crea o actualiza contenido en `docs/spec/history/**`.
 
@@ -64,7 +67,7 @@ Regla práctica:
 ## Tabla de documentos (qué es cada uno)
 
 | Archivo | Propósito | Cuándo se actualiza | Salidas típicas |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `docs/spec/index.md` | Punto de entrada e índice navegable de la spec | Al inicio, al cerrar iteraciones y cuando cambie la estructura | Enlaces, convenciones, lectura recomendada, enlaces al histórico |
 | `docs/spec/00-context.md` | Problema, objetivos, alcance, restricciones y riesgos | Arranque y cuando cambie el marco | IN/OUT, roles, supuestos, integraciones |
 | `docs/spec/01-plan.md` | Plan ejecutable de la iteración **activa** (tareas + DoD) | Cada iteración | Lista breve de tareas verificables |
@@ -103,6 +106,7 @@ Aunque se itera, suele funcionar bien este orden:
 10) Trazabilidad `02-...` “mínimo vivo” durante todo el proceso
 
 Cierre recomendado:
+
 - Cuando una iteración está completada y revisada, ejecutar `/close-iteration` para archivar snapshots y mantener el estado vivo pequeño.
 
 ---
@@ -110,6 +114,7 @@ Cierre recomendado:
 ## Cómo se asegura consistencia y calidad
 
 El sistema combina:
+
 - **convenciones** (IDs, marcadores, trazabilidad, ADR),
 - **plan por iteración** con DoD verificable,
 - **review notes** como mecanismo de control de calidad,
@@ -119,6 +124,7 @@ El sistema combina:
 ---
 
 ## Señales de alarma típicas (cuando hay que corregir)
+
 - FR sin criterios de aceptación verificables.
 - NFR redactados como adjetivos (sin umbral o verificación).
 - UI sin estados mínimos (loading/empty/error/sin permisos).

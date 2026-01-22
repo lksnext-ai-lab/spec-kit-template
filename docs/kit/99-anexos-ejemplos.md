@@ -8,7 +8,8 @@ Este documento contiene ejemplos mínimos (copy/paste) para redactar y mantener 
 
 ## 1) Ejemplo de FR (bien formado)
 
-**FR-001 — Checkout: confirmar pedido**
+### FR-001 — Checkout: confirmar pedido
+
 - **Prioridad:** Alta
 - **Estado:** Draft
 - **Descripción:** El usuario podrá confirmar un pedido con los productos del carrito y una dirección de envío válida.
@@ -21,7 +22,8 @@ Este documento contiene ejemplos mínimos (copy/paste) para redactar y mantener 
 
 ## 2) Ejemplo de NFR (medible / verificable)
 
-**NFR-001 — Rendimiento: latencia API checkout**
+### NFR-001 — Rendimiento: latencia API checkout
+
 - **Objetivo:** P95 < 800 ms para `POST /api/orders` bajo carga nominal definida.
 - **Verificación:** prueba de carga (k6) en entorno pre con dataset representativo.
 - **Notas:** excluir picos de cold start si aplica.
@@ -30,7 +32,8 @@ Este documento contiene ejemplos mínimos (copy/paste) para redactar y mantener 
 
 ## 3) Ejemplo de UI spec (estados mínimos)
 
-**UI-010 — Pantalla “Checkout”**
+### UI-010 — Pantalla "Checkout"
+
 - **Roles:** Cliente
 - **Acciones:**
   - confirmar pedido
@@ -53,6 +56,7 @@ En documento (por ejemplo `40-arquitectura.md`):
 `DECISION: Comunicación asíncrona para confirmación de pedido (ver ADR-0003: adr/ADR-0003-eventing-checkout.md)`
 
 En ADR (`docs/spec/adr/ADR-0003-eventing-checkout.md`):
+
 - Contexto
 - Drivers (NFR)
 - Opciones (mínimo 2)
@@ -65,6 +69,7 @@ En ADR (`docs/spec/adr/ADR-0003-eventing-checkout.md`):
 ## 5) Ejemplo de OPENQ (con impacto)
 
 **OPENQ-002 — ¿Se requiere pago en el MVP?**
+
 - **Contexto:** FR-001 y UI-010 asumen confirmación “sin pago” o “con pago”.
 - **Impacto:** define flujo UI, integraciones, seguridad y modelo de datos.
 - **Bloquea:** `30-ui-spec.md`, `60-backend.md`, ADR de integración pagos.
@@ -74,7 +79,8 @@ En ADR (`docs/spec/adr/ADR-0003-eventing-checkout.md`):
 
 ## 6) Ejemplo de TODO (concreto)
 
-**TODO-004 — Definir catálogo de errores API-POST-ORDER**
+### TODO-004 — Definir catálogo de errores API-POST-ORDER
+
 - **Dónde:** `docs/spec/60-backend.md`
 - **Motivo:** faltan códigos/formatos de error para validaciones y stock.
 - **Prioridad sugerida:** Alta
@@ -85,7 +91,7 @@ En ADR (`docs/spec/adr/ADR-0003-eventing-checkout.md`):
 ## 7) Ejemplo de trazabilidad mínima (fila)
 
 | FR | UI | API/EVT | Datos | ADR |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | FR-001 | UI-010 | API-001 `POST /api/orders` | Order, OrderItem, Address | ADR-0003 |
 
 ---
