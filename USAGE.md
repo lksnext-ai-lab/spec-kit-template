@@ -5,6 +5,7 @@ Esta guía explica cómo crear y mantener **especificaciones técnicas en Markdo
 ---
 
 ## 0) Requisitos previos
+
 - VS Code instalado.
 - Git configurado (credenciales para GitHub).
 - GitHub Copilot habilitado.
@@ -14,6 +15,7 @@ Esta guía explica cómo crear y mantener **especificaciones técnicas en Markdo
 ---
 
 ## 1) Crear una nueva especificación (nuevo repositorio)
+
 1. Ir a GitHub → repositorio **`spec-kit-template`**.
 2. Pulsar **Use this template**.
 3. Crear el repositorio nuevo (normalmente **Private**).
@@ -24,6 +26,7 @@ Esta guía explica cómo crear y mantener **especificaciones técnicas en Markdo
 ---
 
 ## 2) Clonar y abrir en VS Code (Windows / PowerShell)
+
 ```powershell
 cd C:\Dev
 git clone <URL_DEL_NUEVO_REPO>
@@ -41,40 +44,40 @@ Este es el flujo recomendado para casi todos los proyectos. Se ejecuta por **ite
 
 En Copilot Chat:
 
-1. Ejecuta **`/new-spec`** *(o usa el agente `intake`)*
+1: Ejecuta **`/new-spec`** *(o usa el agente `intake`)*
    Resultado:
 
-   * `docs/spec/00-context.md` con contexto mínimo real
-   * `docs/spec/95-open-questions.md` con OPENQ iniciales
+   - `docs/spec/00-context.md` con contexto mínimo real
+   - `docs/spec/95-open-questions.md` con OPENQ iniciales
 
 ### 3.2 Planificación de iteración
 
-2. Ejecuta **`/plan-iteration`** *(o usa el agente `planner`)*
+2: Ejecuta **`/plan-iteration`** *(o usa el agente `planner`)*
    Resultado:
 
-   * `docs/spec/01-plan.md` con tareas atómicas (5–15) + DoD
-   * gates: `OPENQ` y `DECISION` si proceden
+   - `docs/spec/01-plan.md` con tareas atómicas (5–15) + DoD
+   - gates: `OPENQ` y `DECISION` si proceden
 
 ### 3.3 Redacción / ejecución del plan
 
-3. Ejecuta **`/write-from-plan`** *(o usa el agente `writer`)*
+3: Ejecuta **`/write-from-plan`** *(o usa el agente `writer`)*
    Resultado:
 
-   * documentos de `docs/` actualizados según el plan
-   * trazabilidad mínima en `docs/spec/02-trazabilidad.md`
-   * nuevos `TODO-###` y `OPENQ-###` si aparece trabajo o dudas
+   - documentos de `docs/` actualizados según el plan
+   - trazabilidad mínima en `docs/spec/02-trazabilidad.md`
+   - nuevos `TODO-###` y `OPENQ-###` si aparece trabajo o dudas
 
 ### 3.4 Revisión crítica + ADR automáticos
 
-4. Ejecuta **`/review-and-adr`** *(o usa el agente `reviewer`)*
+4: Ejecuta **`/review-and-adr`** *(o usa el agente `reviewer`)*
    Resultado:
 
-   * `docs/spec/97-review-notes.md` con observaciones accionables
-   * creación automática de ADR en `docs/spec/adr/` si detecta `DECISION:` sin ADR enlazado
+   - `docs/spec/97-review-notes.md` con observaciones accionables
+   - creación automática de ADR en `docs/spec/adr/` si detecta `DECISION:` sin ADR enlazado
 
 ### 3.5 Iterar
 
-* Repite **Writer ↔ Reviewer** hasta cumplir el DoD de `docs/spec/01-plan.md`.
+- Repite **Writer ↔ Reviewer** hasta cumplir el DoD de `docs/spec/01-plan.md`.
 
 ---
 
@@ -82,28 +85,28 @@ En Copilot Chat:
 
 ### 4.1 IDs
 
-* FR: `FR-###` → `docs/spec/10-requisitos-funcionales.md`
-* NFR: `NFR-###` → `docs/spec/11-requisitos-tecnicos-nfr.md`
-* UI: `UI-###` → `docs/30-ui-spec.md`
-* API: `API-###` → `docs/60-backend.md`
-* EVT (asíncrono): `EVT-###` → `docs/60-backend.md` (si aplica)
-* OPENQ: `OPENQ-###` → `docs/spec/95-open-questions.md`
-* TODO: `TODO-###` → `docs/spec/96-todos.md`
-* ADR: `ADR-####` → `docs/spec/adr/`
+- FR: `FR-###` → `docs/spec/10-requisitos-funcionales.md`
+- NFR: `NFR-###` → `docs/spec/11-requisitos-tecnicos-nfr.md`
+- UI: `UI-###` → `docs/30-ui-spec.md`
+- API: `API-###` → `docs/60-backend.md`
+- EVT (asíncrono): `EVT-###` → `docs/60-backend.md` (si aplica)
+- OPENQ: `OPENQ-###` → `docs/spec/95-open-questions.md`
+- TODO: `TODO-###` → `docs/spec/96-todos.md`
+- ADR: `ADR-####` → `docs/spec/adr/`
 
 ### 4.2 Marcadores permitidos durante elaboración
 
-* `TODO:` trabajo pendiente (si es relevante, también en `docs/spec/96-todos.md`)
-* `OPENQ:` duda importante (también en `docs/spec/95-open-questions.md`)
-* `RISK:` riesgo detectado
-* `DECISION:` decisión pendiente (debe acabar en ADR)
+- `TODO:` trabajo pendiente (si es relevante, también en `docs/spec/96-todos.md`)
+- `OPENQ:` duda importante (también en `docs/spec/95-open-questions.md`)
+- `RISK:` riesgo detectado
+- `DECISION:` decisión pendiente (debe acabar en ADR)
 
 ### 4.3 Calidad mínima
 
-* FR: siempre con **criterios de aceptación verificables** + prioridad.
-* NFR: siempre con **métrica objetivo** o **verificación explícita**.
-* Trazabilidad: `docs/spec/02-trazabilidad.md` debe mantenerse “mínimo pero vivo”.
-* Decisiones relevantes: siempre como ADR (el reviewer puede crearlas).
+- FR: siempre con **criterios de aceptación verificables** + prioridad.
+- NFR: siempre con **métrica objetivo** o **verificación explícita**.
+- Trazabilidad: `docs/spec/02-trazabilidad.md` debe mantenerse “mínimo pero vivo”.
+- Decisiones relevantes: siempre como ADR (el reviewer puede crearlas).
 
 ---
 
@@ -131,12 +134,8 @@ Luego abre la URL que indique la consola (normalmente `http://127.0.0.1:8000/`).
 
 ## 6) Recomendaciones de colaboración (equipo)
 
-* Trabajar por iteraciones: una iteración debe ser revisable y con DoD claro.
-* Usar PRs para revisión si hay más de una persona editando.
-* Mantener `docs/spec/95-open-questions.md` actualizado: las dudas críticas deben estar ahí.
-* Mantener `docs/spec/97-review-notes.md` accionable: cada observación debe acabar en cambio, TODO, OPENQ o ADR.
-* Si el proyecto crece, crear ADRs temprano: evita decisiones “escondidas” en texto.
-
----
-
-Fin.
+- Trabajar por iteraciones: una iteración debe ser revisable y con DoD claro.
+- Usar PRs para revisión si hay más de una persona editando.
+- Mantener `docs/spec/95-open-questions.md` actualizado: las dudas críticas deben estar ahí.
+- Mantener `docs/spec/97-review-notes.md` accionable: cada observación debe acabar en cambio, TODO, OPENQ o ADR.
+- Si el proyecto crece, crear ADRs temprano: evita decisiones “escondidas” en texto.
