@@ -1,46 +1,7 @@
 ﻿site_name: Spec Kit
 docs_dir: docs
-
-nav:
-  - Especificación:
-      - Índice: spec/index.md
-      - Contexto: spec/00-context.md
-      - Plan: spec/01-plan.md
-      - Trazabilidad: spec/02-trazabilidad.md
-      - Requisitos funcionales: spec/10-requisitos-funcionales.md
-      - Requisitos técnicos (NFR): spec/11-requisitos-tecnicos-nfr.md
-      - Conceptualización: spec/20-conceptualizacion.md
-      - UI Spec: spec/30-ui-spec.md
-      - Arquitectura: spec/40-arquitectura.md
-      - Modelo de datos: spec/50-modelo-datos.md
-      - Backend: spec/60-backend.md
-      - Frontend: spec/70-frontend.md
-      - Seguridad: spec/80-seguridad.md
-      - Infra: spec/90-infra.md
-      - Preguntas abiertas: spec/95-open-questions.md
-      - TODOs: spec/96-todos.md
-      - Review notes: spec/97-review-notes.md
-      - ADR:
-          - Plantilla ADR: spec/adr/ADR-0001-template.md
-
-  - Guía del spec-kit:
-      - Índice: kit/index.md
-      - Resumen ejecutivo: kit/00-resumen-ejecutivo.md
-      - Objetivo y alcance: kit/10-objetivo-y-alcance.md
-      - Conceptos clave y flujo: kit/20-conceptos-clave-y-flujo.md
-      - Estructura del repo: kit/30-estructura-del-repo.md
-      - Documentación generada: kit/40-documentacion-generada.md
-      - Sistema de IA:
-          - Instructions: kit/51-instructions.md
-          - Custom agents: kit/52-custom-agents.md
-          - Prompts: kit/53-prompts.md
-          - Skills: kit/54-skills.md
-      - Uso del template: kit/60-uso-del-template.md
-      - Operativa diaria: kit/70-operativa-diaria.md
-      - Previsualización: kit/80-previsualizacion-mkdocs.md
-      - Mantenimiento: kit/90-mantenimiento-y-evolucion.md
-      - FAQ: kit/95-faq-y-troubleshooting.md
-      - Anexos: kit/99-anexos-ejemplos.md
+watch:
+  - docs
 
 theme:
   name: material
