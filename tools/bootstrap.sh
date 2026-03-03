@@ -40,7 +40,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ── TUI geometry ──────────────────────────────────────────
-HEADER_HEIGHT=14
+HEADER_HEIGHT=13
 STEP_AREA_HEIGHT=14
 PROGRESS_HEIGHT=4
 STEP_AREA_TOP=$HEADER_HEIGHT
@@ -88,7 +88,11 @@ cursor_at() {
 }
 
 clear_step_area() {
-    if ! $USE_TUI; then echo ''; return; fi
+    if ! $USE_TUI; then
+        clear
+        show_header
+        return
+    fi
     cursor_at "$STEP_AREA_TOP" 0
     for (( i=0; i<STEP_AREA_HEIGHT; i++ )); do
         printf '\033[K\n'
@@ -122,12 +126,11 @@ show_header() {
     echo ''
     printf "  ${C_CYAN}${C_BOLD}╔══════════════════════════════════════════════════════════════╗${C_RESET}\n"
     printf "  ${C_CYAN}║${C_RESET}                                                              ${C_CYAN}║${C_RESET}\n"
-    printf "  ${C_CYAN}║${C_RESET}  ${C_BOLD}${C_WHITE}███████╗██████╗ ███████╗ ██████╗    ██╗  ██╗██╗████████╗${C_RESET}   ${C_CYAN}║${C_RESET}\n"
-    printf "  ${C_CYAN}║${C_RESET}  ${C_WHITE}██╔════╝██╔══██╗██╔════╝██╔════╝    ██║ ██╔╝██║╚══██╔══╝${C_RESET}   ${C_CYAN}║${C_RESET}\n"
-    printf "  ${C_CYAN}║${C_RESET}  ${C_WHITE}███████╗██████╔╝█████╗  ██║         █████╔╝ ██║   ██║${C_RESET}      ${C_CYAN}║${C_RESET}\n"
-    printf "  ${C_CYAN}║${C_RESET}  ${C_WHITE}╚════██║██╔═══╝ ██╔══╝  ██║         ██╔═██╗ ██║   ██║${C_RESET}      ${C_CYAN}║${C_RESET}\n"
-    printf "  ${C_CYAN}║${C_RESET}  ${C_WHITE}███████║██║     ███████╗╚██████╗    ██║  ██╗██║   ██║${C_RESET}      ${C_CYAN}║${C_RESET}\n"
-    printf "  ${C_CYAN}║${C_RESET}  ${C_WHITE}╚══════╝╚═╝     ╚══════╝ ╚═════╝    ╚═╝  ╚═╝╚═╝   ╚═╝${C_RESET}      ${C_CYAN}║${C_RESET}\n"
+    printf "  ${C_CYAN}║${C_RESET}      ${C_BOLD}${C_WHITE}_____ ____  ___________${C_RESET}     ${C_BOLD}${C_CYAN}__ __ ________${C_RESET}                ${C_CYAN}║${C_RESET}\n"
+    printf "  ${C_CYAN}║${C_RESET}     ${C_BOLD}${C_WHITE}/ ___// __ \\/ ____/ ___/${C_RESET}    ${C_BOLD}${C_CYAN}/ //_//  _/_  __/${C_RESET}            ${C_CYAN}║${C_RESET}\n"
+    printf "  ${C_CYAN}║${C_RESET}     ${C_BOLD}${C_WHITE}\\__ \\/ /_/ / __/ / /${C_RESET}       ${C_BOLD}${C_CYAN}/ ,<   / /  / /${C_RESET}               ${C_CYAN}║${C_RESET}\n"
+    printf "  ${C_CYAN}║${C_RESET}    ${C_BOLD}${C_WHITE}___/ / ____/ /___/ /___${C_RESET}    ${C_BOLD}${C_CYAN}/ /| |_/ /  / /${C_RESET}                ${C_CYAN}║${C_RESET}\n"
+    printf "  ${C_CYAN}║${C_RESET}   ${C_BOLD}${C_WHITE}/____/_/   /_____/\\____/${C_RESET}   ${C_BOLD}${C_CYAN}/_/ |_/___/ /_/${C_RESET}                 ${C_CYAN}║${C_RESET}\n"
     printf "  ${C_CYAN}║${C_RESET}                                                              ${C_CYAN}║${C_RESET}\n"
     printf "  ${C_CYAN}║${C_RESET}  ${C_DIM}Workspace Bootstrap${C_RESET}                              ${C_DIM}v${SCRIPT_VERSION}${C_RESET}  ${C_CYAN}║${C_RESET}\n"
     printf "  ${C_CYAN}║${C_RESET}                                                              ${C_CYAN}║${C_RESET}\n"
@@ -243,6 +246,12 @@ read_yesno() {
     [[ "$val" =~ ^[yYsS] ]] && return 0 || return 1
 }
 
+read_continue() {
+    echo ''
+    printf "  ${C_DIM}Press Enter to continue...${C_RESET}"
+    read -r _
+}
+
 # ═══════════════════════════════════════════════════════════════
 # PREREQUISITE CHECKS
 # ═══════════════════════════════════════════════════════════════
@@ -301,9 +310,11 @@ test_prerequisites() {
         exit 1
     fi
 
+    w_pad "$(printf "${C_GREEN}All required tools found.${C_RESET}")" 4
+    read_continue
+
     CURRENT_STEP=1
     show_progress_bar
-    sleep 0.5
 }
 
 # ═══════════════════════════════════════════════════════════════
