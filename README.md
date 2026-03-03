@@ -51,13 +51,13 @@ El bootstrap crea automáticamente el workspace completo (spec + codebase + arch
 **Windows (PowerShell):**
 
 ```powershell
-irm https://raw.githubusercontent.com/lksnext/spec-kit-template/main/tools/bootstrap.ps1 | iex
+irm https://raw.githubusercontent.com/lksnext-ai-lab/spec-kit-template/main/tools/bootstrap.ps1 | iex
 ```
 
 **macOS / Linux (Bash):**
 
 ```bash
-curl -sL https://raw.githubusercontent.com/lksnext/spec-kit-template/main/tools/bootstrap.sh | bash
+curl -sL https://raw.githubusercontent.com/lksnext-ai-lab/spec-kit-template/main/tools/bootstrap.sh | bash
 ```
 
 **Requisitos:** solo `git`. Opcionalmente: `gh` (GitHub CLI), `python 3.8+`, `code` (VS Code CLI).

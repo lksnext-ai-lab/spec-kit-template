@@ -12,7 +12,7 @@
 # ═══════════════════════════════════════════════════════════════
 set -euo pipefail
 
-TEMPLATE_REPO="lksnext/spec-kit-template"
+TEMPLATE_REPO="lksnext-ai-lab/spec-kit-template"
 TEMPLATE_URL="https://github.com/$TEMPLATE_REPO.git"
 SCRIPT_VERSION="1.0.0"
 
@@ -372,7 +372,7 @@ get_spec_config() {
                 SPEC_MODE='clone'
             else
                 echo ''
-                SPEC_ORG=$(read_value 'GitHub org/user for the new repo' 'lksnext')
+                SPEC_ORG=$(read_value 'GitHub org/user for the new repo' 'lksnext-ai-lab')
                 local vis
                 vis=$(read_choice 'Visibility' 1 "Private" "Public")
                 SPEC_MODE='template'

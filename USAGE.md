@@ -23,7 +23,7 @@ El modo más rápido es usar el script de bootstrap, que configura todo de forma
 
 ```powershell
 # Opción A: one-liner (descarga y ejecuta)
-irm https://raw.githubusercontent.com/lksnext/spec-kit-template/main/tools/bootstrap.ps1 | iex
+irm https://raw.githubusercontent.com/lksnext-ai-lab/spec-kit-template/main/tools/bootstrap.ps1 | iex
 
 # Opción B: desde un clon local del template
 .\tools\bootstrap.ps1
@@ -33,7 +33,7 @@ irm https://raw.githubusercontent.com/lksnext/spec-kit-template/main/tools/boots
 
 ```bash
 # Opción A: one-liner
-curl -sL https://raw.githubusercontent.com/lksnext/spec-kit-template/main/tools/bootstrap.sh | bash
+curl -sL https://raw.githubusercontent.com/lksnext-ai-lab/spec-kit-template/main/tools/bootstrap.sh | bash
 
 # Opción B: desde un clon local del template
 bash tools/bootstrap.sh

@@ -9,7 +9,7 @@
     Requirements: PowerShell 5.1+, git.
     Optional: gh (GitHub CLI), python 3.8+, code (VS Code CLI).
 .LINK
-    https://github.com/lksnext/spec-kit-template
+    https://github.com/lksnext-ai-lab/spec-kit-template
 #>
 [CmdletBinding()]
 param(
@@ -27,7 +27,7 @@ $ErrorActionPreference = 'Stop'
 # CONSTANTS
 # ===================================================================
 
-$TEMPLATE_REPO  = 'lksnext/spec-kit-template'
+$TEMPLATE_REPO  = 'lksnext-ai-lab/spec-kit-template'
 $TEMPLATE_URL   = "https://github.com/${TEMPLATE_REPO}.git"
 $SCRIPT_VERSION = '1.0.0'
 
@@ -354,7 +354,7 @@ function Get-SpecConfig {
                 $script:specMode = 'clone'
             } else {
                 Write-C ''
-                $org = Read-Value 'GitHub org/user for the new repo' 'lksnext'
+                $org = Read-Value 'GitHub org/user for the new repo' 'lksnext-ai-lab'
                 $vis = Read-Choice 'Visibility' @('Private', 'Public') 1
                 $script:specMode  = 'template'
                 $script:specOrg   = $org
