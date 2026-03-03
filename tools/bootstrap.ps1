@@ -525,6 +525,11 @@ function Invoke-Setup {
     Write-Pad "${C_DIM}$('_' * 56)${C_RESET}" 2
     Write-C ''
 
+    # Native commands (git, gh) write progress to stderr.
+    # With $ErrorActionPreference = 'Stop' this would abort the script.
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+
     $specDir       = Join-Path $script:baseDir $script:specName
     $workspaceFile = Join-Path $script:baseDir "$($script:projectName).code-workspace"
 
@@ -604,6 +609,9 @@ function Invoke-Setup {
             Write-Task 'Codebase' 'skip'
         }
     }
+
+    # Restore strict error handling
+    $ErrorActionPreference = $prevEAP
 
     # -- Workspace file ------------------------------------------------
     Write-Task 'Generating workspace file' 'running'
