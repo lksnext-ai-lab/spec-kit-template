@@ -62,7 +62,9 @@ curl -sL https://raw.githubusercontent.com/lksnext-ai-lab/spec-kit-template/main
 
 **Requisitos:** solo `git`. Opcionalmente: `gh` (GitHub CLI), `python 3.8+`, `code` (VS Code CLI).
 
-El script guiará por los pasos: nombre del proyecto, creación del spec desde el template de GitHub, enlace o creación del codebase, y configuración de venv/extensiones.
+> **¿Desde dónde ejecutarlo?** Desde cualquier carpeta. El script pregunta un **directorio base** (por defecto la carpeta actual) y crea todo dentro de él — no hay que preparar nada a mano.
+
+El script guiará por los pasos: nombre del proyecto, directorio base, creación del spec desde el template de GitHub, enlace o creación del codebase, y configuración de venv/extensiones.
 
 Guía completa de uso: **`USAGE.md`**.
 

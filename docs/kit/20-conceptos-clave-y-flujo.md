@@ -107,14 +107,13 @@ Documentos en `docs/spec/_inputs/evidence/` que contienen investigación técnic
 
 Generados con el skill `evidence_pack` o el prompt `/evidence-pack`.
 
-### Verificación externa (mandatory para integraciones/SDKs)
+### Verificación de integraciones y fuentes externas
 
-Para evitar inventar información sobre integraciones, SDKs, APIs, límites, compatibilidades:
+Para afirmaciones sobre integraciones, SDKs, APIs externas, límites o compatibilidades de terceros:
 
-- **Herramienta obligatoria**: `playwright-mcp` (navegación web automatizada).
-- **Fallback**: `chrome-devtools-mcp` si playwright no está disponible.
-- Si ninguna está disponible: registrar `OPENQ-###` o pedir al usuario que aporte la información.
-- **Registrar fuentes**: subsección `### Fuentes` con URL + fecha (YYYY-MM-DD) + qué se extrajo.
+- **No inventar**: si no se puede verificar → registrar `OPENQ-###` indicando qué falta y por qué importa.
+- Si el usuario aporta documentación o se tiene acceso directo a ella: reflejarla en la spec con la fuente (`### Fuentes`: URL + fecha + qué se extrajo).
+- Si la duda afecta a un área crítica (auth, contratos de integración, datos sensibles): usar impacto `BLOCKER` o `MAJOR` en la OPENQ.
 ---
 
 ## El flujo recomendado
@@ -181,7 +180,15 @@ Cierre recomendado de iteración:
   - y dejar `95-open-questions.md`, `96-todos.md`, `97-review-notes.md` en modo “vivo” (solo lo pendiente).
 
 Esto evita el error frecuente de mezclar I01/I02 en el mismo plan y que los agentes intenten “limpiar” archivos grandes de forma insegura.
+### 5) RFC e IMP (fases opcionales, post-SPEC)
 
+Una vez que la spec está razonablemente estable, el sistema soporta dos fases adicionales:
+
+- **RFC** (`spc-rfc-writer` + `spc-rfc-reviewer`): genera propuestas narrativas consolidadas para stakeholders o para revisión formal, a partir de `docs/spec/**`. Salida: `docs/spec/rfc/<RFC_ID>-<slug>.md`.
+
+- **SPC-IMP** (`spc-imp-backlog-slicer` → `spc-imp-task-detailer` → `spc-imp-coverage-auditor`): convierte la spec en un backlog canónico de tareas de implementación (**T01..Tnn**). Salidas: `docs/spec/spc-imp-backlog.md` + fichas `docs/spec/spc-imp-tasks/Txx.md`.
+
+Ambas fases las orquesta `spc-spec-director` con el mismo principio rector: no inventar.
 ---
 
 ## Qué “mueve” el flujo (artefactos de control)
@@ -193,8 +200,8 @@ En la práctica, el ciclo se sostiene con estos artefactos:
 - `docs/spec/96-todos.md` → captura trabajo pendiente sin contaminar el plan actual.
 - `docs/spec/97-review-notes.md` → convierte calidad en tareas concretas.
 - `docs/spec/adr/` → captura decisiones y reduce ambigüedad futura.
-- `docs/spec/history/` → conserva iteraciones cerradas sin contaminar el estado vivo.
-
+- `docs/spec/history/` → conserva iteraciones cerradas sin contaminar el estado vivo.- `docs/spec/rfc/` → propuestas narrativas generadas por `spc-rfc-writer` (fase RFC).
+- `docs/spec/spc-imp-backlog.md` + `docs/spec/spc-imp-tasks/` → backlog canónico Txx (fase SPC-IMP).
 ---
 
 ## Señales de que el flujo está funcionando

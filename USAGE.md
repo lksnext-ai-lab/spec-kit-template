@@ -39,10 +39,12 @@ curl -sL https://raw.githubusercontent.com/lksnext-ai-lab/spec-kit-template/main
 bash tools/bootstrap.sh
 ```
 
+> **¿Desde dónde ejecutarlo?** Desde **cualquier carpeta** — no hace falta estar en ninguna ubicación concreta ni crear la carpeta del proyecto previamente. El script pedirá un **directorio base** (por defecto la carpeta actual) y lo creará si no existe.
+
 El script guía por 5 pasos:
 
 1. **Prerequisites** — detecta `git`, `code`, `gh`, `python`
-2. **Project name** — nombre del proyecto + directorio base
+2. **Project name + base dir** — nombre del proyecto y directorio base donde se creará el workspace (se crea si no existe)
 3. **Spec repo** — crear desde GitHub template, clonar, o usar existente
 4. **Codebase** — repo existente, clonar URL, crear vacío, o skip
 5. **Extras** — venv + mkdocs, extensiones VS Code, abrir VS Code
