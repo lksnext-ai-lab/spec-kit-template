@@ -53,74 +53,78 @@ code .
 
 Recomendado:
 
-- VS Code actualizado
-- Git configurado
-- GitHub Copilot habilitado
-- Acceso a Copilot Chat en el repo
+* VS Code actualizado
+* Git configurado
+* GitHub Copilot habilitado
+* Acceso a Copilot Chat en el repo
 
 Opcional (pero muy útil):
 
-- extensión de Markdown (lint, preview mejorado)
-- extensión de MkDocs si el equipo la usa (no imprescindible)
+* extensión de Markdown (lint, preview mejorado)
+* extensión de MkDocs si el equipo la usa (no imprescindible)
 
 ---
 
 ## 4) Arranque controlado de una nueva especificación
+
+> Recomendación de UX: si quieres minimizar fricción, usa el enfoque **director-first** (agente `spc-spec-director`). El director decide internamente si toca intake, plan, write, review, RFC o implementación, sin que el usuario tenga que pensar en el flujo.
 
 ### Paso 1 — Arrancar con Intake (`/new-spec` o agente Intake)
 
 En Copilot Chat, tienes dos opciones equivalentes de arranque:
 
 **Opción A (rápida):** ejecuta `/new-spec` y responde a la entrevista mínima.
-**Opción B (recomendada en proyectos complejos):** selecciona el **agente Intake** y conversa (mismas reglas, preguntas adaptativas).
+**Opción B (recomendada en proyectos complejos):** usa el agente `spc-spec-intake` (preguntas adaptativas, máximo 2 por turno).
 
 El resultado debe actualizar/crear:
 
-- `docs/spec/00-context.md`
-- `docs/spec/index.md`
-- `docs/spec/95-open-questions.md` (si aplica)
+* `docs/spec/00-context.md`
+* `docs/spec/index.md`
+* `docs/spec/95-open-questions.md` (si aplica)
 
 Objetivo:
 
-- dejar la spec "arrancada" con alcance y terminología mínima,
-- sin inventar datos (si falta info → OPENQ).
+* dejar la spec "arrancada" con alcance y terminología mínima,
+* sin inventar datos (si falta info → OPENQ).
 
 ---
 
 ### Paso 2 — Planificar la primera iteración con `/plan-iteration` (o agente Planner)
 
-Ejecuta `/plan-iteration` (o usa el agente Planner) para actualizar:
+Ejecuta `/plan-iteration` (o usa el agente `spc-spec-planner`) para actualizar:
 
-- `docs/spec/01-plan.md`
+* `docs/spec/01-plan.md`
 
 Objetivo:
 
-- definir 5–15 tareas atómicas con DoD,
-- y una lista clara de entregables en `docs/spec/**`.
+* definir 5–15 tareas atómicas con DoD,
+* y una lista clara de entregables en `docs/spec/**`.
 
 Nota operativa:
 
-- `docs/spec/01-plan.md` representa **una única iteración activa**. Evita mezclar iteraciones en el mismo plan.
+* `docs/spec/01-plan.md` representa **una única iteración activa**.
+* IDs del plan en SPEC: **P01..Pnn** (Pxx).
+  (Los IDs **Txx** se reservan para tareas de implementación.)
 
 ---
 
 ### Paso 3 — Redactar siguiendo el plan con `/write-from-plan` (o agente Writer)
 
-Ejecuta `/write-from-plan` (o usa el agente Writer) para:
+Ejecuta `/write-from-plan` (o usa el agente `spc-spec-writer`) para:
 
-- completar las tareas,
-- actualizar trazabilidad (`docs/spec/02-trazabilidad.md`) al mínimo vivo,
-- registrar OPENQ/TODO/DECISION según aparezcan.
+* completar las tareas del plan (Pxx),
+* actualizar trazabilidad (`docs/spec/02-trazabilidad.md`) al mínimo vivo,
+* registrar OPENQ/TODO/DECISION según aparezcan.
 
 ---
 
 ### Paso 4 — Revisión crítica con `/review-and-adr` (o agente Reviewer)
 
-Ejecuta `/review-and-adr` (o usa el agente Reviewer) para:
+Ejecuta `/review-and-adr` (o usa el agente `spc-spec-reviewer`) para:
 
-- generar/actualizar `docs/spec/97-review-notes.md`,
-- crear OPENQ/TODO si procede,
-- y crear ADRs automáticamente cuando existan `DECISION:` sin ADR enlazado.
+* generar/actualizar `docs/spec/97-review-notes.md`,
+* crear OPENQ/TODO si procede,
+* y crear ADRs automáticamente cuando existan `DECISION:` sin ADR enlazado.
 
 ---
 
@@ -128,9 +132,9 @@ Ejecuta `/review-and-adr` (o usa el agente Reviewer) para:
 
 Cuando la iteración esté completada (o decidas cerrarla formalmente), ejecuta `/close-iteration` para:
 
-- archivar snapshots en `docs/spec/history/Ixx/`,
-- "limpiar" los archivos activos (`01-plan.md`, `95/96/97`) dejándolos como **estado vivo**,
-- preparar el repo para planificar la siguiente iteración sin mezclar planes ni inflar ficheros.
+* archivar snapshots en `docs/spec/history/Ixx/`,
+* "limpiar" los archivos activos (`01-plan.md`, `95/96/97`) dejándolos como **estado vivo**,
+* preparar el repo para planificar la siguiente iteración sin mezclar planes ni inflar ficheros.
 
 ---
 
@@ -146,12 +150,12 @@ Ciclo recomendado:
 
 Buenas prácticas:
 
-- Mantener iteraciones pequeñas (mejor varias rondas cortas).
-- Evitar "reescrituras masivas".
-- Mantener `OPENQ` y `TODO` al día.
-- Tratar `docs/spec/history/**` como **solo lectura** para el día a día:
+* Mantener iteraciones pequeñas (mejor varias rondas cortas).
+* Evitar "reescrituras masivas".
+* Mantener `OPENQ` y `TODO` al día.
+* Tratar `docs/spec/history/**` como **solo lectura** para el día a día:
 
-  - por defecto, prompts/agentes deben ignorarlo para planificar/redactar/revisar.
+  * por defecto, prompts/agentes deben ignorarlo para planificar/redactar/revisar.
 
 ---
 
@@ -159,18 +163,18 @@ Buenas prácticas:
 
 ### Opción simple (equipo pequeño)
 
-- Commits directos a main con mensajes claros por iteración.
-- Revisión ligera manual antes de mezclar cambios grandes.
+* Commits directos a main con mensajes claros por iteración.
+* Revisión ligera manual antes de mezclar cambios grandes.
 
 ### Opción recomendada (equipo mediano)
 
-- Rama por iteración o por bloque:
+* Rama por iteración o por bloque:
 
-  - `iter/I01`
-  - `feature/fr-mvp`
-  - `review/adr-decisions`
-- Pull Request con checklist (si existe plantilla).
-- Un revisor (mínimo) antes de merge.
+  * `iter/I01`
+  * `feature/fr-mvp`
+  * `review/adr-decisions`
+* Pull Request con checklist (si existe plantilla).
+* Un revisor (mínimo) antes de merge.
 
 ---
 
@@ -178,10 +182,10 @@ Buenas prácticas:
 
 Por defecto:
 
-- Sí: `docs/spec/**`
-- Sí (si hace falta): `docs/assets/**`
-- No: `docs/kit/**` (salvo petición explícita)
-- Cambios en `.github/**` deben tratarse como cambios de plataforma (revisar con cuidado).
+* Sí: `docs/spec/**`
+* Sí (si hace falta): `docs/assets/**`
+* No: `docs/kit/**` (salvo petición explícita)
+* Cambios en `.github/**` deben tratarse como cambios de plataforma (revisar con cuidado).
 
 ---
 
@@ -189,46 +193,107 @@ Por defecto:
 
 Antes de compartir una especificación:
 
-- `docs/spec/00-context.md` está claro (IN/OUT, roles, restricciones).
-- FR con criterios verificables y estados.
-- NFR con métricas/validación.
-- UI con estados mínimos.
-- Backend con catálogo de errores y authz.
-- Seguridad + infra con operación real.
-- Trazabilidad mínima actualizada.
-- `docs/spec/97-review-notes.md` sin bloqueantes abiertos.
-- `OPENQ` y `TODO` revisados (y marcados como aceptados si quedan abiertos).
-- (Recomendado) Iteración cerrada con `/close-iteration` si se va a iniciar una nueva iteración o a congelar un baseline:
+* `docs/spec/00-context.md` está claro (IN/OUT, roles, restricciones).
+* FR con criterios verificables y estados.
+* NFR con métricas/validación.
+* UI con estados mínimos.
+* Backend con catálogo de errores y authz.
+* Seguridad + infra con operación real.
+* Trazabilidad mínima actualizada.
+* `docs/spec/97-review-notes.md` sin bloqueantes abiertos.
+* `OPENQ` y `TODO` revisados (y marcados como aceptados si quedan abiertos).
+* (Recomendado) Iteración cerrada con `/close-iteration` si se va a iniciar una nueva iteración o a congelar un baseline:
 
-  - histórico generado en `docs/spec/history/Ixx/`
-  - archivos activos "limpios" y manejables.
-
----
-
-## 9) Siguiente lectura recomendada
-
-- Operativa diaria: `docs/kit/70-operativa-diaria.md`
-- Previsualización en navegador: `docs/kit/80-previsualizacion-mkdocs.md`
-- FAQ/troubleshooting: `docs/kit/95-faq-y-troubleshooting.md`
+  * histórico generado en `docs/spec/history/Ixx/`
+  * archivos activos "limpios" y manejables.
 
 ---
 
-## 10) Exportar la documentación a DOCX (Word)
+## 9) Workflows adicionales
+
+Además del flujo principal (Plan → Write → Review → Iterate), el template soporta workflows especializados:
+
+### 9.1 Generación de propuestas RFC
+
+Para documentar cambios complejos o decisiones críticas antes de implementarlas:
+
+* **Agentes**: `spc-rfc-writer` / `spc-rfc-reviewer`
+* **Skill**: `rfc-proposal`
+* **Salida**: propuestas estructuradas con alternativas, impacto, costos y estrategia
+
+Ver `docs/kit/52-custom-agents.md` para más detalle.
+
+### 9.2 Gestión de backlog de implementación (SPC-IMP)
+
+Para proyectos grandes donde la spec debe generar backlog ejecutable de implementación:
+
+* **Agentes**: `spc-imp-backlog-slicer` / `spc-imp-task-detailer` / `spc-imp-coverage-auditor`
+* **Skills**: `spc-imp-task-definition` / `generate-tool-permissions`
+* **Workflow**: slicing de spec en tareas atómicas, definición detallada, auditoría de cobertura
+
+Ver `docs/kit/52-custom-agents.md` y `docs/kit/54-skills.md` para más detalle.
+
+---
+
+## 10) Modo evolutivo con codebase
+
+Cuando trabajas en un proyecto que ya tiene código implementado:
+
+### 10.1 Configuración del workspace
+
+* El codebase debe estar en el workspace (normalmente en carpeta `codebase/` o similar).
+* El repo de spec puede estar en otro workspace folder paralelo.
+* Los agentes pueden **leer** el codebase pero **nunca modificarlo**.
+
+### 10.2 Flujo de trabajo recomendado
+
+1. **Generar codebase-map**: usa el skill `codebase_scout` para crear `docs/spec/_inputs/codebase-map.md`.
+2. **Planificar con evidencia**: al planificar iteraciones, consulta el codebase-map para decisiones técnicas.
+3. **Generar Evidence Packs**: cuando una sección requiera precisión técnica específica:
+
+   * Usa el prompt `/evidence-pack` o el skill `evidence_pack`
+   * Salida: `docs/spec/_inputs/evidence/EP-###-<tema>.md`
+4. **Citar evidencia**: en decisiones técnicas relevantes, enlaza o referencia:
+
+   * Rutas del codebase: `codebase/<ruta/al/archivo>`
+   * Evidence Packs: `docs/spec/_inputs/evidence/EP-###-<tema>.md`
+5. **OPENQ si no hay evidencia**: si no encuentras evidencia suficiente tras buscar en el codebase:
+
+   * No inventar: registrar `OPENQ-###` indicando qué falta y dónde se buscó
+
+### 10.3 Prompts específicos para modo evolutivo
+
+* `/audit-spec-vs-codebase`: audita consistencia entre spec y código
+* `/evidence-pack`: genera Evidence Pack para un tema específico
+
+Ver `docs/kit/53-prompts.md` para más detalle.
+
+---
+
+## 11) Siguiente lectura recomendada
+
+* Operativa diaria: `docs/kit/70-operativa-diaria.md`
+* Previsualización en navegador: `docs/kit/80-previsualizacion-mkdocs.md`
+* FAQ/troubleshooting: `docs/kit/95-faq-y-troubleshooting.md`
+
+---
+
+## 12) Exportar la documentación a DOCX (Word)
 
 Este repositorio permite exportar la documentación a un archivo **DOCX** (Word) para compartirla fuera del repo.
 
 ### Requisitos
 
-- Tener **Pandoc** instalado y disponible en PATH.
-- Tener Python disponible para ejecutar el script del repo.
-- (Opcional) Puedes usar el prompt `/export-docx` para que Copilot te genere el comando exacto.
+* Tener **Pandoc** instalado y disponible en PATH.
+* Tener Python disponible para ejecutar el script del repo.
+* (Opcional) Puedes usar el prompt `/export-docx` para que Copilot te genere el comando exacto.
 
 ### Exportar SPEC (docs/spec/**)
 
 Por defecto:
 
-- **NO** se incluye TOC (tabla de contenidos),
-- cada archivo `.md` empieza en **una nueva página** (a través del script).
+* **NO** se incluye TOC (tabla de contenidos),
+* cada archivo `.md` empieza en **una nueva página** (a través del script).
 
 ```powershell
 python tools\export_docx.py --scope spec --output exports\spec.docx --title "Especificación técnica"
@@ -258,8 +323,8 @@ python tools\export_docx.py --scope kit --output exports\kit.docx --title "Spec-
 
 ### Notas
 
-- El resultado se genera en `exports/`.
-- Para comprobar Pandoc:
+* El resultado se genera en `exports/`.
+* Para comprobar Pandoc:
 
   ```powershell
   pandoc --version

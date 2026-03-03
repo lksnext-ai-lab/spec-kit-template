@@ -1,74 +1,138 @@
 ﻿---
 name: write-from-plan
-description: Ejecuta docs/spec/01-plan.md (redacción/actualización de docs), manteniendo trazabilidad y registrando TODO/OPENQ/DECISION con disciplina.
+description: Ejecuta la iteración activa en `docs/spec/01-plan.md` para materializar cambios en `docs/spec/**` de forma incremental, trazable y sin invenciones. Procesa tareas `Pxx` y respeta `Tipo` (spec/rfc/imp). Modo `auto` decide qué ejecutar y qué derivar a agentes canónicos, minimizando riesgo y churn.
 ---
 
-# Write-from-plan
+# write-from-plan
 
 ## Objetivo
+Ejecutar la **iteración activa** de `docs/spec/01-plan.md` y materializar cambios en `docs/spec/**`, con:
+- disciplina anti-invención,
+- trazabilidad incremental,
+- gates (OPENQ/TODO/DECISION),
+- y decisiones de derivación automáticas (rfc/imp) cuando corresponda.
 
-Ejecutar `docs/spec/01-plan.md` como “tareas de implementación” y materializarlo
-en cambios concretos dentro de `docs/spec/`.
+---
+
+## Parámetros opcionales
+- `EXECUTE_TYPES` (default `auto`):
+  - `auto`: ejecuta `spec` y solo ejecuta `rfc/imp` si es “trivial y seguro” (ver heurísticas)
+  - `spec`: solo `Tipo=spec`
+  - `spec,rfc`: `spec` + `rfc`
+  - `spec,rfc,imp`: todo (solo si se fuerza)
+- `OPENQ_MODE` (default `link-only`): `link-only` | `write`
+- `TODO_MODE` (default `write`): `write` | `link-only`
+- `UPDATE_TRACEABILITY` (default `true`)
+- `MAX_TASKS` (default `12`)
+- `STOP_ON_BLOCKERS` (default `2`): detenerse si se generan >= N bloqueos reales (OPENQ/DECISION) que impiden continuar
+- `REPORT_VERSION` (default `1.0`)
+
+---
 
 ## Reglas duras
+- No inventar requisitos ni detalles técnicos.
+- Evitar reescrituras masivas: cambios incrementales y diff-friendly.
+- Ignorar `docs/spec/history/**`.
+- No usar shell/PowerShell/Bash.
+- Ejecutar solo la iteración activa. Si `01-plan.md` está mezclado → detener y recomendar `/close-iteration` + `/plan-iteration`.
 
-- No inventes requisitos ni detalles técnicos.
-- Ejecuta tareas en orden.
-- Evita reescrituras masivas: cambios incrementales y seguros.
-- Si falta info: marca `OPENQ:` y registra `OPENQ-###` en
-  `docs/spec/95-open-questions.md`.
-- Si surge trabajo pendiente: crea `TODO-###` en `docs/spec/96-todos.md`.
-- Si aparece una elección relevante: marca `DECISION:` (el Reviewer abrirá el
-  ADR).
-- Ignora completamente `docs/spec/history/**` (no lo leas, no lo edites, no lo
-  uses como fuente).
-- Ejecuta ÚNICAMENTE las tareas de la iteración activa descritas en
-  `docs/spec/01-plan.md`:
+---
 
-  - Si detectas que `docs/spec/01-plan.md` mezcla iteraciones
-    (histórico/duplicados), NO intentes limpiarlo ni reinterpretarlo.
-  - En ese caso, detén la ejecución y recomienda ejecutar `/close-iteration`
-    (para archivar/cerrar la iteración previa) y luego `/plan-iteration` para
-    regenerar el plan activo limpio.
+## Lectura previa obligatoria
+1) `docs/spec/01-plan.md`
+2) `docs/spec/00-context.md`
+3) `docs/spec/95-open-questions.md` y `docs/spec/96-todos.md` (solo para dedupe)
+4) ADRs `docs/spec/adr/**` (si aplica)
+5) `docs/spec/02-trazabilidad.md` (si `UPDATE_TRACEABILITY=true`)
 
-- No uses comandos de shell / PowerShell / Bash. Solo ediciones de archivos.
+---
 
-## Método
+## Parseo del plan (Pxx)
+- Extraer tabla: `Pxx | Tipo | Tarea | Archivos | Resultado-DoD | Bloqueos`.
+- Validar que IDs son Pxx (no Txx). Si hay Txx → detener y recomendar regenerar con `/plan-iteration`.
 
-1. Lee `docs/spec/01-plan.md` (tareas + DoD de iteración).
-2. Por cada tarea Txx:
+---
 
-   - edita solo los archivos indicados (o el mínimo imprescindible),
-   - completa el Resultado/DoD de la tarea,
-   - añade enlaces y trazabilidad cuando ya existan IDs.
+## Orden de ejecución (reordenamiento mínimo, sin replanificar)
+Dentro del conjunto de tareas ejecutables:
+1) tareas que crean/definen base (FR/NFR/arquitectura) antes que
+2) tareas de trazabilidad/indexes antes que
+3) tareas de refinamiento/edición.
 
-3. Mantén `docs/spec/02-trazabilidad.md` (mínimo):
+Regla:
+- No cambiar el plan; solo escoger este orden interno para ejecutar mejor.
 
-   - si creas/amplías FR: añade/actualiza fila FR (aunque UI/API estén en TODO)
-   - si defines UI: enlaza FR
-   - si defines API/EVT: enlaza FR
-   - si identificas entidades: enlaza FR
-   - si existe ADR asociado: ponlo en la columna ADR (si se conoce)
+---
 
-## Gestión de IDs (OPENQ/TODO)
+## Heurísticas “trivial y seguro” (EXECUTE_TYPES=auto)
 
-- OPENQ: usa el siguiente número libre en `docs/spec/95-open-questions.md`.
-- TODO: usa el siguiente número libre en `docs/spec/96-todos.md`.
-- No reutilices IDs.
+### Para `Tipo=rfc` (ejecutar solo si)
+- Existe spec suficiente (no hay blockers críticos abiertos sobre decisiones del RFC), y
+- el trabajo es principalmente:
+  - generar el RFC a partir de archivos de spec ya existentes, o
+  - completar secciones formales con links a spec (sin inventar).
+Si no cumple: derivar a `spc-rfc-writer`.
 
-## Control de cambios (cuando algo no encaja con el plan)
+### Para `Tipo=imp` (ejecutar solo si)
+- El plan pide *solo*:
+  - crear/actualizar `docs/spec/spc-imp-backlog.md`, o
+  - crear stubs de tareas,
+  - sin tocar CODEBASE.
+Si no cumple: derivar a `spc-imp-backlog-slicer` (y luego detailer/auditor).
 
-- No replanifiques desde Writer.
-- Si una tarea requiere cambiar alcance, dividir trabajo o introducir un gate
-  nuevo:
+---
 
-  - registra el hallazgo como `TODO-###` y/o `OPENQ-###` (según corresponda),
-  - y recomienda volver a `/plan-iteration` (o al agente Planner) para ajustar
-    el plan.
+## Ejecución tarea a tarea
+Para cada Pxx ejecutable:
+- Editar SOLO archivos listados (o el mínimo imprescindible si falta uno crítico).
+- Cumplir Resultado/DoD con outputs verificables.
+- Añadir links a evidencias internas (docs/spec) cuando corresponda.
+- Si aparece un bloqueo real:
+  - registrar `OPENQ` o `DECISION` o `TODO` según corresponda,
+  - incrementar contador de blockers,
+  - si blockers >= `STOP_ON_BLOCKERS` → detener ejecución (para evitar ruido).
 
-## Salida en el chat (resumen)
+---
 
-- Archivos actualizados (lista)
-- FR/NFR/UI/API/EVT/Entidades añadidas o ampliadas (si aplica)
-- OPENQ/TODO/DECISION creadas (IDs)
-- Recomendación: ejecutar `/review-and-adr` o pasar al agente Reviewer
+## Gestión de OPENQ/TODO/DECISION
+### OPENQ
+- `OPENQ_MODE=write`: crear/actualizar `docs/spec/95-open-questions.md` con `OPENQ-###`.
+- `OPENQ_MODE=link-only`: no escribir; proponer en el resumen.
+
+### TODO
+- `TODO_MODE=write`: crear/actualizar `docs/spec/96-todos.md` con `TODO-###`.
+- `TODO_MODE=link-only`: no escribir; proponer en el resumen.
+
+### DECISION
+- Marcar `DECISION:` en el documento afectado o en sección de decisiones si existe.
+- No crear ADR aquí.
+
+---
+
+## Trazabilidad incremental (si UPDATE_TRACEABILITY=true)
+Actualizar `docs/spec/02-trazabilidad.md` solo para lo tocado en esta pasada:
+- FR ↔ UI ↔ API/EVT ↔ Entidades ↔ ADR (si aplica).
+
+---
+
+## Salida en el chat (resumen estable)
+
+```yaml
+report_version: "<REPORT_VERSION>"
+iteration: "Ixx"
+executed_tasks: ["P01","P02", "..."]
+skipped_tasks: ["P05", "..."]
+skipped_reason: "derivation|blocked|type-not-allowed"
+files_updated: ["docs/spec/..", "..."]
+blockers_created: <n>
+openq_mode: "<OPENQ_MODE>"
+todo_mode: "<TODO_MODE>"
+next_recommended: ["spc-spec-reviewer", "..."]
+```
+
+* Lista breve de cambios por archivo
+* Gates creados/propuestos (OPENQ/TODO/DECISION)
+* Pendientes por derivación:
+
+  * `rfc` → `spc-rfc-writer` / `spc-rfc-reviewer`
+  * `imp` → `spc-imp-backlog-slicer` → `spc-imp-task-detailer` → `spc-imp-coverage-auditor`

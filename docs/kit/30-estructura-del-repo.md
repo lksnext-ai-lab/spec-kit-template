@@ -63,6 +63,17 @@ Archivos principales (orientativo):
 - `90-...` infra
 - `95-open-questions.md`, `96-todos.md`, `97-review-notes.md` (estado “vivo”)
 
+#### `docs/spec/_inputs/` — Inputs y evidencia (modo evolutivo y workflows avanzados)
+
+Carpeta de trabajo para investigación, evidencia técnica y artefactos auxiliares:
+
+- `codebase-map.md` (modo evolutivo): mapa técnico resumido del codebase existente.
+- `evidence/EP-###-<tema>.md` (modo evolutivo): Evidence Packs con análisis técnico específico del codebase.
+- `rfc/<RFC_ID>/` (workflow RFC): artefactos auxiliares de propuestas de cambio.
+- `spc-imp-backlog/` (workflow SPC-IMP): artefactos del backlog de implementación.
+
+Esta carpeta es **derivada** del análisis, no es contenido "principal" de la spec.
+
 #### `docs/spec/adr/` — ADRs (decisiones)
 
 Decisiones relevantes capturadas como registros, siguiendo un formato consistente.
@@ -129,9 +140,10 @@ Reglas globales de trabajo del repo:
 
 - alcance (qué tocar / qué no tocar)
 - calidad mínima por documento
-- proceso (Plan → Write → Review → Iterate)
+- proceso (Plan → Write → Review → Iterate → Close)
 - convenciones (IDs, OPENQ/TODO/ADR)
 - reglas sobre histórico (`docs/spec/history/**`) y quién puede escribir ahí
+- modo evolutivo (as-is vs to-be) y protocolo de evidencia
 
 Es el “contrato” que guía al asistente y ayuda a que el equipo trabaje homogéneamente.
 
@@ -139,18 +151,28 @@ Es el “contrato” que guía al asistente y ayuda a que el equipo trabaje homo
 
 ### `.github/agents/` — Custom agents
 
-Agentes con rol y responsabilidad definida. Normalmente:
+Agentes con rol y responsabilidad definida, organizados por **fase** y **rol**:
 
-- `60-intake.agent.md` → arranque/entrevista
-- `70-planner.agent.md` → planificación de iteraciones
-- `80-writer.agent.md` → redacción según plan
-- `90-reviewer.agent.md` → revisión crítica + ADR
+- **SPEC** (especificación):
+  - `spc-spec-director` → puerta única de entrada (orquesta el resto)
+  - `spc-spec-intake` → arranque/entrevista (contexto mínimo + OPENQ/gates)
+  - `spc-spec-planner` → planificación de iteración activa (**P01..Pnn** en `01-plan.md`)
+  - `spc-spec-writer` → redacción según plan (ejecuta Pxx)
+  - `spc-spec-reviewer` → revisión crítica + ADR
 
-Los agentes deben:
+- **RFC** (propuesta técnica):
+  - `spc-rfc-writer` → redacta RFC desde `docs/spec/**`
+  - `spc-rfc-reviewer` → audita RFC vs spec/ADRs
 
-- operar sobre `docs/spec/**` (estado vivo),
+- **SPC-IMP** (implementación):
+  - `spc-imp-backlog-slicer` → crea backlog canónico (**T01..Tnn**)
+  - `spc-imp-task-detailer` → genera fichas Txx ejecutables
+  - `spc-imp-coverage-auditor` → audita cobertura spec→tareas
+
+Reglas comunes:
+- deben operar sobre `docs/spec/**` (estado vivo),
 - **ignorar** `docs/spec/history/**`,
-- evitar enlaces relativos en `.github/**` (usar rutas desde raíz: `docs/spec/...`).
+- y evitar enlaces relativos en `.github/**` (usar rutas desde raíz: `docs/spec/...`).
 
 ---
 

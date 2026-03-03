@@ -2,9 +2,10 @@
 
 Este documento explica, de forma didáctica, cómo se utiliza la IA dentro de `spec-kit-template` para crear especificaciones técnicas en `docs/spec/`.
 
-La idea no es “generar texto”, sino sostener un flujo de trabajo repetible y controlado:
+La idea no es “generar texto”, sino sostener un flujo de trabajo **repetible y controlado**, con trazabilidad, gates (OPENQ/DECISION/RFC) y cambios pequeños (diff-friendly).
 
-Ciclo: **Plan → Write → Review → Iterate**
+Ciclo principal: **Plan → Write → Review → Iterate**  
+(Con cierre opcional de iteración: **Close**)
 
 Para ello se combinan 4 tipos de componentes:
 
@@ -29,7 +30,7 @@ Ejemplos de lo que gobierna:
 - “No tocar docs/kit salvo petición”
 - Convenciones de IDs (FR/NFR/UI/API/OPENQ/TODO/ADR)
 - Calidad mínima por documento
-- Proceso obligatorio Plan → Write → Review → Iterate
+- Proceso obligatorio Plan → Write → Review → Iterate (+ Close)
 
 **Especificidad:** aplica siempre como “marco” cuando Copilot trabaja en este repo.
 
@@ -37,18 +38,41 @@ Ejemplos de lo que gobierna:
 
 ### 1.2 Custom Agents
 
-**Qué es:** roles predefinidos con responsabilidad (intake, planner, writer, reviewer).  
+**Qué es:** roles predefinidos con responsabilidad y dominio específico.  
 **Dónde vive:** `.github/agents/`  
-**Para qué sirve:** separar tareas cognitivas y evitar “mezclar todo en una única conversación”.
+**Para qué sirve:** separar tareas cognitivas y evitar "mezclar todo en una única conversación".
 
-Ejemplos típicos:
+En este template, los agentes se nombran con convención:
 
-- Intake: entrevista inicial + aterrizaje de contexto
-- Planner: convierte estado actual en plan ejecutable
-- Writer: ejecuta tareas del plan editando docs/spec
-- Reviewer: revisión crítica + creación de ADRs
+- `spc-<fase>-<rol>`
+- Fases: `spec` (especificación), `rfc` (propuesta), `imp` (implementación)
 
-**Especificidad:** un agente aporta “personalidad operativa”: foco, checklist mental, límites y handoffs.
+Existen 3 suites principales de agentes:
+
+#### Suite SPEC (5 agentes) — Workflow de especificación (director-first)
+
+- **spc-spec-director**: puerta única de entrada (orquesta el resto)
+- **spc-spec-intake**: entrevista inicial + aterrizaje de contexto
+- **spc-spec-planner**: convierte estado actual en plan ejecutable (**P01..Pnn** en `docs/spec/01-plan.md`)
+- **spc-spec-writer**: ejecuta tareas del plan editando `docs/spec/**`
+- **spc-spec-reviewer**: revisión crítica + creación de ADRs
+
+> Nota IDs:
+> - SPEC plan: **Pxx** en `docs/spec/01-plan.md`
+> - Implementación: **Txx** en `docs/spec/spc-imp-tasks/Txx.md`
+
+#### Suite RFC (2 agentes) — Propuestas ejecutivas/técnicas
+
+- **spc-rfc-writer**: genera RFC (español) como artefacto narrativo para stakeholders desde `docs/spec/**` (multi-archivo)
+- **spc-rfc-reviewer**: audita el RFC, detecta invenciones/enlaces rotos/gaps, emite PASS/WARN/FAIL
+
+#### Suite SPC-IMP (3 agentes) — Backlog de implementación
+
+- **spc-imp-backlog-slicer**: genera backlog canónico (T01..Tnn) desde `docs/spec/**` para implementación en CODEBASE
+- **spc-imp-task-detailer**: detalla tareas Txx en fichas ejecutables con DoD verificable
+- **spc-imp-coverage-auditor**: audita cobertura FR/NFR/ADR/RFC vs backlog+fichas, emite PASS/WARN/FAIL
+
+**Especificidad:** un agente aporta "personalidad operativa": foco, checklist mental, límites y handoffs entre agentes.
 
 ---
 
@@ -118,40 +142,152 @@ Una forma útil de verlo:
 
 ## 4) Flujos típicos (cómo se usan en el día a día)
 
-### 4.1 Flujo estándar recomendado
+### 4.1 Flujo estándar recomendado (director-first)
 
-1) Ejecutar `/new-spec` (o agente Intake)  
-2) Ejecutar `/plan-iteration` (o agente Planner)  
-3) Ejecutar `/write-from-plan` (o agente Writer)  
-4) Ejecutar `/review-and-adr` (o agente Reviewer)  
-5) (Opcional pero recomendado) Ejecutar `/close-iteration` al cerrar la iteración  
-6) Volver al Writer (aplicar mejoras) o planificar nueva iteración
+1) Hablar con **spc-spec-director** con la intención (qué se quiere lograr)  
+2) El director decide:
+   - Intake (si falta contexto)
+   - Plan (si falta o está desalineado)
+   - Write (si hay tareas READY o un bloque claro)
+   - Review (para coherencia/ADR)
+3) Iterar hasta cerrar una iteración (opcional: `/close-iteration`)
 
 Este flujo se repite por iteraciones (I01, I02, …).
 
+#### Alternativa (modo manual por prompts)
+Si el equipo prefiere usar prompts explícitos:
+
+1) `/new-spec`  
+2) `/plan-iteration`  
+3) `/write-from-plan`  
+4) `/review-and-adr`  
+5) (Opcional) `/close-iteration`
+
+---
+
+### 4.2 Workflow RFC (propuestas ejecutivas/técnicas)
+
+Para generar un RFC consolidado desde la spec distribuida:
+
+1) Ejecutar agente **spc-rfc-writer** (parámetros típicos: TEMA, RFC_ID, VARIANTE)  
+   - Genera `docs/spec/rfc/<RFC_ID>-<slug>.md` + artefactos auxiliares en `docs/spec/_inputs/rfc/<RFC_ID>/`
+2) Ejecutar agente **spc-rfc-reviewer** (parámetros típicos: RFC_PATH, MODE=report-only)  
+   - Audita y genera `review-report.md` con veredicto PASS/WARN/FAIL
+3) Si hay mejoras sustanciales: volver a **spc-rfc-writer**  
+   Si hay correcciones menores: ejecutar **spc-rfc-reviewer** con MODE=patch-rfc
+
+**Cuándo usar:**
+
+- Para documentos ejecutivos/técnicos consolidados antes de revisiones formales
+- Para presentar propuestas a stakeholders
+- Cuando necesitas un artefacto narrativo desde una spec multi-file
+
+---
+
+### 4.3 Workflow SPC-IMP (backlog de implementación)
+
+Para convertir la spec en backlog canónico de implementación:
+
+1) Ejecutar agente **spc-imp-backlog-slicer** (parámetros típicos: TEMA, MAX_TASKS, CREATE_STUBS)  
+   - Genera `docs/spec/spc-imp-backlog.md` + stubs en `docs/spec/spc-imp-tasks/`
+2) Ejecutar agente **spc-imp-task-detailer** (parámetros típicos: TASK_IDS o procesar incompletas)  
+   - Genera/actualiza fichas `docs/spec/spc-imp-tasks/Txx.md` con DoD verificable
+3) Ejecutar agente **spc-imp-coverage-auditor**  
+   - Audita cobertura FR/NFR/ADR/RFC vs backlog+fichas, genera `coverage-report.md` con PASS/WARN/FAIL
+4) Si hay huecos: volver a **spc-imp-task-detailer** para crear/ajustar fichas
+
+**Cuándo usar:**
+
+- Cuando la spec está lo suficientemente completa para planificar implementación
+- Al inicio de ciclos de desarrollo
+- Para planificar trabajo en CODEBASE con trazabilidad a spec
+
+---
+
+### 4.4 Modo evolutivo con codebase
+
+Cuando el workspace contiene un repositorio de código (normalmente root `codebase/`), se puede trabajar en **modo evolutivo**: redactar spec basándose en un proyecto existente.
+
+**Reglas del modo evolutivo:**
+
+- `codebase/**` es **solo lectura** (fuente de verdad técnica as-is)
+- Los agentes/prompts consultan `codebase/**` pero **nunca** crean/editan ahí
+- Mantener `docs/spec/_inputs/codebase-map.md` como mapa técnico derivado
+- Generar Evidence Packs (`docs/spec/_inputs/evidence/EP-###-<tema>.md`) cuando una sección requiera precisión técnica
+- Si no hay evidencia suficiente: registrar `OPENQ-###` indicando qué se revisó
+
+**Flujo típico en modo evolutivo:**
+
+1) **Intake/Planner**: confirmar stack/arquitectura básica desde `codebase/**`
+2) **Writer**: generar Evidence Packs (skill `evidence_pack`) para secciones especializadas (auth, permisos, datos, integraciones)
+3) **Reviewer**: auditar que afirmaciones técnicas tienen evidencia (`codebase/...` o Evidence Packs) o `OPENQ`
+4) (Opcional) Ejecutar `/audit-spec-vs-codebase` para validar coherencia spec ↔ codebase
+
+**Qué agentes/prompts soportan modo evolutivo:**
+
+- Agentes SPEC: director, intake, planner, writer, reviewer
+- Prompts: `/new-spec`, `/plan-iteration`, `/write-from-plan`, `/review-and-adr`, `/audit-spec-vs-codebase`, `/evidence-pack`
+
+---
+
 ### Nota operativa: estado vivo vs histórico
 
-- `docs/spec/01-plan.md` representa **una única iteración activa**.
+- `docs/spec/01-plan.md` representa **una única iteración activa** (plan vivo).
 - `docs/spec/95-open-questions.md`, `96-todos.md` y `97-review-notes.md` deben mantenerse como **estado vivo** (solo lo relevante/pediente).
 - Las iteraciones cerradas se archivan en `docs/spec/history/Ixx/` para evitar planes mezclados y ficheros cada vez más grandes.
-- Por defecto, prompts y agentes deben **ignorar `docs/spec/history/**`** al planificar/redactar/revisar.
+- Por defecto, prompts y agentes deben **ignorar `docs/spec/history/**`** al planificar/redactar/revisar (solo se toca con `/close-iteration`).
 
 ---
 
 ## 5) Diagrama: ciclo de trabajo y artefactos
 
+### Workflow principal (SPEC)
+
 ```mermaid
 flowchart TD
-  U[Usuario] -->|/new-spec o Intake| C[docs/spec/00-context.md + index.md]
-  C -->|/plan-iteration o Planner| P[docs/spec/01-plan.md]
-  P -->|/write-from-plan o Writer| S[Actualiza docs/spec/* + trazabilidad]
-  S -->|/review-and-adr o Reviewer| R[docs/spec/97-review-notes.md]
-  R -->|si DECISION| A[docs/spec/adr/ADR-####-<slug>.md]
-  R -->|si faltan datos| Q[docs/spec/95-open-questions.md]
-  R -->|si trabajo pendiente| T[docs/spec/96-todos.md]
+  U[Usuario] -->|spc-spec-director| D[Director]
+  D -->|si falta contexto| C[[docs/spec/00-context.md + index.md]]
+  D -->|si falta plan| P[[docs/spec/01-plan.md (Pxx)]]
+  D -->|si hay READY| S[[Actualiza docs/spec/* + trazabilidad]]
+  D -->|revisión| R[[docs/spec/97-review-notes.md]]
+  R -->|si DECISION| A[[docs/spec/adr/ADR-####-slug.md]]
+  R -->|si faltan datos| Q[[docs/spec/95-open-questions.md]]
+  R -->|si trabajo pendiente| T[[docs/spec/96-todos.md]]
   R -->|cerrar iteración| X[/close-iteration]
-  X --> H[docs/spec/history/Ixx/* (snapshots)]
+  X --> H[[docs/spec/history/Ixx/* snapshots]]
   X -->|nueva iteración| P
+```
+
+### Workflow RFC (propuestas consolidadas)
+
+```mermaid
+flowchart LR
+  SPEC[[docs/spec/**]] -->|spc-rfc-writer| RFC[[docs/spec/rfc/RFC-####-slug.md]]
+  RFC -->|spc-rfc-reviewer| REV[[review-report.md: PASS/WARN/FAIL]]
+  REV -->|FAIL/MAJOR| RFC
+  REV -->|MINOR| PATCH[patch-rfc: correcciones mínimas]
+  PATCH --> RFC
+```
+
+### Workflow SPC-IMP (backlog de implementación)
+
+```mermaid
+flowchart LR
+  SPEC[[docs/spec/**]] -->|spc-imp-backlog-slicer| BL[[docs/spec/spc-imp-backlog.md (Txx)]]
+  BL -->|spc-imp-task-detailer| TSK[[docs/spec/spc-imp-tasks/Txx.md]]
+  TSK -->|spc-imp-coverage-auditor| COV[[coverage-report.md: PASS/WARN/FAIL]]
+  COV -->|gaps detectados| TSK
+```
+
+### Modo evolutivo con codebase
+
+```mermaid
+flowchart TD
+  CB[[codebase/** solo lectura]] -->|consulta| MAP[[docs/spec/_inputs/codebase-map.md]]
+  CB -->|evidence_pack skill| EP[[docs/spec/_inputs/evidence/EP-###-tema.md]]
+  MAP --> SPEC[[docs/spec/** cita rutas o enlaza EP]]
+  EP --> SPEC
+  SPEC -->|/audit-spec-vs-codebase| AUDIT[[validación: evidencia o OPENQ]]
 ```
 
 (Nota: si Mermaid no se renderiza aún, se puede activar en MkDocs más adelante.)
@@ -162,43 +298,43 @@ flowchart TD
 
 ### 6.1 Separación Spec vs Kit
 
-- La IA (prompts/agentes) debe editar **solo** `docs/spec/**`.
-- `docs/kit/**` solo se modifica si el usuario lo solicita explícitamente.
+* La IA (prompts/agentes) debe editar **solo** `docs/spec/**`.
+* `docs/kit/**` solo se modifica si el usuario lo solicita explícitamente.
 
 ### 6.2 Histórico de iteraciones (`docs/spec/history/**`)
 
-- `docs/spec/history/**` contiene **snapshots cerrados por iteración**.
-- Por defecto, prompts y agentes deben **ignorar** este directorio para planificar/redactar/revisar.
-- Solo el prompt `/close-iteration` puede crear/actualizar contenido dentro de `docs/spec/history/**`.
+* `docs/spec/history/**` contiene **snapshots cerrados por iteración**.
+* Por defecto, prompts y agentes deben **ignorar** este directorio para planificar/redactar/revisar.
+* Solo el prompt `/close-iteration` puede crear/actualizar contenido dentro de `docs/spec/history/**`.
 
 ### 6.3 Rutas en `.github/**`
 
-- En prompts/agentes (`.github/**`) usar siempre rutas desde raíz: `docs/spec/...`.
-- Evitar enlaces relativos tipo `./adr/...` en `.github/**` para no generar rutas rotas.
+* En prompts/agentes (`.github/**`) usar siempre rutas desde raíz: `docs/spec/...`.
+* Evitar enlaces relativos tipo `./adr/...` en `.github/**` para no generar rutas rotas.
 
 ### 6.4 Rutas en `docs/spec/**`
 
-- En la spec, enlaces relativos son correctos (por ejemplo `adr/ADR-0002-...md`).
+* En la spec, enlaces relativos son correctos (por ejemplo `adr/ADR-0002-...md`).
 
 ---
 
 ## 7) Qué aporta este sistema frente a “un chat que redacta”
 
-- Control del alcance por iteración (plan ejecutable).
-- Calidad mínima reforzada por skills.
-- Revisión crítica sistemática (review notes).
-- Decisiones visibles (ADR) y trazables.
-- Evita inventar: OPENQ como mecanismo de honestidad.
-- Evolución versionada (Git) y navegable (MkDocs).
-- Evita planes mezclados y "documentos bola de nieve": histórico por iteración (`/close-iteration`).
+* Control del alcance por iteración (plan ejecutable Pxx).
+* Calidad mínima reforzada por skills.
+* Revisión crítica sistemática (review notes).
+* Decisiones visibles (ADR) y trazables.
+* Evita inventar: OPENQ como mecanismo de honestidad.
+* Evolución versionada (Git) y navegable (MkDocs).
+* Evita planes mezclados y "documentos bola de nieve": histórico por iteración (`/close-iteration`).
 
 ---
 
 ## Lecturas recomendadas
 
-- `51-instructions.md` (detalle de reglas globales)
-- `52-custom-agents.md` (roles y handoffs)
-- `53-prompts.md` (comandos y resultados esperados)
-- `54-skills.md` (skills core y cómo ampliarlos)
+* `51-instructions.md` (detalle de reglas globales)
+* `52-custom-agents.md` (roles y handoffs)
+* `53-prompts.md` (comandos y resultados esperados)
+* `54-skills.md` (skills core y cómo ampliarlos)
 
 Siguiente lectura recomendada: **`60-uso-del-template.md`**.

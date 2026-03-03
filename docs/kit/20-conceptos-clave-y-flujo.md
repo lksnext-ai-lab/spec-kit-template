@@ -85,7 +85,36 @@ Un ADR es un documento en `docs/spec/adr/` que captura una decisión relevante, 
 - consecuencias e impacto operativo.
 
 Los ADR evitan decisiones implícitas o perdidas en texto.
+### Modo evolutivo con codebase
 
+Cuando el proyecto ya tiene código implementado, el modo evolutivo permite:
+
+- Consultar el codebase existente (solo lectura) para fundamentar decisiones técnicas.
+- Generar un **codebase-map.md** con el mapa técnico del sistema.
+- Crear **Evidence Packs (EP-###)** con evidencia específica del código.
+- Verificar información externa (integraciones, SDKs, APIs) con **playwright-mcp**.
+- Citar evidencia concreta del codebase en la spec.
+
+Regla: **no inventar** — cualquier afirmación técnica debe tener evidencia del codebase o registrarse como `OPENQ-###`.
+
+### Evidence Packs (EP-###)
+
+Documentos en `docs/spec/_inputs/evidence/` que contienen investigación técnica específica del codebase:
+
+- Rutas/archivos concretos analizados.
+- Contenido confirmado vs inferido (distinguir ambos).
+- Respuesta a preguntas técnicas específicas (autenticación, permisos, datos, integraciones, etc.).
+
+Generados con el skill `evidence_pack` o el prompt `/evidence-pack`.
+
+### Verificación externa (mandatory para integraciones/SDKs)
+
+Para evitar inventar información sobre integraciones, SDKs, APIs, límites, compatibilidades:
+
+- **Herramienta obligatoria**: `playwright-mcp` (navegación web automatizada).
+- **Fallback**: `chrome-devtools-mcp` si playwright no está disponible.
+- Si ninguna está disponible: registrar `OPENQ-###` o pedir al usuario que aporte la información.
+- **Registrar fuentes**: subsección `### Fuentes` con URL + fecha (YYYY-MM-DD) + qué se extrajo.
 ---
 
 ## El flujo recomendado

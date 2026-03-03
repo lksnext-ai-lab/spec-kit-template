@@ -15,9 +15,24 @@ En lugar de repetir “cómo redactar FR” o “qué debe incluir seguridad” 
 - convenciones,
 - y criterios verificables.
 
-En este template, los skills viven en:
+---
 
-- `.github/skills/<skill-name>/SKILL.md`
+## Dónde viven (estructura recomendada)
+
+Los skills viven bajo:
+
+- `.github/skills/`
+
+Para diferenciar claramente lo que pertenece al **framework spec-kit** de lo que pertenece a un **proyecto concreto**, se usa esta convención:
+
+- **Framework (spec-kit):**
+  - `.github/skills/spec-kit-<skill-name>/SKILL.md`
+
+- **Proyecto (workspace/project-specific):**
+  - `.github/skills/<skill-name>/SKILL.md`
+  - (no llevan prefijo `spec-kit-`)
+
+> Nota: se mantiene un único nivel de carpetas bajo `.github/skills/` para maximizar compatibilidad y descubrimiento sencillo por herramientas.
 
 ---
 
@@ -26,20 +41,16 @@ En este template, los skills viven en:
 Los skills ayudan a:
 
 1. **Normalizar calidad**
-
    - Evitan que cada persona redacte FR/NFR/UI de forma distinta.
    - Reducen ambigüedad y vaguedades.
 
 2. **Acelerar redacción sin perder consistencia**
-
    - Proporcionan "plantillas mentales" para escribir bien a la primera.
 
 3. **Reducir deuda documental**
-
    - Evitan huecos típicos (estados UI, catálogo de errores, operación, etc.).
 
 4. **Mejorar revisión**
-
    - El reviewer puede evaluar contra una checklist conocida.
 
 ---
@@ -52,51 +63,71 @@ Los skills ayudan a:
 
 ---
 
-## Skills incluidos (core)
+## Skills incluidos
 
-Los skills core actuales suelen cubrir las áreas clave de una especificación:
+### A) Skills del framework (spec-kit)
 
-### 1) `spec-style`
+Estos skills forman parte del funcionamiento general del template y se consideran “plataforma”.
 
-**Objetivo:** estilo y convenciones de redacción para toda la spec.  
-**Aporta:** tono profesional, estructura clara, uso de IDs y marcadores, evitar vaguedades.
+1) `spec-style`  
+**Ruta:** `.github/skills/spec-kit-spec-style/SKILL.md`  
+**Objetivo:** estilo y convenciones de redacción para toda la spec.
 
-### 2) `requirements-fr`
+2) `requirements-fr`  
+**Ruta:** `.github/skills/spec-kit-requirements-fr/SKILL.md`  
+**Objetivo:** cómo redactar requisitos funcionales (FR).
 
-**Objetivo:** cómo redactar requisitos funcionales (FR).  
-**Aporta:** estructura por FR-###, criterios de aceptación verificables, prioridad y estado.
+3) `requirements-nfr`  
+**Ruta:** `.github/skills/spec-kit-requirements-nfr/SKILL.md`  
+**Objetivo:** cómo redactar requisitos no funcionales (NFR).
 
-### 3) `requirements-nfr`
+4) `ui-spec`  
+**Ruta:** `.github/skills/spec-kit-ui-spec/SKILL.md`  
+**Objetivo:** cómo especificar pantallas y flujos de UI sin diseñar visualmente.
 
-**Objetivo:** cómo redactar requisitos no funcionales (NFR).  
-**Aporta:** NFR-### medibles (SLO/SLI/umbrales) o verificación explícita, y relación con drivers.
+5) `architecture`  
+**Ruta:** `.github/skills/spec-kit-architecture/SKILL.md`  
+**Objetivo:** cómo redactar arquitectura técnica y límites de sistema.
 
-### 4) `ui-spec`
+6) `security-baseline`  
+**Ruta:** `.github/skills/spec-kit-security-baseline/SKILL.md`  
+**Objetivo:** baseline de seguridad mínimo operativo.
 
-**Objetivo:** cómo especificar pantallas y flujos de UI sin diseñar visualmente.  
-**Aporta:** UI-###, estados mínimos (loading/empty/error/sin permisos), reglas por rol, validaciones.
+7) `infra`  
+**Ruta:** `.github/skills/spec-kit-infra/SKILL.md`  
+**Objetivo:** infraestructura y operación (dev/pre/prod).
 
-### 5) `architecture`
+8) `codebase-scout`  
+**Ruta:** `.github/skills/spec-kit-codebase-scout/SKILL.md`  
+**Objetivo:** explorar `codebase/**` para construir un mapa técnico derivado (modo evolutivo).  
+**Salida típica:** `docs/spec/_inputs/codebase-map.md`.
 
-**Objetivo:** cómo redactar arquitectura técnica y límites de sistema.  
-**Aporta:** componentes/servicios, integraciones, responsabilidades, riesgos, y puntos de decisión.
+9) `evidence-pack`  
+**Ruta:** `.github/skills/spec-kit-evidence-pack/SKILL.md`  
+**Objetivo:** investigar un tema específico en `codebase/**` y generar un Evidence Pack con hallazgos sustentados.  
+**Salida típica:** `docs/spec/_inputs/evidence/EP-###-<tema>.md`.
 
-### 6) `security-baseline`
+10) `rfc-proposal`  
+**Ruta:** `.github/skills/spec-kit-rfc-proposal/SKILL.md`  
+**Objetivo:** patrón de calidad para RFC/Proposal (español) como artefacto narrativo para stakeholders.
 
-**Objetivo:** baseline de seguridad mínimo operativo.  
-**Aporta:** authn/authz, secretos, auditoría, amenazas, controles, compliance y operación real.
+11) `spc-imp-task-definition`  
+**Ruta:** `.github/skills/spec-kit-spc-imp-task-definition/SKILL.md`  
+**Objetivo:** definir tareas atómicas de implementación (Txx) ejecutables para CODEBASE.
 
-### 7) `infra`
+12) `export-docx`  
+**Ruta:** `.github/skills/spec-kit-export-docx/SKILL.md`  
+**Objetivo:** exportar documentación Markdown a DOCX.
 
-**Objetivo:** infraestructura y operación (dev/pre/prod).  
-**Aporta:** CI/CD, observabilidad, logging, backups/DR, configuración, despliegue y runbooks.
+---
 
-> Nota: el conjunto exacto puede variar según el repo; lo importante es mantener los “core” para consistencia.
+### B) Skills específicos del proyecto (workspace/project-specific)
 
-### 8) `export-docx`
+Estos skills existen porque este repositorio/proyecto lo necesita; **no forman parte del framework spec-kit**.
 
-**Objetivo:** exportar documentación Markdown a DOCX.  
-**Aporta:** procedimiento estándar para convertir `docs/spec/**` o `docs/kit/**` (o todo `docs/**`) a un `.docx` reproducible mediante Pandoc + script del repo.
+1) `generate-tool-permissions`  
+**Ruta:** `.github/skills/generate-tool-permissions/SKILL.md`  
+**Objetivo:** generar documentación sincronizada de permisos/herramientas desde definiciones del backend.
 
 ---
 
@@ -127,59 +158,47 @@ Un `SKILL.md` suele incluir:
 
 1) Propósito del skill
 2) Cuándo usarlo
-3) Estructura recomendada (plantilla)
-4) Checklist de calidad
+3) Protocolo de ejecución (pasos)
+4) Validaciones / checks (conteos, formatos, criterios)
 5) Anti-patrones (errores comunes)
 6) Ejemplo breve (si aporta)
+
+### Metadatos recomendados (front-matter)
+
+Para que la clasificación no dependa solo del nombre de carpeta, se recomienda añadir un front-matter YAML mínimo en cada `SKILL.md`:
+
+```yaml
+---
+category: spec-kit | project
+scope: spec | rfc | imp | codebase | platform
+status: stable | experimental | deprecated
+---
+```
 
 ---
 
 ## Cómo añadir un nuevo skill
 
-1. Crear carpeta:
+1. Elegir categoría y nombre:
 
-   - `.github/skills/<nombre-skill>/`
+* framework: `spec-kit-<nombre-skill>`
+* proyecto: `<nombre-skill>` (sin prefijo `spec-kit-`)
 
-2. Crear archivo:
+2. Crear carpeta:
 
-   - `.github/skills/<nombre-skill>/SKILL.md`
+* `.github/skills/<carpeta-skill>/`
 
-3. Mantenerlo corto y accionable:
+3. Crear archivo:
 
-   - plantillas claras
-   - checklists verificables
+* `.github/skills/<carpeta-skill>/SKILL.md`
 
-4. Actualizar esta guía (`docs/kit/54-skills.md`):
+4. Mantenerlo corto y accionable:
 
-   - añadir el skill a la lista y explicar su objetivo
+* plantillas claras
+* checklists verificables
 
-5. (Opcional) Referenciarlo desde prompts/agentes
+5. Actualizar esta guía (`docs/kit/54-skills.md`)
 
-- si el skill afecta a un flujo frecuente, merece referencia explícita.
-
-Ejemplos de skills adicionales (según necesidades del equipo):
-
-- `integration-patterns`
-- `eventing-async`
-- `data-governance`
-- `testing-strategy`
-- `observability`
-- `performance-baseline`
+6. (Opcional) Referenciarlo desde prompts/agentes si afecta a un flujo frecuente
 
 ---
-
-## Buenas prácticas de mantenimiento
-
-- No convertir skills en “mini-libros”: deben ser guías prácticas.
-- Revisar skills cuando el equipo cambie su forma de trabajar.
-- Versionar cambios en skills como cambios “de plataforma”.
-- Evitar duplicar reglas globales: si es transversal, va a instructions.
-
----
-
-## Referencias
-
-- Visión general del sistema IA: `docs/kit/50-sistema-ia.md`
-- Prompts: `docs/kit/53-prompts.md`
-- Custom agents: `docs/kit/52-custom-agents.md`
-- Reglas globales: `.github/copilot-instructions.md`

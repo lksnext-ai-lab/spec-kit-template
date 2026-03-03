@@ -2,8 +2,12 @@
 
 on:
   pull_request:
+    paths-ignore:
+      - "docs/spec/history/**"
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - "docs/spec/history/**"
 
 jobs:
   markdownlint:

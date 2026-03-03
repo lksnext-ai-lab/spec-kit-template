@@ -263,6 +263,65 @@ Antes de terminar el día:
 
 ---
 
+## 8) Operativa en modo evolutivo (con codebase existente)
+
+Cuando trabajas en modo evolutivo (proyecto con codebase ya implementado):
+
+### 8.1 Cuándo generar Evidence Packs
+
+Genera un Evidence Pack (`/evidence-pack` o skill `evidence_pack`) cuando:
+
+- Necesitas precisión técnica sobre autenticación, permisos, datos, integraciones u operación.
+- Vas a tomar decisiones arquitectónicas que dependen del código existente.
+- Necesitas verificar cómo funciona realmente algo crítico en el sistema.
+- Quieres documentar una integración compleja o un flujo no obvio.
+
+**No generar EP** para:
+
+- Consultas rápidas (usa búsquedas directas en el codebase).
+- Información obvia o ya mapeada en `codebase-map.md`.
+
+### 8.2 Cómo verificar información externa
+
+Para integraciones, SDKs, APIs, límites, compatibilidades, licencias:
+
+1. **Obligatorio**: usar `playwright-mcp` (o fallback `chrome-devtools-mcp`) para verificar.
+2. **Priorizar fuentes**: documentación oficial > repo oficial > releases > issues/discussions.
+3. **Registrar fuentes**: siempre añadir subsección `### Fuentes` con:
+   - URL + fecha (YYYY-MM-DD) + qué se extrajo (1 línea)
+4. **Si no hay acceso a herramientas**: registrar `OPENQ-###` o pedir al usuario que aporte snapshots.
+
+### 8.3 Cómo citar evidencia del codebase en la spec
+
+Cuando afirmes algo técnico relevante en la spec:
+
+- **Citar rutas concretas**:
+  ```
+  **EVIDENCE:** `codebase/src/auth/AuthController.ts` (endpoint login)
+  ```
+- **Referenciar Evidence Packs**:
+  ```
+  **EVIDENCE PACK:** `docs/spec/_inputs/evidence/EP-001-auth-flow.md`
+  ```
+- **Si hay decisión arquitectónica**: enlazar el EP en el ADR correspondiente.
+
+### 8.4 Regla anti-invención (critical)
+
+Si no encuentras evidencia suficiente tras buscar en el codebase:
+
+1. **No completar con suposiciones**: dejar explícito que falta evidencia.
+2. **Registrar `OPENQ-###`** en `docs/spec/95-open-questions.md` indicando:
+   - Términos usados para buscar
+   - Rutas revisadas
+   - Hipótesis mínima (marcada explícitamente como *no confirmada*)
+
+### 8.5 Nombres reales vs inventados
+
+- **Siempre usar nombres reales** del codebase: módulos, paquetes, servicios, variables de entorno, funciones, clases.
+- **Si no encuentras el nombre real**: marcar `OPENQ-###` en vez de inventar.
+
+---
+
 Siguiente lectura recomendada:
 
 - Previsualización en navegador: `docs/kit/80-previsualizacion-mkdocs.md`

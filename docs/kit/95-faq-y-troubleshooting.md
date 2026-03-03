@@ -315,6 +315,100 @@ Si lo incluyes en MkDocs nav:
 
 ---
 
+### 4.4 ¿Qué es el modo evolutivo con codebase?
+
+**Modo evolutivo** es cuando trabajas en la especificación de un proyecto que **ya tiene código implementado**.
+
+Características:
+
+- El codebase está en el workspace (normalmente `codebase/` o similar).
+- Los agentes/prompts pueden **leer** el codebase pero **nunca modificarlo** (solo lectura).
+- La spec se fundamenta en **evidencia real** del código existente.
+- Se genera un **codebase-map.md** con el mapa técnico del sistema.
+- Se crean **Evidence Packs (EP-###)** con investigación técnica específica.
+
+**Cuándo usarlo:**
+
+- Evolutivos de sistemas existentes.
+- Migraciones/refactors que requieren documentar el estado actual.
+- Auditorías técnicas o alineación de spec con implementación.
+
+Ver `docs/kit/60-uso-del-template.md` (sección "Modo evolutivo con codebase") para más detalle.
+
+---
+
+### 4.5 ¿Cuándo debo generar un Evidence Pack?
+
+Genera un **Evidence Pack** (EP-###) cuando:
+
+- Necesitas precisión técnica sobre autenticación/autorización, modelo de datos, integraciones, operación.
+- Vas a tomar decisiones arquitectónicas que dependen del código existente.
+- Quieres documentar cómo funciona realmente algo crítico en el sistema actual.
+
+**Cómo generarlo:**
+
+- Usa el prompt `/evidence-pack` o el skill `evidence_pack`.
+- Salida: `docs/spec/_inputs/evidence/EP-###-<tema>.md`
+
+**No generar EP para:**
+
+- Consultas rápidas (usa búsquedas directas en el codebase).
+- Información obvia o ya mapeada en `codebase-map.md`.
+
+Ver `docs/kit/70-operativa-diaria.md` (sección "Operativa en modo evolutivo") para más detalle.
+
+---
+
+### 4.6 ¿Qué es la verificación externa y cuándo se requiere?
+
+**Verificación externa** es el proceso de consultar fuentes oficiales (documentación, repos, releases) para confirmar información sobre:
+
+- Integraciones con servicios externos.
+- SDKs/APIs y sus capacidades/límites.
+- Compatibilidades y versiones.
+- Licencias y políticas de uso.
+- Pasos de instalación y configuración.
+
+**Herramientas obligatorias:**
+
+1. **Primaria**: `playwright-mcp` (navegación web automatizada).
+2. **Fallback**: `chrome-devtools-mcp`.
+3. Si ninguna está disponible: registrar `OPENQ-###` o pedir al usuario que aporte la información.
+
+**Registro obligatorio:**
+
+- Siempre añadir subsección `### Fuentes` en el documento afectado con:
+  - URL + fecha (YYYY-MM-DD) + qué se extrajo (1 línea)
+
+**Prioridad de fuentes:**
+
+- Documentación oficial > repo oficial > releases > issues/discussions
+
+Ver `.github/copilot-instructions.md` (sección "Verificar con fuentes externas") para más detalle.
+
+---
+
+### 4.7 ¿Qué hago si no tengo acceso a playwright-mcp?
+
+Si `playwright-mcp` (o `chrome-devtools-mcp`) no está disponible cuando necesitas verificar información externa:
+
+**Opciones:**
+
+1. **Registrar `OPENQ-###`** indicando:
+   - Qué información falta verificar.
+   - Qué fuentes deberían consultarse.
+   - Impacto de no tener esta información.
+
+2. **Pedir al usuario** que:
+   - Aporte la información manualmente.
+   - O añada snapshots/capturas al repo como documentación auxiliar.
+
+3. **Si es información crítica**: marcar la tarea como **bloqueada** hasta que se resuelva el acceso.
+
+**No inventar**: nunca completar con suposiciones cuando se trata de APIs externas, límites, compatibilidades o licencias.
+
+---
+
 ## 5) Calidad de la spec
 
 ### 5.1 FR sin criterios verificables

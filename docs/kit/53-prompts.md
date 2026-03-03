@@ -196,6 +196,82 @@ Notas:
 
 ---
 
+## Prompts de modo codebase (evolutivos)
+
+Estos prompts se usan cuando el workspace contiene un repositorio de código (`codebase/**`) y se redacta especificación para proyectos existentes:
+
+### 7) `/audit-spec-vs-codebase`
+
+**Archivo:** [.github/prompts/audit-spec-vs-codebase.prompt.md](../.github/prompts/audit-spec-vs-codebase.prompt.md)
+
+**Propósito:** auditar la especificación contra la realidad del codebase, ajustar la spec o crear OPENQ cuando hay discrepancias.
+
+Qué hace:
+
+- Lee `docs/spec/**` (ignorando `docs/spec/history/**`)
+- Consulta `codebase/**` (solo lectura) como fuente de verdad técnica
+- Detecta:
+  - **Afirmaciones sin evidencia**: cuando la spec dice algo técnico no sustentado
+  - **Contradicciones**: cuando la spec contradice el codebase real
+  - **Gaps**: cuando falta información crítica en la spec respecto al codebase
+  - **Invenciones**: cuando se asume comportamiento no confirmado
+- Ajusta la spec:
+  - Cita rutas `codebase/...` para sustentar afirmaciones
+  - Enlaza Evidence Packs (`docs/spec/_inputs/evidence/EP-###-<tema>.md`) si existen
+  - Crea `OPENQ-###` si no hay evidencia suficiente (indicando qué se revisó)
+- Actualiza `docs/spec/_inputs/codebase-map.md` si detecta información estructural relevante
+
+Cuándo usarlo:
+
+- Después de redactar secciones técnicas (arquitectura, backend, datos, integraciones) en modo evolutivo
+- Cuando sospechas que la spec está "asumiendo" comportamientos no verificados
+- Antes de una revisión formal para validar coherencia spec ↔ codebase
+
+Salida esperada:
+
+- Spec actualizada con evidencias (`codebase/...` o links a Evidence Packs)
+- `OPENQ-###` creados para gaps detectados
+- Notas de auditoría con hallazgos (contradicciones, invenciones, ajustes realizados)
+- Siguiente paso recomendado: `/review-and-adr` para validar calidad final
+
+---
+
+### 8) `/evidence-pack`
+
+**Archivo:** [.github/prompts/evidence-pack.prompt.md](../.github/prompts/evidence-pack.prompt.md)
+
+**Propósito:** investigar un tema específico en `codebase/**` y generar un Evidence Pack con hallazgos sustentados.
+
+Qué hace:
+
+- Recibe un **tema** a investigar (p. ej. "auth flow", "permisos por rol", "integración con servicio X")
+- Explora `codebase/**` de forma acotada:
+  - Busca archivos/carpetas relevantes con términos relacionados
+  - Lee código fuente, configs, tests relacionados
+  - Distingue entre hallazgos **confirmados** (evidencia directa) y **inferidos** (probable pero no explícito)
+- Genera `docs/spec/_inputs/evidence/EP-###-<tema>.md` con:
+  - **Tema**: qué se investiga
+  - **Rutas revisadas**: archivos/carpetas consultados en `codebase/**`
+  - **Hallazgos confirmados**: afirmaciones con evidencia directa (citas de rutas)
+  - **Hallazgos inferidos**: lo que parece probable pero requiere validación
+  - **Gaps detectados**: información que no se encuentra (candidatos a OPENQ)
+  - **Recomendaciones para la spec**: cómo reflejar estos hallazgos sin inventar
+- Aplica skill `evidence_pack` para estructura y calidad
+
+Cuándo usarlo:
+
+- Cuando una sección de la spec requiere precisión técnica (auth, permisos, datos, integraciones, operación)
+- Antes de redactar decisiones técnicas críticas que dependen del codebase
+- Cuando necesitas fundamentar una decisión arquitectónica con hechos del sistema existente
+
+Salida esperada:
+
+- Evidence Pack en `docs/spec/_inputs/evidence/EP-###-<tema>.md`
+- Reporte con rutas consultadas, hallazgos (confirmados vs inferidos) y gaps
+- Siguiente paso recomendado: usar el Evidence Pack como referencia al redactar/actualizar la spec (enlazar desde secciones relevantes)
+
+---
+
 ## Cómo se combinan con agentes
 
 Puedes usar prompts sin seleccionar agente. Aun así, la combinación típica es:

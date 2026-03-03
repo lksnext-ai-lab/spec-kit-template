@@ -30,10 +30,18 @@ See: [TRADEMARKS.md](TRADEMARKS.md)
 ## Qué incluye
 
 - Estructura de documentación en `docs/` (contexto, requisitos, UI, arquitectura, datos, backend, seguridad, infra, ADRs).
-- Agentes (custom agents) en `.github/agents/`:
-  - `intake` · `planner` · `writer` · `reviewer` (con creación automática de ADRs al detectar `DECISION:`).
-- Prompt files en `.github/prompts/` (comandos `/new-spec`, `/plan-iteration`, `/write-from-plan`, `/review-and-adr`).
-- Skills en `.github/skills/` (reutilizables para FR/NFR/UI/arquitectura/seguridad/infra).
+- **Instructions** en `.github/copilot-instructions.md` + `.github/instructions/` (reglas globales de repo, spec y codebase).
+- **Custom agents** en `.github/agents/` — 3 suites, 10 agentes:
+  - **SPEC** (director-first): `spc-spec-director` · `spc-spec-intake` · `spc-spec-planner` · `spc-spec-writer` · `spc-spec-reviewer`
+  - **RFC**: `spc-rfc-writer` · `spc-rfc-reviewer`
+  - **IMP** (backlog): `spc-imp-backlog-slicer` · `spc-imp-task-detailer` · `spc-imp-coverage-auditor`
+- **Prompt files** en `.github/prompts/` — 8 comandos:
+  - `/new-spec` · `/plan-iteration` · `/write-from-plan` · `/review-and-adr`
+  - `/close-iteration` · `/audit-spec-vs-codebase` · `/evidence-pack` · `/export-docx`
+- **Skills** en `.github/skills/` — 12 skills de framework + 1 de proyecto:
+  - Spec: `spec-style` · `requirements-fr` · `requirements-nfr` · `ui-spec` · `architecture` · `security-baseline` · `infra`
+  - Avanzados: `codebase-scout` · `evidence-pack` · `rfc-proposal` · `spc-imp-task-definition` · `export-docx`
+- **CI** en `.github/workflows/` (`docs-quality.yml`).
 - `mkdocs.yml` para navegación y vista en navegador (opcional).
 
 ## Cómo usar esta plantilla (crear una nueva especificación)
