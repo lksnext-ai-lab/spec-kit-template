@@ -143,6 +143,9 @@ show_header() {
 
 show_progress_bar() {
     $USE_TUI || return
+    # Save cursor position
+    printf '\033[s'
+
     cursor_at "$PROGRESS_TOP" 0
     for (( i=0; i<PROGRESS_HEIGHT; i++ )); do printf '\033[K\n'; done
     cursor_at "$PROGRESS_TOP" 0
@@ -169,6 +172,9 @@ show_progress_bar() {
         fi
     done
     printf '%b\n' "$line"
+
+    # Restore cursor position
+    printf '\033[u'
 }
 
 # ═══════════════════════════════════════════════════════════════

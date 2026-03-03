@@ -127,13 +127,13 @@ function Show-Header {
     Write-C ''
     Write-C "  ${C_CYAN}${C_BOLD}+==============================================================+${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}                                                              ${C_CYAN}|${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}      ${C_BOLD}${C_WHITE}_____ ____  ___________${C_RESET}     ${C_BOLD}${C_CYAN}__ __ ________${C_RESET}                ${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}      ${C_BOLD}${C_WHITE}_____ ____  ___________${C_RESET}     ${C_BOLD}${C_CYAN}__ __ ________${C_RESET}              ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}     ${C_BOLD}${C_WHITE}/ ___// __ \/ ____/ ___/${C_RESET}    ${C_BOLD}${C_CYAN}/ //_//  _/_  __/${C_RESET}            ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}     ${C_BOLD}${C_WHITE}\__ \/ /_/ / __/ / /${C_RESET}       ${C_BOLD}${C_CYAN}/ ,<   / /  / /${C_RESET}               ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}    ${C_BOLD}${C_WHITE}___/ / ____/ /___/ /___${C_RESET}    ${C_BOLD}${C_CYAN}/ /| |_/ /  / /${C_RESET}                ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}   ${C_BOLD}${C_WHITE}/____/_/   /_____/\____/${C_RESET}   ${C_BOLD}${C_CYAN}/_/ |_/___/ /_/${C_RESET}                 ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}                                                              ${C_CYAN}|${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}  ${C_DIM}Workspace Bootstrap${C_RESET}                              ${C_DIM}v${SCRIPT_VERSION}${C_RESET}  ${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}  ${C_DIM}Workspace Bootstrap${C_RESET}                              ${C_DIM}v${SCRIPT_VERSION}${C_RESET}     ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}                                                              ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}${C_BOLD}+==============================================================+${C_RESET}"
     # Pad header to fixed height
@@ -147,6 +147,10 @@ function Show-Header {
 
 function Show-ProgressBar {
     if (-not $script:useTui) { return }
+    # Save cursor position
+    $savedRow = [Console]::CursorTop
+    $savedCol = [Console]::CursorLeft
+
     Set-CursorAt $PROGRESS_TOP 0
     for ($i = 0; $i -lt $PROGRESS_HEIGHT; $i++) { Write-Host "${C_CLR_LN}" }
     Set-CursorAt $PROGRESS_TOP 0
@@ -174,6 +178,9 @@ function Show-ProgressBar {
         }
     }
     Write-C $line
+
+    # Restore cursor position
+    [Console]::SetCursorPosition($savedCol, $savedRow)
 }
 
 # ===================================================================
