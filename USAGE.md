@@ -6,33 +6,92 @@ Esta guía explica cómo crear y mantener **especificaciones técnicas en Markdo
 
 ## 0) Requisitos previos
 
-- VS Code instalado.
 - Git configurado (credenciales para GitHub).
-- GitHub Copilot habilitado.
+- (Recomendado) VS Code + GitHub Copilot habilitado.
+- (Opcional) `gh` CLI para crear repos desde template automáticamente.
+- (Opcional) Python 3.8+ para mkdocs y herramientas avanzadas (`tools/`).
 - (Recomendado) Activar *Agent Skills* (preview):
   - VS Code Settings → `chat.useAgentSkills` = `true`
 
 ---
 
-## 1) Crear una nueva especificación (nuevo repositorio)
+## 1) Crear el workspace (bootstrap automático — recomendado)
+
+El modo más rápido es usar el script de bootstrap, que configura todo de forma interactiva:
+
+**Windows (PowerShell):**
+
+```powershell
+# Opción A: one-liner (descarga y ejecuta)
+irm https://raw.githubusercontent.com/lksnext/spec-kit-template/main/tools/bootstrap.ps1 | iex
+
+# Opción B: desde un clon local del template
+.\tools\bootstrap.ps1
+```
+
+**macOS / Linux (Bash):**
+
+```bash
+# Opción A: one-liner
+curl -sL https://raw.githubusercontent.com/lksnext/spec-kit-template/main/tools/bootstrap.sh | bash
+
+# Opción B: desde un clon local del template
+bash tools/bootstrap.sh
+```
+
+El script guía por 5 pasos:
+
+1. **Prerequisites** — detecta `git`, `code`, `gh`, `python`
+2. **Project name** — nombre del proyecto + directorio base
+3. **Spec repo** — crear desde GitHub template, clonar, o usar existente
+4. **Codebase** — repo existente, clonar URL, crear vacío, o skip
+5. **Extras** — venv + mkdocs, extensiones VS Code, abrir VS Code
+
+Resultado:
+
+```
+mi-proyecto/
+├── spec-mi-proyecto/          ← spec (desde el template)
+├── mi-proyecto/               ← codebase
+└── mi-proyecto.code-workspace ← workspace VS Code
+```
+
+Flags disponibles: `--workspace-only`, `--no-venv`, `--no-open`, `--yes`, `--dry-run`.
+
+---
+
+## 2) Crear el workspace (manual)
+
+Si prefieres no usar el bootstrap:
 
 1. Ir a GitHub → repositorio **`spec-kit-template`**.
 2. Pulsar **Use this template**.
 3. Crear el repositorio nuevo (normalmente **Private**).
 4. Nombre recomendado:
    - `spec-<cliente>-<proyecto>` o el estándar interno acordado.
-5. (Opcional) Añadir descripción del proyecto y responsables.
+5. Clonar el nuevo repo y el codebase (si existe) en carpetas hermanas.
+6. Crear un archivo `.code-workspace`:
 
----
+```json
+{
+  "folders": [
+    { "name": "spec",     "path": "./spec-mi-proyecto" },
+    { "name": "codebase", "path": "./mi-proyecto" }
+  ],
+  "settings": {
+    "powershell.cwd": "codebase",
+    "chat.useAgentSkills": true
+  },
+  "extensions": {
+    "recommendations": [
+      "GitHub.copilot",
+      "GitHub.copilot-chat"
+    ]
+  }
+}
+```
 
-## 2) Clonar y abrir en VS Code (Windows / PowerShell)
-
-```powershell
-cd C:\Dev
-git clone <URL_DEL_NUEVO_REPO>
-cd <NOMBRE_DEL_REPO>
-code .
-````
+7. Abrir el workspace en VS Code: `code mi-proyecto.code-workspace`
 
 ---
 

@@ -44,14 +44,48 @@ See: [TRADEMARKS.md](TRADEMARKS.md)
 - **CI** en `.github/workflows/` (`docs-quality.yml`).
 - `mkdocs.yml` para navegación y vista en navegador (opcional).
 
-## Cómo usar esta plantilla (crear una nueva especificación)
+## Quick start
 
-1) En GitHub, abre este repo y pulsa **Use this template** para crear un repositorio nuevo (privado o público, según tus necesidades).  
-2) Clona el repositorio nuevo y ábrelo en VS Code.
+El bootstrap crea automáticamente el workspace completo (spec + codebase + archivo `.code-workspace`), detecta e instala dependencias opcionales, y abre VS Code.
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/lksnext/spec-kit-template/main/tools/bootstrap.ps1 | iex
+```
+
+**macOS / Linux (Bash):**
+
+```bash
+curl -sL https://raw.githubusercontent.com/lksnext/spec-kit-template/main/tools/bootstrap.sh | bash
+```
+
+**Requisitos:** solo `git`. Opcionalmente: `gh` (GitHub CLI), `python 3.8+`, `code` (VS Code CLI).
+
+El script guiará por los pasos: nombre del proyecto, creación del spec desde el template de GitHub, enlace o creación del codebase, y configuración de venv/extensiones.
 
 Guía completa de uso: **`USAGE.md`**.
 
-## Estructura principal
+## Cómo usar esta plantilla (alternativa manual)
+
+1) En GitHub, abre este repo y pulsa **Use this template** para crear un repositorio nuevo (privado o público, según tus necesidades).  
+2) Clona el repositorio nuevo y ábrelo en VS Code.
+3) Crea el workspace manualmente (ver `USAGE.md`).
+
+## Estructura del workspace (recomendada)
+
+Spec Kit funciona como un **workspace multi-root** en VS Code con dos proyectos:
+
+```
+mi-proyecto/
+├── spec-mi-proyecto/       ← spec (este template)
+├── mi-proyecto/            ← codebase (nuevo o existente)
+└── mi-proyecto.code-workspace
+```
+
+El bootstrap genera este layout automáticamente.
+
+## Estructura principal (dentro del spec)
 
 - Índice de la especificación: `docs/spec/index.md`
 - Contexto: `docs/spec/00-context.md`
