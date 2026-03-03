@@ -610,9 +610,6 @@ function Invoke-Setup {
         }
     }
 
-    # Restore strict error handling
-    $ErrorActionPreference = $prevEAP
-
     # -- Workspace file ------------------------------------------------
     Write-Task 'Generating workspace file' 'running'
 
@@ -693,6 +690,9 @@ ${foldersJson}
     if ($script:openVsCode -and (-not $DryRun)) {
         & code $workspaceFile 2>&1 | Out-Null
     }
+
+    # Restore strict error handling (native commands above write to stderr)
+    $ErrorActionPreference = $prevEAP
 }
 
 # ===================================================================
