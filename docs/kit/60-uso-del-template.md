@@ -4,6 +4,8 @@ Este documento explica cómo usar `spec-kit-template` para crear una nueva espec
 
 > Nota: Este template está pensado para uso interno. Adapta nombres, permisos y normas de tu organización.
 
+> **Atajo recomendado:** si quieres crear el workspace completo (spec + codebase + `.code-workspace`) en un solo paso, usa el script de bootstrap: `tools/bootstrap.ps1` (Windows) o `tools/bootstrap.sh` (Unix/Mac). Ver [61-bootstrap.md](61-bootstrap.md) para instrucciones detalladas.
+
 ---
 
 ## 1) Crear un nuevo repositorio a partir del template
@@ -33,6 +35,26 @@ Recomendación:
 
 - empezar con Opción A,
 - y solo migrar a script cuando haya necesidad real.
+
+---
+
+### Opción C — Script de bootstrap (recomendada para workspace completo)
+
+Si necesitas crear el repo de spec, vincular un codebase existente y generar el archivo `.code-workspace` de VS Code en un solo paso:
+
+```powershell
+# Windows
+.\tools\bootstrap.ps1
+```
+
+```bash
+# Unix / Mac
+bash tools/bootstrap.sh
+```
+
+El script guia paso a paso: verifica herramientas, pide nombre de proyecto, ofrece opciones para el repo de spec y el codebase, y genera todo automáticamente.
+
+Ver [61-bootstrap.md](61-bootstrap.md) para una guía completa del script con pantallas y opciones.
 
 ---
 
@@ -272,6 +294,7 @@ Ver `docs/kit/53-prompts.md` para más detalle.
 
 ## 11) Siguiente lectura recomendada
 
+* Bootstrap (crear workspace en un paso): `docs/kit/61-bootstrap.md`
 * Operativa diaria: `docs/kit/70-operativa-diaria.md`
 * Previsualización en navegador: `docs/kit/80-previsualizacion-mkdocs.md`
 * FAQ/troubleshooting: `docs/kit/95-faq-y-troubleshooting.md`

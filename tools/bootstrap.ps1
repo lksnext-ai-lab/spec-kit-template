@@ -29,7 +29,7 @@ $ErrorActionPreference = 'Stop'
 
 $TEMPLATE_REPO  = 'lksnext-ai-lab/spec-kit-template'
 $TEMPLATE_URL   = "https://github.com/${TEMPLATE_REPO}.git"
-$SCRIPT_VERSION = '2.2.0'
+$SCRIPT_VERSION = '2.2.1'
 
 # ESC character for ANSI — works in PowerShell 5.1+
 $ESC = [char]0x1b

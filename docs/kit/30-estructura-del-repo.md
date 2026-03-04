@@ -227,7 +227,43 @@ Automatizaciones que ayudan a calidad:
 
 ---
 
-## Archivos de configuración (raíz)
+## Carpeta `tools/` (scripts de soporte)
+
+Scripts de utilidad que automatizan tareas frecuentes.
+
+### `tools/bootstrap.ps1` / `tools/bootstrap.sh`
+
+Script interactivo de 5 pasos para crear un workspace completo desde cero:
+
+1. Verifica herramientas (git, VS Code, GitHub CLI, Python)
+2. Configura nombre de proyecto y directorio base
+3. Crea o clona el repo de spec (desde GitHub template, localmente, o usa uno existente)
+4. Vincula o crea el repo de codebase
+5. Genera el `.code-workspace` de VS Code e instala dependencias opcionales
+
+```powershell
+# Windows
+.\tools\bootstrap.ps1
+
+# Unix / Mac
+bash tools/bootstrap.sh
+```
+
+Ver [61-bootstrap.md](61-bootstrap.md) para la guía completa con pantallas y opciones.
+
+### `tools/close_iteration.py`
+
+Script Python que automatiza el cierre de iteración: crea el snapshot en `docs/spec/history/Ixx/` y limpia los archivos activos. Equivale al prompt `/close-iteration`.
+
+### `tools/export_docx.py`
+
+Exporta la documentación a DOCX (Word) usando Pandoc. Ver sección 12 de [60-uso-del-template.md](60-uso-del-template.md) para uso.
+
+### `tools/requirements.txt`
+
+Dependencias Python para el entorno local (MkDocs, etc.). Se instala automáticamente con el script de bootstrap si se elige crear el venv.
+
+---
 
 ### `mkdocs.yml`
 
