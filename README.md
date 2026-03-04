@@ -1,5 +1,5 @@
 ﻿# Spec Kit Template
-> **Versión:** `2.1.0` — fuente única en [`VERSION`](VERSION)
+> **Versión:** `2.2.0` — fuente única en [`VERSION`](VERSION)
 Plantilla para crear **especificaciones técnicas** en Markdown con VS Code + COPILOT, siguiendo un flujo “agentic”:
 **Plan → Redacción → Revisión → Iteración**, versionado con Git.
 
