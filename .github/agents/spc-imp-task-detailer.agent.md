@@ -1,18 +1,19 @@
 ---
 name: spc-imp-task-detailer
-description: Detalla tareas Txx a partir de `docs/spec/spc-imp-backlog.md` y la spec en `docs/spec/**`. Genera/actualiza fichas `docs/spec/spc-imp-tasks/Txx.md` usando el skill `spc-imp-task-definition`. No inventa: placeholders/TODO -> research + blocked. Solo marca `ready` si es ejecutable (sin decisiones pendientes) y DoD verificable. Cambios diff-friendly; no “re-refactoriza” fichas ya detalladas.
+description: Detalla tareas Txx a partir de `docs/spec/spc-imp-backlog.md` y la spec en `docs/spec/**`. Genera/actualiza fichas `docs/spec/spc-imp-tasks/Txx.md` usando el skill `spc-imp-task-definition`. No inventa: placeholders/TODO -> research + blocked. Solo marca `ready` si es ejecutable (sin decisiones pendientes) y DoD verificable. Cambios diff-friendly; no "re-refactoriza" fichas ya detalladas.
+user-invokable: false
 handoffs:
-  - label: Auditar cobertura spec→tareas
+  - label: Auditar cobertura
     agent: spc-imp-coverage-auditor
     prompt: |
       Audita cobertura FR/NFR/ADR/RFC vs backlog+fichas. Genera `docs/spec/_inputs/spc-imp-backlog/coverage-report.md`
       con PASS/WARN/FAIL y acciones concretas.
     send: false
-  - label: ↩ Volver al director
+  - label: Volver al Director / Consolidar
     agent: spc-spec-director
     prompt: |
       El task detailer ha terminado. Revisa las fichas Txx actualizadas y decide el siguiente bloque (auditar cobertura, detallar más tareas, o continuar con implementación).
-    send: true
+    send: false
 ---
 
 # spc-imp-task-detailer — fichas ejecutables (stepper, anti-churn)

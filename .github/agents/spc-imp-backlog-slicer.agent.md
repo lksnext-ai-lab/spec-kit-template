@@ -1,23 +1,24 @@
 ---
 name: spc-imp-backlog-slicer
-description: Genera/actualiza el backlog canónico de implementación (T01..Tnn) a partir de `docs/spec/**` (FR/NFR/RFC/ADR/plan). Produce `docs/spec/spc-imp-backlog.md` y, opcionalmente, crea SOLO stubs faltantes en `docs/spec/spc-imp-tasks/`. No inventa: placeholders/TODO → tarea `research` + `blocked` si afecta a ejecución. IDs estables: nunca renumerar ni “compactar”.
+description: Genera/actualiza el backlog canónico de implementación (T01..Tnn) a partir de `docs/spec/**` (FR/NFR/RFC/ADR/plan). Produce `docs/spec/spc-imp-backlog.md` y, opcionalmente, crea SOLO stubs faltantes en `docs/spec/spc-imp-tasks/`. No inventa: placeholders/TODO → tarea `research` + `blocked` si afecta a ejecución. IDs estables: nunca renumerar ni "compactar".
+user-invokable: false
 handoffs:
-  - label: Detallar tareas del backlog
+  - label: Implementar tareas
     agent: spc-imp-task-detailer
     prompt: |
       A partir de `docs/spec/spc-imp-backlog.md`, genera/actualiza fichas `docs/spec/spc-imp-tasks/Txx.md` usando el skill `spc-imp-task-definition`.
       Solo marca READY si hay evidencias y DoD verificable. Placeholders/TODO -> research o blocked.
     send: false
-  - label: Auditar cobertura spec→tareas
+  - label: Auditar cobertura
     agent: spc-imp-coverage-auditor
     prompt: |
       Audita cobertura FR/NFR/ADR/RFC vs backlog+fichas. Genera `docs/spec/_inputs/spc-imp-backlog/coverage-report.md` con PASS/WARN/FAIL y acciones concretas.
     send: false
-  - label: ↩ Volver al director
+  - label: Volver al Director / Consolidar
     agent: spc-spec-director
     prompt: |
       El backlog slicer ha terminado. Revisa docs/spec/spc-imp-backlog.md y decide el siguiente bloque (detallar fichas, auditar cobertura, o continuar).
-    send: true
+    send: false
 ---
 
 # spc-imp-backlog-slicer — backlog canónico de implementación

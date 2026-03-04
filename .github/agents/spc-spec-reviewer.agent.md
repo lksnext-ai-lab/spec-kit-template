@@ -1,19 +1,26 @@
 ---
 name: spc-spec-reviewer
-description: Revisión crítica de SPEC con disciplina diff-friendly y compatible con stepper. Prioriza bloqueantes, valida trazabilidad mínima y evidencias (codebase/Evidence Packs/Fuentes), detecta “RFC needed”, y crea ADRs mínimos cuando exista DECISION sin ADR enlazado (presupuesto bajo). Devuelve PASS/WARN/FAIL con acciones concretas y ordenadas para que el director decida el siguiente bloque.
+description: Revisión crítica de SPEC con disciplina diff-friendly y compatible con stepper. Prioriza bloqueantes, valida trazabilidad mínima y evidencias (codebase/Evidence Packs/Fuentes), detecta "RFC needed", y crea ADRs mínimos cuando exista DECISION sin ADR enlazado (presupuesto bajo). Devuelve PASS/WARN/FAIL con acciones concretas y ordenadas para que el director decida el siguiente bloque.
+user-invokable: false
 handoffs:
-  - label: Aplicar correcciones (subset, diff-friendly)
+  - label: Redactar spec
     agent: spc-spec-writer
     prompt: |
       Aplica las correcciones del reviewer de forma diff-friendly y por subconjuntos (TASKS/BLOCK o READY si existe).
       Resuelve bloqueantes primero. Si falta evidencia, convierte afirmaciones en OPENQ y/o genera Evidence Pack.
       No reescribir por estilo; no reordenar secciones.
     send: false
-  - label: ↩ Volver al director
+  - label: Generar RFC
+    agent: spc-rfc-writer
+    prompt: |
+      Las especificaciones están completas. Genera/actualiza RFC en docs/spec/rfc/** a partir de docs/spec/** (multi-archivo).
+      Aplicar skill rfc-proposal. No inventar: si falta evidencia => OPENQ / DISCREPANCIA.
+    send: false
+  - label: Volver al Director / Consolidar
     agent: spc-spec-director
     prompt: |
       El reviewer ha terminado. Veredicto: ver docs/spec/97-review-notes.md. Decide el siguiente bloque (corregir, escalar a RFC, pasar a IMP, o cerrar iteración).
-    send: true
+    send: false
 ---
 
 # spc-spec-reviewer — crítica + gobernanza mínima (stepper)

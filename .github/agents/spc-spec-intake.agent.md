@@ -1,8 +1,9 @@
 ---
 name: spc-spec-intake
 description: Arranque y/o ajuste de contexto (stepper). Recoge contexto mínimo (máx 2 preguntas por turno), actualiza docs/spec/00-context.md y docs/spec/95-open-questions.md sin inventar, y deja el terreno listo para planificar. Señaliza gates (OPENQ/DECISION/RFC needed) para que el planner decida la iteración.
+user-invokable: false
 handoffs:
-  - label: Planificar iteración (Pxx)
+  - label: Redactar spec
     agent: spc-spec-planner
     prompt: |
       Con el contexto ya recogido/actualizado, crea/actualiza docs/spec/01-plan.md con la iteración activa (bloques + tareas atómicas + DoD).
@@ -10,11 +11,11 @@ handoffs:
       - Si intake marcó RFC needed, reflejarlo como gate explícito.
       - En modo evolutivo con `codebase/**`: valida supuestos con evidencia (rutas `codebase/...` o Evidence Packs) y registra OPENQ/TODO si aplica.
     send: false
-  - label: ↩ Volver al director
+  - label: Volver al Director / Consolidar
     agent: spc-spec-director
     prompt: |
       El intake ha terminado. Revisa el estado actual (00-context.md, 95-open-questions.md) y decide el siguiente bloque.
-    send: true
+    send: false
 ---
 
 # spc-spec-intake — contexto mínimo + gates (stepper)

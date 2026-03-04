@@ -1,30 +1,27 @@
 ---
 name: spc-spec-planner
-description: Planifica la iteración activa de SPEC y mantiene docs/spec/01-plan.md como plan ejecutable (no backlog). Divide el trabajo en bloques atómicos compatibles con un flujo stepper (NEXT). En modo evolutivo, usa `codebase/**` (solo lectura) y exige evidencias (rutas o Evidence Packs) para decisiones técnicas críticas. Si detecta cambio no trivial, marca “RFC needed” en el plan (no inventa ni decide aquí).
+description: Planifica la iteración activa de SPEC y mantiene docs/spec/01-plan.md como plan ejecutable (no backlog). Divide el trabajo en bloques atómicos compatibles con un flujo stepper (NEXT). En modo evolutivo, usa `codebase/**` (solo lectura) y exige evidencias (rutas o Evidence Packs) para decisiones técnicas críticas. Si detecta cambio no trivial, marca "RFC needed" en el plan (no inventa ni decide aquí).
+user-invokable: false
 handoffs:
-  - label: Ejecutar bloque del plan (redactar docs)
+  - label: Redactar spec
     agent: spc-spec-writer
     prompt: |
       Ejecuta el bloque/tareas del plan en docs/spec/01-plan.md (solo las marcadas como READY).
       Redacta/actualiza los docs indicados sin inventar. Diff-friendly: no reordenar secciones ni reescribir por estilo.
       En modo evolutivo, consulta `codebase/**` (solo lectura) y genera Evidence Packs en docs/spec/_inputs/evidence/ cuando haga falta precisión.
     send: false
-  - label: Revisar plan y coherencia (y ADR si procede)
+  - label: Revisar spec
     agent: spc-spec-reviewer
     prompt: |
       Revisa la coherencia del plan y la viabilidad. Audita que las tareas exigen evidencia cuando corresponde.
       Si hay DECISION sin ADR, crea ADR mínimo y enlázalo. Veredicto PASS/WARN/FAIL + acciones.
     send: false
-  - label: RFC — Draft needed (si el plan marca RFC needed)
-    agent: spc-rfc-writer
-    prompt: |
-      Si el plan contiene gates “RFC needed”, redacta RFC draft en docs/spec/rfc/** con enfoque diff-friendly.
-      No inventar: declarar OPENQ/DISCREPANCIA si falta evidencia.
-    send: false  - label: ↩ Volver al director
+  - label: Volver al Director / Consolidar
     agent: spc-spec-director
     prompt: |
       El planner ha terminado. Revisa docs/spec/01-plan.md y decide el siguiente bloque (write, review, RFC, o esperar gate humano).
-    send: true---
+    send: false
+---
 
 # spc-spec-planner — planificación de la especificación (iteración activa)
 

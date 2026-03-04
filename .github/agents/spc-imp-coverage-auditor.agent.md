@@ -1,31 +1,26 @@
 ---
 name: spc-imp-coverage-auditor
-description: Audita cobertura entre SPEC (FR/NFR/ADR/RFC en `docs/spec/**`) y backlog/fichas (`docs/spec/spc-imp-backlog.md` + `docs/spec/spc-imp-tasks/`). Emite PASS/WARN/FAIL con estructura estable y acciones deduplicadas. Valida sanidad del backlog (vocabulario/columnas/blocked reason) y distingue cobertura “mapeada” vs “ejecutable” (P0/P1).
+description: Audita cobertura entre SPEC (FR/NFR/ADR/RFC en `docs/spec/**`) y backlog/fichas (`docs/spec/spc-imp-backlog.md` + `docs/spec/spc-imp-tasks/`). Emite PASS/WARN/FAIL con estructura estable y acciones deduplicadas. Valida sanidad del backlog (vocabulario/columnas/blocked reason) y distingue cobertura "mapeada" vs "ejecutable" (P0/P1).
+user-invokable: false
 handoffs:
-  - label: Ajustar backlog (crear tareas faltantes o re-slicing focalizado)
+  - label: Detallar tareas y planificar
     agent: spc-imp-backlog-slicer
     prompt: |
       A partir del coverage-report, corrige el backlog canónico: añadir tareas faltantes (sin renumerar), ajustar evidencias/dependencias
       y, si conviene, re-slicing con FOCUS. Mantén IDs estables y añade nuevas tareas al final.
     send: false
-  - label: Ajustar fichas existentes (DoD/NFR/evidencias) y actualizar estado de tareas procesadas
+  - label: Implementar tareas
     agent: spc-imp-task-detailer
     prompt: |
       Aplica acciones del coverage-report sobre fichas existentes: completa evidencias, añade checks NFR/DoD, corrige dependencias
       y ajusta Estado (ready/todo/blocked) con Blocked reason cuando aplique. Evita churn (patch mínimo).
       Si el coverage-report recomienda nuevas tareas, deriva a spc-imp-backlog-slicer (no inventes IDs).
     send: false
-  - label: Reportar hueco de SPEC (si el problema es de definición/decisión, no de tareas)
-    agent: spc-spec-intake
-    prompt: |
-      El coverage-report detectó SPEC GAP (falta definición/decisión/evidencia en `docs/spec/**`).
-      Actualiza `docs/spec/00-context.md` y OPENQs (si procede) para desbloquear implementación, sin inventar.
-    send: false
-  - label: ↩ Volver al director
+  - label: Volver al Director / Consolidar
     agent: spc-spec-director
     prompt: |
       El coverage auditor ha terminado. Veredicto: ver coverage-report.md. Decide el siguiente bloque (corregir gaps, re-slicing, ajustar fichas, o marcar IMP como lista para ejecutar).
-    send: true
+    send: false
 ---
 
 # spc-imp-coverage-auditor
