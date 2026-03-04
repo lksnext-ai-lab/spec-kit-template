@@ -1,26 +1,11 @@
 ---
 name: spc-rfc-reviewer
 description: Revisa un RFC/Proposal generado desde `docs/spec/**`. Verifica estructura (quality gate), ausencia de invenciones, coherencia con ADRs vigentes, evidencias/links (incl. anchors), y cobertura de seguridad/operación/compatibilidad. Emite PASS/WARN/FAIL y genera un review-report estable para consumo por `spc-rfc-writer`. Opcionalmente aplica un patch mínimo al RFC (diff-friendly).
-user-invokable: false
-handoffs:
-  - label: Generar RFC
-    agent: spc-rfc-writer
-    prompt: |
-      Actualiza el RFC indicado aplicando las acciones del review-report (BLOCKER y MAJOR primero).
-      Mantén diffs pequeños: no reordenes secciones ni cambies encabezados.
-      Usa REVIEW_REPORT_PATH para guiar la actualización. Declara OPENQ/DISCREPANCIA si falta evidencia.
-    send: false
-  - label: Detallar tareas y planificar
-    agent: spc-imp-backlog-slicer
-    prompt: |
-      El RFC ha sido revisado y aceptado. Genera/actualiza el backlog canónico de implementación desde SPEC/ADR/RFC/plan.
-      IDs: T01..Tnn. No renumerar existentes. Placeholders => OPENQ o research.
-    send: false
-  - label: Volver al Director / Consolidar
-    agent: spc-spec-director
-    prompt: |
-      El RFC reviewer ha terminado. Veredicto: ver quality-report.md. Decide el siguiente bloque (iterar RFC, gate humano Aceptado/Rechazado, o pasar a IMP).
-    send: false
+user-invocable: false
+tools:
+  - read
+  - search
+  - edit
 ---
 
 # spc-rfc-reviewer

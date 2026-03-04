@@ -52,7 +52,7 @@ Existen 3 suites principales de agentes:
 #### Suite SPEC (5 agentes) — Workflow de especificación (director-first)
 
 - **spc-spec-director**: puerta única de entrada (orquesta el resto)
-- **spc-spec-intake**: entrevista inicial + aterrizaje de contexto
+- **spc-spec-intake**: formaliza el contexto recogido por el Director en `docs/spec/00-context.md` (invocado en one-shot)
 - **spc-spec-planner**: convierte estado actual en plan ejecutable (**P01..Pnn** en `docs/spec/01-plan.md`)
 - **spc-spec-writer**: ejecuta tareas del plan editando `docs/spec/**`
 - **spc-spec-reviewer**: revisión crítica + creación de ADRs
@@ -72,7 +72,7 @@ Existen 3 suites principales de agentes:
 - **spc-imp-task-detailer**: detalla tareas Txx en fichas ejecutables con DoD verificable
 - **spc-imp-coverage-auditor**: audita cobertura FR/NFR/ADR/RFC vs backlog+fichas, emite PASS/WARN/FAIL
 
-**Especificidad:** un agente aporta "personalidad operativa": foco, checklist mental, límites y handoffs entre agentes.
+**Especificidad:** un agente aporta “personalidad operativa”: foco, checklist mental, límites y criterios de delegación entre agentes.
 
 ---
 
@@ -145,11 +145,12 @@ Una forma útil de verlo:
 ### 4.1 Flujo estándar recomendado (director-first)
 
 1) Hablar con **spc-spec-director** con la intención (qué se quiere lograr)  
-2) El director decide:
-   - Intake (si falta contexto)
-   - Plan (si falta o está desalineado)
-   - Write (si hay tareas READY o un bloque claro)
-   - Review (para coherencia/ADR)
+2) El director conduce una conversación contextualizada: explica qué va a hacer, pide confirmación, delega al subagente y presenta el resultado.  
+   Roles internos que el Director orquesta:
+   - Intake (el Director entrevista al usuario; delega a intake en one-shot para formalizar docs)
+   - Plan (invoca al Planner)
+   - Write (invoca al Writer)
+   - Review (invoca al Reviewer) — si el reviewer necesita info del usuario, el Director pregunta
 3) Iterar hasta cerrar una iteración (opcional: `/close-iteration`)
 
 Este flujo se repite por iteraciones (I01, I02, …).
@@ -245,11 +246,12 @@ Cuando el workspace contiene un repositorio de código (normalmente root `codeba
 
 ```mermaid
 flowchart TD
-  U[Usuario] -->|spc-spec-director| D[Director]
-  D -->|si falta contexto| C[[docs/spec/00-context.md + index.md]]
-  D -->|si falta plan| P[[docs/spec/01-plan.md (Pxx)]]
-  D -->|si hay READY| S[[Actualiza docs/spec/* + trazabilidad]]
-  D -->|revisión| R[[docs/spec/97-review-notes.md]]
+  U[Usuario] <-->|conversación continua| D[Director]
+  D -->|entrevista al usuario + delega one-shot| C[[docs/spec/00-context.md + index.md]]
+  D -->|explica + confirma + delega| P[[docs/spec/01-plan.md Pxx]]
+  D -->|explica + confirma + delega| S[[Actualiza docs/spec/* + trazabilidad]]
+  D -->|explica + confirma + delega| R[[docs/spec/97-review-notes.md]]
+  D -->|traslada preguntas de subagentes al usuario| U
   R -->|si DECISION| A[[docs/spec/adr/ADR-####-slug.md]]
   R -->|si faltan datos| Q[[docs/spec/95-open-questions.md]]
   R -->|si trabajo pendiente| T[[docs/spec/96-todos.md]]
@@ -333,7 +335,7 @@ flowchart TD
 ## Lecturas recomendadas
 
 * `51-instructions.md` (detalle de reglas globales)
-* `52-custom-agents.md` (roles y handoffs)
+* `52-custom-agents.md` (roles y delegación programática)
 * `53-prompts.md` (comandos y resultados esperados)
 * `54-skills.md` (skills core y cómo ampliarlos)
 

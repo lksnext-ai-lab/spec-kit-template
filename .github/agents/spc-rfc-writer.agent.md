@@ -1,20 +1,11 @@
 ---
 name: spc-rfc-writer
 description: Genera/actualiza un RFC/Proposal (español) desde `docs/spec/**` (spec multi-archivo). Produce `sources.md`, `notes.md`, RFC en `docs/spec/rfc/**` y `quality-report.md`. No inventa: si falta evidencia, declara `OPENQ:` y enlaza a su gestión. Mantiene cambios diff-friendly.
-user-invokable: false
-handoffs:
-  - label: Revisar RFC
-    agent: spc-rfc-reviewer
-    prompt: |
-      Revisa el RFC generado frente a `docs/spec/**`. Detecta invenciones, enlaces rotos, contradicciones con ADR vigente,
-      y gaps en seguridad/operación/compatibilidad. Devuelve veredicto PASS/WARN/FAIL y acciones priorizadas.
-      Si MODE=patch-rfc, aplica solo correcciones mínimas y diff-friendly.
-    send: false
-  - label: Volver al Director / Consolidar
-    agent: spc-spec-director
-    prompt: |
-      El RFC writer ha terminado. Revisa docs/spec/rfc/** y decide el siguiente bloque (revisar RFC, esperar gate humano Aceptado/Rechazado, o continuar con IMP).
-    send: false
+user-invocable: false
+tools:
+  - read
+  - search
+  - edit
 ---
 
 # Custom Agent: spc-rfc-writer

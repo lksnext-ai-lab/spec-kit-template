@@ -3,7 +3,7 @@ name: spec-kit-architecture
 description: "Define o revisa la arquitectura en docs/spec/40-arquitectura.md: componentes y límites, contratos, sync/async, datos/ownership, seguridad y observabilidad. Crea ADR/OPENQ cuando falte información o haya trade-offs."
 license: Proprietary
 argument-hint: "[cambio/tema] [drivers FR/NFR] [restricciones] [pistas/evidence packs]"
-user-invokable: false
+user-invocable: false
 ---
 
 # Skill: Architecture (spec-kit)

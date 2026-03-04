@@ -33,7 +33,7 @@ Este template aporta:
 - `.github/agents/`: **agentes organizados en 3 suites** (convención `spc-<fase>-<rol>`):
   - **SPEC** (flujo principal de especificación):
     - `spc-spec-director` (puerta única / orquestación)
-    - `spc-spec-intake` (contexto mínimo + OPENQ/gates)
+    - `spc-spec-intake` (formaliza contexto en one-shot; invocado por el Director)
     - `spc-spec-planner` (plan de iteración activa)
     - `spc-spec-writer` (redacción desde plan)
     - `spc-spec-reviewer` (revisión crítica + ADR)

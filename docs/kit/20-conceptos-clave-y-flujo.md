@@ -182,13 +182,30 @@ Cierre recomendado de iteración:
 Esto evita el error frecuente de mezclar I01/I02 en el mismo plan y que los agentes intenten “limpiar” archivos grandes de forma insegura.
 ### 5) RFC e IMP (fases opcionales, post-SPEC)
 
-Una vez que la spec está razonablemente estable, el sistema soporta dos fases adicionales:
+Una vez que la spec está razonablemente estable, el sistema soporta dos fases adicionales, ambas orquestadas por `spc-spec-director` con el mismo principio rector: **no inventar**.
 
-- **RFC** (`spc-rfc-writer` + `spc-rfc-reviewer`): genera propuestas narrativas consolidadas para stakeholders o para revisión formal, a partir de `docs/spec/**`. Salida: `docs/spec/rfc/<RFC_ID>-<slug>.md`.
+#### Sub-flujo RFC
 
-- **SPC-IMP** (`spc-imp-backlog-slicer` → `spc-imp-task-detailer` → `spc-imp-coverage-auditor`): convierte la spec en un backlog canónico de tareas de implementación (**T01..Tnn**). Salidas: `docs/spec/spc-imp-backlog.md` + fichas `docs/spec/spc-imp-tasks/Txx.md`.
+Objetivo: consolidar la spec multi-archivo en un artefacto narrativo para stakeholders o revisión formal.
 
-Ambas fases las orquesta `spc-spec-director` con el mismo principio rector: no inventar.
+1. **Write** (`spc-rfc-writer`) → genera `docs/spec/rfc/<RFC_ID>-<slug>.md` + artefactos auxiliares en `docs/spec/_inputs/rfc/<RFC_ID>/`
+2. **Review** (`spc-rfc-reviewer`) → audita el RFC y emite **PASS / WARN / FAIL** con acciones priorizadas
+3. **Iterate** → si FAIL/WARN con cambios sustanciales: volver a rfc-writer; si solo correcciones menores: patch directo
+
+Regla: el RFC complementa la spec; no la reemplaza. La fuente de verdad sigue siendo `docs/spec/**`.
+
+#### Sub-flujo SPC-IMP
+
+Objetivo: convertir SPEC/ADR/RFC en un backlog canónico de tareas de implementación (**T01..Tnn**).
+
+*Prerequisito:* la spec debe estar razonablemente completa y revisada.
+
+1. **Slice** (`spc-imp-backlog-slicer`) → genera `docs/spec/spc-imp-backlog.md` con IDs **estables** (nunca renumerar)
+2. **Detail** (`spc-imp-task-detailer`) → crea/actualiza fichas `docs/spec/spc-imp-tasks/Txx.md` con DoD verificable y trazabilidad a FR/NFR/ADR/RFC
+3. **Audit** (`spc-imp-coverage-auditor`) → verifica cobertura FR/NFR/ADR/RFC vs backlog+fichas; emite **PASS / WARN / FAIL**
+4. **Iterate** → si hay gaps: resolver en SPEC primero, luego re-detallar y re-auditar
+
+Nota: Pxx = plan SPEC (`docs/spec/01-plan.md`); Txx = implementación (`docs/spec/spc-imp-tasks/`). No mezclar.
 ---
 
 ## Qué “mueve” el flujo (artefactos de control)

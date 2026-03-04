@@ -58,7 +58,7 @@ Salida esperada:
 
 Notas:
 
-- En proyectos complejos, el **agente Intake** suele ofrecer una experiencia más natural (mismas reglas, preguntas adaptativas). `/new-spec` actúa como atajo de arranque.
+- En proyectos complejos, usar **`spc-spec-director`** ofrece la experiencia más natural: el Director conduce la entrevista directamente y formaliza el contexto en one-shot. `/new-spec` actúa como atajo de arranque.
 
 ---
 
@@ -276,11 +276,8 @@ Salida esperada:
 
 Puedes usar prompts sin seleccionar agente. Aun así, la combinación típica es:
 
-- Intake → `/new-spec` (o usar directamente el agente Intake)
-- Planner → `/plan-iteration`
-- Writer → `/write-from-plan`
-- Reviewer → `/review-and-adr`
-- (Cierre) → `/close-iteration` cuando una iteración queda cerrada
+- Inicio → `spc-spec-director` (orquesta todo el flujo conversacionalmente)
+- O prompts explícitos: `/new-spec` → `/plan-iteration` → `/write-from-plan` → `/review-and-adr`
 
 En equipos, es útil acordar:
 
@@ -295,7 +292,7 @@ para mantener consistencia.
 
 1. **Contexto mínimo primero**
 
-   - Si el repo está vacío o hay poca info, empieza por `/new-spec` (o por el agente Intake).
+   - Si el repo está vacío o hay poca info, empieza por `spc-spec-director` (o por `/new-spec` si prefieres prompts).
 
 2. **Iteraciones cortas**
 
@@ -325,7 +322,7 @@ para mantener consistencia.
 - Dejar `DECISION:` sin ADR (o sin que el reviewer lo transforme).
 - Permitir que el prompt toque `docs/kit/**`.
 - Usar enlaces relativos en `.github/**` que generan rutas rotas.
-- Tratar el intake como un “formulario” (8 preguntas de golpe) en lugar de una conversación guiada por rondas.
+- Tratar el intake como un “formulario” (8 preguntas de golpe) en lugar de una conversación guiada por rondas (el Director hace esto correctamente si lo dejas operar).
 - No cerrar iteraciones y acabar con `01-plan.md` mezclando I01/I02.
 
 ---

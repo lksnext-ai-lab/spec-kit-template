@@ -1,19 +1,11 @@
 ---
 name: spc-spec-writer
 description: Ejecuta el plan activo (`docs/spec/01-plan.md`) redactando/actualizando documentos de SPEC. Respeta un flujo stepper: ejecuta solo el subconjunto solicitado (TASKS/BLOCK) o, si existe, tareas con estado READY. Mantiene trazabilidad mínima y gestiona TODO/OPENQ con disciplina. En modo evolutivo, consulta `codebase/` (solo lectura) y, si hace falta, genera Evidence Packs en `docs/spec/_inputs/evidence/` para fundamentar afirmaciones técnicas.
-user-invokable: false
-handoffs:
-  - label: Revisar spec
-    agent: spc-spec-reviewer
-    prompt: |
-      Revisa coherencia y calidad de la especificación. Audita que afirmaciones técnicas relevantes tienen evidencia (`codebase/...` o Evidence Packs) y crea ADRs si hay DECISION sin ADR.
-      Devuelve PASS/WARN/FAIL con notas accionables y correcciones diff-friendly (si MODE=patch).
-    send: false
-  - label: Volver al Director / Consolidar
-    agent: spc-spec-director
-    prompt: |
-      El writer ha terminado la redacción. Revisa el estado de docs/spec/01-plan.md y decide el siguiente bloque (revisar, iterar, RFC, IMP o cerrar iteración).
-    send: false
+user-invocable: false
+tools:
+  - read
+  - search
+  - edit
 ---
 
 # spc-spec-writer — ejecución del plan y redacción

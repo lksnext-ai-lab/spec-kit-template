@@ -67,14 +67,14 @@ Opcional (pero muy útil):
 
 ## 4) Arranque controlado de una nueva especificación
 
-> Recomendación de UX: si quieres minimizar fricción, usa el enfoque **director-first** (agente `spc-spec-director`). El director decide internamente si toca intake, plan, write, review, RFC o implementación, sin que el usuario tenga que pensar en el flujo.
+> Recomendación de UX: usa el enfoque **director-first** (agente `spc-spec-director`). El Director conduce la entrevista de contexto directamente, gestiona el flujo completo de forma conversacional y delega a los subagentes sin que el usuario tenga que pensar en el proceso interno.
 
-### Paso 1 — Arrancar con Intake (`/new-spec` o agente Intake)
+### Paso 1 — Arrancar con Intake (`/new-spec` o agente Director)
 
 En Copilot Chat, tienes dos opciones equivalentes de arranque:
 
 **Opción A (rápida):** ejecuta `/new-spec` y responde a la entrevista mínima.
-**Opción B (recomendada en proyectos complejos):** usa el agente `spc-spec-intake` (preguntas adaptativas, máximo 2 por turno).
+**Opción B (recomendada):** usa el agente `spc-spec-director`. El Director conduce la entrevista por rondas (máximo 2 preguntas por turno) y al terminar formaliza los documentos automáticamente.
 
 El resultado debe actualizar/crear:
 

@@ -155,7 +155,7 @@ Agentes con rol y responsabilidad definida, organizados por **fase** y **rol**:
 
 - **SPEC** (especificación):
   - `spc-spec-director` → puerta única de entrada (orquesta el resto)
-  - `spc-spec-intake` → arranque/entrevista (contexto mínimo + OPENQ/gates)
+  - `spc-spec-intake` → formaliza el contexto recogido por el Director (invocado en one-shot)
   - `spc-spec-planner` → planificación de iteración activa (**P01..Pnn** en `01-plan.md`)
   - `spc-spec-writer` → redacción según plan (ejecuta Pxx)
   - `spc-spec-reviewer` → revisión crítica + ADR

@@ -53,16 +53,12 @@ En .github usa: docs/spec/adr/ADR-####-<slug>.md
 
 ### 1.4 ¿Puede un custom agent llamar a otro custom agent?
 
-En la práctica, lo habitual es que:
+Sí. El **Director** invoca a todos los subagentes de forma programática (vía `tools: ['agent']`), sin intervención del usuario. El flujo completo es:
 
-- tú selecciones el agente adecuado,
-- o ejecutes un prompt concreto,
-- y el "handoff" se haga como recomendación ("siguiente paso: usa Planner / ejecuta /plan-iteration").
-
-Si quieres automatizar encadenado de agentes, eso depende de las capacidades concretas del entorno (Copilot / VS Code / configuración disponible). El diseño del spec-kit ya está preparado para que el flujo se ejecute como:
-
-- prompts encadenables,
-- o agentes por rol.
+- El usuario habla únicamente con el Director.
+- El Director explica qué va a hacer, pide confirmación, delega al subagente y presenta el resultado.
+- Si un subagente genera OPENQs o necesita información del usuario, el Director actúa como relay: formula la pregunta al usuario en lenguaje claro y, con la respuesta, re-invoca al subagente.
+- No hay botones de handoff ni cambios manuales de agente.
 
 ---
 

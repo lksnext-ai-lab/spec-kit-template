@@ -5,7 +5,7 @@ Además, existen instrucciones **por ruta** en `.github/instructions/*.instructi
 
 ## Principios globales (siempre)
 
-1) **Director-first (obligatorio en modo agente):** el flujo se orquesta desde `spc-spec-director`, la única puerta de entrada visible al usuario. Los 9 subagentes operan con `user-invokable: false` y solo se activan por delegación del Director. El usuario expresa intención ("qué quiere"), no el procedimiento interno.
+1) **Director-first (obligatorio en modo agente):** el flujo se orquesta desde `spc-spec-director`, la única puerta de entrada visible al usuario. Los 9 subagentes operan con `user-invocable: false` y solo se activan por delegación del Director. El usuario expresa intención ("qué quiere"), no el procedimiento interno.
 2) **No inventar:** si falta información o evidencia, registrar `OPENQ-###` (o `TODO-###` si es trabajo pendiente) en los ficheros correspondientes.
 3) **Cambios pequeños y diff-friendly:** evitar reescrituras masivas y cambios cosméticos. Cambiar solo lo necesario.
 4) **Sin operaciones destructivas:** no usar comandos de shell/PowerShell/Bash para borrar/limpiar ni modificar cosas fuera del alcance pedido.
@@ -32,9 +32,12 @@ El sistema usa un patrón Director + 9 subagentes organizados en 4 fases secuenc
 | 4 — Implementar | Backlog, fichas y cobertura | `spc-imp-backlog-slicer` → `spc-imp-task-detailer` ⇄ `spc-imp-coverage-auditor` |
 
 Reglas de delegación:
-- Los handoffs usan `send: false`: el usuario revisa el prompt pre-rellenado antes de enviarlo.
-- No encadenar más de 2 delegaciones automáticas sin feedback del usuario.
-- El Director NO hace el trabajo de los subagentes: delega, recopila resultados y presenta el siguiente paso.
+- La delegación es **100% programática** (`tools: ['agent']`). No hay handoffs ni botones clicables.
+- El Director es el único interlocutor del usuario. Antes de cada delegación: explica qué va a hacer, qué agente usará, qué archivos tocará, y espera confirmación del usuario.
+- Para intake (Fase 1), el Director conduce él mismo la entrevista multi-turno con el usuario (patrón stepper) y luego delega a `spc-spec-intake` en one-shot para formalizar los documentos.
+- Los subagentes tienen `user-invocable: false` y NO aparecen en el selector de agentes. Solo son accesibles vía delegación programática del Director.
+- No invocar más de 2 subagentes programáticamente sin presentar resultados intermedios al usuario.
+- El Director NO hace el trabajo de los subagentes: analiza, decide la fase, explica, pide confirmación, delega y consolida resultados.
 
 ### Política CHANGE: Patch vs RFC
 

@@ -198,9 +198,83 @@ Regla:
 
 ---
 
-## 4) Flujo Git recomendado (día a día)
+## 4) Generación de RFC (post-SPEC)
 
-### 4.1 Commits
+Cuando la spec está suficientemente estable, se puede generar un **RFC** como artefacto narrativo consolidado para stakeholders o revisión formal.
+
+### 4.1 Cuándo generar un RFC
+
+Genera un RFC cuando:
+
+- El cambio afecta a datos/migraciones, auth/roles, compatibilidad de API, seguridad, integraciones externas o alcance/coste relevante.
+- Necesitas presentar la propuesta a stakeholders en formato ejecutivo.
+- El equipo requiere un artefacto narrativo consolidado desde la spec multi-archivo.
+
+No es obligatorio para cada iteración: solo cuando el impacto justifique formalizarlo.
+
+### 4.2 Flujo RFC: Write → Review → Iterate
+
+1. **Write** → `spc-rfc-writer`:
+   - Indicar: tema, RFC_ID (ej. `RFC-0001`), variante (architecture/proposal/decision)
+   - Salidas: `docs/spec/rfc/<RFC_ID>-<slug>.md` + artefactos en `docs/spec/_inputs/rfc/<RFC_ID>/`
+
+2. **Review** → `spc-rfc-reviewer`:
+   - Verifica: sin invenciones, coherente con ADRs, evidencias, cobertura seguridad/operación/compatibilidad
+   - Emite: PASS / WARN / FAIL con acciones priorizadas
+
+3. **Iterate** según veredicto:
+   - PASS → RFC aceptado
+   - WARN/FAIL (cambios sustanciales) → volver a `spc-rfc-writer`
+   - Solo correcciones menores → `spc-rfc-reviewer` con MODE=patch-rfc
+
+Regla: el RFC complementa la spec; **no** la reemplaza. Si el RFC revela gaps en la spec, actualizar la spec primero.
+
+---
+
+## 5) Backlog de implementación / SPC-IMP (post-SPEC)
+
+Cuando la spec está revisada y estabilizada, se puede convertir en un backlog canónico de tareas de implementación (T01..Tnn) con trazabilidad a SPEC/ADR/RFC.
+
+### 5.1 Cuándo generar el backlog
+
+Genera el backlog cuando:
+
+- La spec tiene FR/NFR/UI/arquitectura razonablemente completos y revisados.
+- El equipo va a planificar el desarrollo en CODEBASE.
+- Se necesita trazabilidad explícita SPEC ↔ implementación.
+
+No generar el backlog con la spec en borrador: producirá fichas llenas de bloqueantes.
+
+### 5.2 Flujo SPC-IMP: Slice → Detail → Audit → Iterate
+
+1. **Slice** → `spc-imp-backlog-slicer`:
+   - Genera `docs/spec/spc-imp-backlog.md` con tareas T01..Tnn (IDs **estables**: nunca renumerar)
+   - Crea stubs en `docs/spec/spc-imp-tasks/` si se solicita
+
+2. **Detail** → `spc-imp-task-detailer`:
+   - Detalla fichas `docs/spec/spc-imp-tasks/Txx.md` con DoD verificable y trazabilidad a FR/NFR/ADR/RFC
+   - Marca `blocked` si una tarea depende de una decisión aún abierta en la spec
+
+3. **Audit** → `spc-imp-coverage-auditor`:
+   - Verifica cobertura: FR/NFR/ADR/RFC vs backlog + fichas
+   - Emite PASS / WARN / FAIL con gaps y acciones correctivas
+
+4. **Iterate** si hay gaps o fichas bloqueadas:
+   - Resolver OPENQs/decisiones en SPEC primero
+   - Volver a `spc-imp-task-detailer` para completar fichas
+   - Re-auditar con `spc-imp-coverage-auditor`
+
+Nota de IDs:
+
+- **Pxx** = tareas del plan SPEC (`docs/spec/01-plan.md`)
+- **Txx** = tareas de implementación (`docs/spec/spc-imp-tasks/`)
+- No mezclar.
+
+---
+
+## 6) Flujo Git recomendado (día a día)
+
+### 6.1 Commits
 
 Mensajes recomendados (claros y pequeños):
 
@@ -209,7 +283,7 @@ Mensajes recomendados (claros y pequeños):
 - `I01: review fixes + ADR-0003 auth strategy`
 - `I01: close iteration (history snapshot + clean active files)`
 
-### 4.2 Pull Requests (si aplica)
+### 6.2 Pull Requests (si aplica)
 
 Si trabajáis con PR:
 
@@ -219,7 +293,7 @@ Si trabajáis con PR:
 
 ---
 
-## 5) Roles sugeridos en equipo
+## 7) Roles sugeridos en equipo
 
 No es obligatorio, pero ayuda:
 
@@ -230,7 +304,7 @@ No es obligatorio, pero ayuda:
 
 ---
 
-## 6) Señales de alarma típicas
+## 8) Señales de alarma típicas
 
 - El plan crece sin cerrar nada (plan ≈ mini-Jira)
 - Hay muchas “DECISION” sin ADR
@@ -251,7 +325,7 @@ Si aparecen 2–3 señales, parar y:
 
 ---
 
-## 7) Checklist rápida diaria (5 minutos)
+## 9) Checklist rápida diaria (5 minutos)
 
 Antes de terminar el día:
 
@@ -263,11 +337,11 @@ Antes de terminar el día:
 
 ---
 
-## 8) Operativa en modo evolutivo (con codebase existente)
+## 10) Operativa en modo evolutivo (con codebase existente)
 
 Cuando trabajas en modo evolutivo (proyecto con codebase ya implementado):
 
-### 8.1 Cuándo generar Evidence Packs
+### 10.1 Cuándo generar Evidence Packs
 
 Genera un Evidence Pack (`/evidence-pack` o skill `evidence_pack`) cuando:
 
@@ -281,7 +355,7 @@ Genera un Evidence Pack (`/evidence-pack` o skill `evidence_pack`) cuando:
 - Consultas rápidas (usa búsquedas directas en el codebase).
 - Información obvia o ya mapeada en `codebase-map.md`.
 
-### 8.2 Cómo verificar información externa
+### 10.2 Cómo verificar información externa
 
 Para integraciones, SDKs, APIs, límites, compatibilidades, licencias:
 
@@ -291,7 +365,7 @@ Para integraciones, SDKs, APIs, límites, compatibilidades, licencias:
    - URL + fecha (YYYY-MM-DD) + qué se extrajo (1 línea)
 4. **Si no hay acceso a herramientas**: registrar `OPENQ-###` o pedir al usuario que aporte snapshots.
 
-### 8.3 Cómo citar evidencia del codebase en la spec
+### 10.3 Cómo citar evidencia del codebase en la spec
 
 Cuando afirmes algo técnico relevante en la spec:
 
@@ -305,7 +379,7 @@ Cuando afirmes algo técnico relevante en la spec:
   ```
 - **Si hay decisión arquitectónica**: enlazar el EP en el ADR correspondiente.
 
-### 8.4 Regla anti-invención (critical)
+### 10.4 Regla anti-invención (critical)
 
 Si no encuentras evidencia suficiente tras buscar en el codebase:
 
@@ -315,7 +389,7 @@ Si no encuentras evidencia suficiente tras buscar en el codebase:
    - Rutas revisadas
    - Hipótesis mínima (marcada explícitamente como *no confirmada*)
 
-### 8.5 Nombres reales vs inventados
+### 10.5 Nombres reales vs inventados
 
 - **Siempre usar nombres reales** del codebase: módulos, paquetes, servicios, variables de entorno, funciones, clases.
 - **Si no encuentras el nombre real**: marcar `OPENQ-###` en vez de inventar.

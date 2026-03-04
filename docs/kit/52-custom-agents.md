@@ -18,7 +18,7 @@ Los custom agents de este sistema:
 
 - Son agentes especializados por fase (**SPEC**, **RFC**, **IMP**) y rol (intake, planner, writer, reviewer, slicer…)
 - Pueden invocar **skills** para aplicar reglas de calidad especializadas
-- Pueden realizar **handoffs** a otros agentes para workflows multi-agente
+- Se invocan **exclusivamente de forma programática** por el Director (no hay botones de handoff)
 - Operan sobre `docs/spec/**` (escritura) y, en modo evolutivo, consultan `codebase/**` (solo lectura)
 - Aplican reglas **anti-invención**: si falta información, registran `OPENQ-###` y continúan sin asumir
 
@@ -40,8 +40,9 @@ Los custom agents de este sistema:
 Para simplificar la experiencia del desarrollador, el modelo recomendado es:
 
 - El usuario se dirige **siempre** al **director**
-- El director decide el siguiente paso y hace handoffs a subagentes
+- El director conduce una conversación contextualizada: explica qué va a hacer, pide confirmación, delega al subagente programáticamente y presenta el resultado
 - El usuario no necesita pensar en “qué fase toca” ni “qué agente toca”
+- No hay botones de handoff. Todo el flujo es conversacional y contextualizado al momento del workflow
 
 ### Director
 
@@ -53,6 +54,9 @@ Para simplificar la experiencia del desarrollador, el modelo recomendado es:
 
 **Qué aporta:**
 - Decide si toca Intake / Plan / Write / Review / RFC / IMP
+- Explica al usuario qué va a hacer y por qué antes de cada delegación, y espera confirmación
+- Conduce él mismo la entrevista de intake (rondas de 2 preguntas) y delega a `spc-spec-intake` en one-shot para formalizar documentos
+- Actúa como relay: si un subagente genera OPENQ/decisiones/preguntas, el Director las traslada al usuario en lenguaje claro antes de continuar
 - Aplica “pasos atómicos” (bloques pequeños) y evita cambios masivos
 - Señaliza gates (OPENQ/DECISION/RFC needed) y bloqueos (BLOCKED)
 
@@ -78,28 +82,25 @@ Estos agentes implementan el ciclo **Plan → Redacción → Revisión → Itera
 
 **Archivo:** [../../.github/agents/spc-spec-intake.agent.md](../../.github/agents/spc-spec-intake.agent.md)
 
-**Propósito:** Arrancar una especificación nueva o ajustar el contexto mínimo (evolutivo) para permitir planificación sin inventar.
+**Propósito:** Formalizar el contexto recogido por el Director en los documentos de spec.
 
-**Qué hace:**
-- Entrevista conversacional con **máx 2 preguntas por turno**
-- Presupuesto anti-bucle: **máx 12 preguntas** (8 CORE + 4 aclaraciones)
-- Registra `OPENQ-###` si falta info o hay ambigüedad
+> **Este agente NO interactúa con el usuario directamente.** La entrevista la conduce el Director.
+
+**Qué hace** (invocado en one-shot por el Director):
+- Recibe todo el contexto acumulado por el Director en el prompt de tarea
+- Crea/actualiza `docs/spec/00-context.md` con objetivo, alcance, éxito, restricciones, integraciones y riesgos
+- Crea/actualiza `docs/spec/95-open-questions.md` con OPENQs identificadas
 - Señaliza gates: `DECISION` y/o `RFC needed` cuando aplique
-- En modo evolutivo:
-  - consulta `codebase/**` para confirmar stack/arquitectura/integraciones
-  - si necesita precisión y no se resuelve rápido: recomienda/crea Evidence Pack (según el flujo)
+- Devuelve al Director un resumen (documentos tocados, OPENQs, gates, evaluación DoR)
+- En modo evolutivo: consulta `codebase/**` para confirmar supuestos técnicos
 
 **Salidas obligatorias:**
 - `docs/spec/00-context.md` actualizado
 - `docs/spec/95-open-questions.md` actualizado
 
-**Cuándo usarlo:**
-- Al inicio de un proyecto/spec nuevo
-- Para recabar contexto mínimo antes de planificar
-- Para incorporar hallazgos de implementación sin reescribir la spec entera
+**Invocado por:** el Director, tras completar la entrevista con el usuario
 
-**Handoff típico:**
-- → `spc-spec-planner`
+**Siguiente paso típico:** el Director presenta el resultado al usuario y propone Planner
 
 ---
 
@@ -135,14 +136,12 @@ Estos agentes implementan el ciclo **Plan → Redacción → Revisión → Itera
 - ✅ (modo evolutivo) `docs/spec/_inputs/codebase-map.md` y Evidence Packs
 - ❌ No redacta la spec completa (eso es Writer)
 
-**Cuándo usarlo:**
-- Después del intake, para crear el plan inicial
+**Cuándo se invoca:**
+- Después de que el Director formalice el contexto con intake
 - Al iniciar una nueva iteración
 - Para actualizar el plan cuando cambie el alcance
 
-**Handoff típico:**
-- → `spc-spec-writer`
-- → `spc-spec-reviewer` (si hay dudas/gates y conviene auditar antes)
+**Siguiente paso típico:** el Director presenta el plan al usuario y propone Writer
 
 ---
 
@@ -176,8 +175,7 @@ Estos agentes implementan el ciclo **Plan → Redacción → Revisión → Itera
 - Actualiza trazabilidad mínima (`docs/spec/02-trazabilidad.md`) sin reescrituras masivas
 - Actualiza `docs/spec/index.md` solo si se crean docs nuevos
 
-**Handoff típico:**
-- → `spc-spec-reviewer`
+**Siguiente paso típico:** el Director presenta el resultado al usuario y propone Reviewer
 
 ---
 
@@ -205,9 +203,7 @@ Estos agentes implementan el ciclo **Plan → Redacción → Revisión → Itera
 - `docs/spec/95-open-questions.md` / `docs/spec/96-todos.md` (si aplica)
 - `docs/spec/adr/ADR-####-*.md` (si aplica)
 
-**Handoff típico:**
-- → `spc-spec-writer` (aplicar mejoras)
-- o cierre de iteración → `/close-iteration`
+**Siguiente paso típico:** el Director presenta el veredicto al usuario; si hay correcciones, propone re-invocar Writer
 
 ---
 
@@ -228,8 +224,7 @@ Estos agentes implementan el ciclo **Plan → Redacción → Revisión → Itera
 - `docs/spec/rfc/<RFC_ID>-<slug>.md`
 - `docs/spec/_inputs/rfc/<RFC_ID>/(sources.md, notes.md, quality-report.md)`
 
-**Handoff típico:**
-- → `spc-rfc-reviewer`
+**Siguiente paso típico:** el Director presenta el RFC al usuario y propone spc-rfc-reviewer
 
 #### 6) `spc-rfc-reviewer` — Auditor de RFC
 
@@ -270,37 +265,45 @@ Estos agentes convierten SPEC/RFC/ADR en un backlog canónico de tareas de imple
 ### Workflow 1: Especificación nueva (director-first)
 
 ```
-
-Usuario → spc-spec-director
-├─ (si falta contexto) → spc-spec-intake
-├─ (si falta plan)     → spc-spec-planner (Pxx)
-├─ (si hay READY)      → spc-spec-writer  (Pxx)
-└─ (si hay cambios)    → spc-spec-reviewer (+ ADR)
-└─ iterar o /close-iteration
-
+Usuario ←→ spc-spec-director (conversación continua)
+  │
+  ├─ [si falta contexto]
+  │   Director entrevista al usuario (rondas de 2 preguntas)
+  │   → confirma → delega a spc-spec-intake (one-shot, formaliza docs)
+  │   → presenta resultado → gate humano
+  │
+  ├─ [si falta plan]
+  │   Director explica → confirma → delega a spc-spec-planner
+  │   → presenta resultado
+  │
+  ├─ [si hay READY]
+  │   Director explica → confirma → delega a spc-spec-writer
+  │   → si subagente genera OPENQs: Director pregunta al usuario → re-invoca
+  │   → presenta resultado
+  │
+  └─ [revisión]
+      Director explica → confirma → delega a spc-spec-reviewer
+      → si hay WARNs/FAILs: Director los traslada al usuario, pide confirmación, itera
+      → gate humano → iterar o /close-iteration
 ```
 
 ### Workflow 2: Generación de RFC
 
 ```
-
-Usuario → spc-spec-director
-├─ spc-rfc-writer
-└─ spc-rfc-reviewer
-└─ gate humano (aceptar/rechazar)
-
+Usuario ←→ spc-spec-director (conversación continua)
+  ├─ Director explica → confirma → delega a spc-rfc-writer → presenta resultado
+  ├─ Director explica → confirma → delega a spc-rfc-reviewer → presenta resultado
+  └─ gate humano: usuario acepta/rechaza el RFC
 ```
 
 ### Workflow 3: Backlog de implementación (SPEC → IMP)
 
 ```
-
-Usuario → spc-spec-director
-├─ spc-imp-backlog-slicer (Txx)
-├─ spc-imp-task-detailer  (Txx)
-└─ spc-imp-coverage-auditor
-└─ corregir gaps → detailer → re-audit
-
+Usuario ←→ spc-spec-director (conversación continua)
+  ├─ Director explica → confirma → delega a spc-imp-backlog-slicer → presenta resultado
+  ├─ Director explica → confirma → delega a spc-imp-task-detailer → presenta resultado
+  ├─ Director explica → confirma → delega a spc-imp-coverage-auditor → presenta resultado
+  └─ si hay gaps: Director los traslada al usuario → itera detailer → re-audit
 ```
 
 ### Workflow 4: Modo evolutivo con codebase
@@ -316,7 +319,7 @@ Reglas clave:
 
 ## Buenas prácticas al usar agentes
 
-1) **Director-first:** usa `spc-spec-director` como puerta única y evita “micro-gestionar” fases.  
+1) **Director-first:** usa `spc-spec-director` como puerta única. El Director guía la conversación, pide confirmación antes de cada paso y traslada preguntas de los subagentes al usuario cuando es necesario. No hace falta saber qué fase toca.  
 2) **Evidence Packs para precisión:** cuando algo es crítico (auth, permisos, datos, integraciones, operación), mejor Evidence Pack que suposición.  
 3) **Respeta iteraciones cerradas:** si aparece mezcla de iteraciones, usa `/close-iteration` antes de seguir.  
 4) **Verificación externa solo cuando sea necesaria:** si sin ella se inventaría, verifica y añade `### Fuentes` (URL + fecha + 1 línea). Si no se puede verificar, `OPENQ`.  
@@ -327,8 +330,8 @@ Reglas clave:
 
 ## Errores frecuentes
 
-1) **Invocar Writer sin plan:** Writer ejecuta `docs/spec/01-plan.md`. Si falta, usa Planner primero.  
-2) **Inventar en lugar de OPENQ:** si falta info, `OPENQ-###`.  
+1) **Invocar Writer sin plan:** Writer ejecuta `docs/spec/01-plan.md`. Si falta, el Director invocará Planner primero.  
+2) **Inventar en lugar de OPENQ:** si falta info, `OPENQ-###`. El Director traslada esas preguntas al usuario.  
 3) **Confundir Pxx con Txx:** Pxx = plan SPEC; Txx = tareas de implementación.  
 4) **Limpiar manualmente plan mezclado:** usa `/close-iteration`.  
 5) **RFC sin spec mínima:** produce RFC lleno de `OPENQ`. Mejor estabilizar spec primero.
