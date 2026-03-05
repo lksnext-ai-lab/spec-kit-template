@@ -1,5 +1,5 @@
 ﻿# Spec Kit Template
-> **Versión:** `2.2.1` — fuente única en [`VERSION`](VERSION)
+> **Versión:** `2.3.0` — fuente única en [`VERSION`](VERSION) <!-- x-release-please-version -->
 Plantilla para crear **especificaciones técnicas** en Markdown con VS Code + COPILOT, siguiendo un flujo “agentic”:
 **Plan → Redacción → Revisión → Iteración**, versionado con Git.
 
@@ -46,7 +46,22 @@ See: [TRADEMARKS.md](TRADEMARKS.md)
 
 ## Quick start
 
-El bootstrap crea automáticamente el workspace completo (spec + codebase + archivo `.code-workspace`), detecta e instala dependencias opcionales, y abre VS Code.
+El bootstrap crea automáticamente el workspace completo (spec + codebase + archivo `.code-workspace`), detecta e instala dependencias opcionales, y abre VS Code. En ejecuciones posteriores, detecta la instalación existente y ofrece **actualización interactiva** del kit.
+
+```
+  +==============================================================+
+  |                                                              |
+  |       _____ ____  ___________     __ __ ________             |
+  |      / ___// __ \/ ____/ ___/    / //_//  _/_  __/           |
+  |      \__ \/ /_/ / __/ / /       / ,<   / /  / /              |
+  |     ___/ / ____/ /___/ /___    / /| |_/ /  / /               |
+  |    /____/_/   /_____/\____/   /_/ |_/___/ /_/                |
+  |                                                              |
+  |  Workspace Bootstrap                              v2.3.0     |
+  |  by LKS Next                                                 |
+  |                                                              |
+  +==============================================================+
+```
 
 **Windows (PowerShell):**
 
@@ -64,7 +79,11 @@ curl -sL https://raw.githubusercontent.com/lksnext-ai-lab/spec-kit-template/main
 
 > **¿Desde dónde ejecutarlo?** Desde cualquier carpeta. El script pregunta un **directorio base** (por defecto la carpeta actual) y crea todo dentro de él — no hay que preparar nada a mano.
 
-El script guiará por los pasos: nombre del proyecto, directorio base, creación del spec desde el template de GitHub, enlace o creación del codebase, y configuración de venv/extensiones.
+El script guié por los pasos: nombre del proyecto, directorio base, creación del spec desde el template de GitHub, enlace o creación del codebase, y configuración de venv/extensiones.
+
+Si ya existe una instalación (`tools/.speckit`), el bootstrap entra en **modo actualización**: comprueba la versión remota, muestra un menú interactivo (ver changelog, ver archivos afectados, aplicar o saltar), y actualiza solo los archivos del kit sin tocar `docs/spec/**` ni el codebase.
+
+Flags adicionales: `--check` (CI: exit 0/1 según estado) · `--update` (forzar reaplicación).
 
 Guía completa de uso: **`USAGE.md`**.
 

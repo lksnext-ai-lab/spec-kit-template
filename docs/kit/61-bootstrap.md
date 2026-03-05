@@ -1,14 +1,20 @@
-# Bootstrap: crear un workspace desde cero
+# Bootstrap: instalar y actualizar SPEC KIT
 
 El script de bootstrap (`tools/bootstrap.ps1` en Windows, `tools/bootstrap.sh` en Unix/Mac) automatiza la creación de un workspace completo de spec-kit en un solo comando.
 
-Es el punto de entrada recomendado cuando comienzas un proyecto nuevo desde cero.
+Además, detecta instalaciones existentes y ofrece un flujo interactivo de **auto-actualización** para mantener el kit al día.
+
+Es el punto de entrada recomendado tanto para proyectos nuevos como para actualizar proyectos en desarrollo.
 
 ---
 
 ## Qué hace
 
-En un único flujo guiado de 5 pasos, el script:
+El script detecta automáticamente en qué modo debe operar:
+
+### Modo instalación (primera vez)
+
+En un único flujo guiado de 5 pasos:
 
 1. Comprueba las herramientas necesarias (git, VS Code, GitHub CLI, Python)
 2. Crea o clona el repositorio de spec desde el template
@@ -17,6 +23,18 @@ En un único flujo guiado de 5 pasos, el script:
 5. (Opcional) Instala dependencias Python (MkDocs) y extensiones de VS Code
 
 Al terminar tienes una **carpeta lista para abrir en VS Code** con todo configurado.
+
+### Modo actualización (ejecuciones posteriores)
+
+Si el script detecta el archivo `tools/.speckit` (generado en la primera instalación):
+
+1. Compara la versión instalada con la última versión del template remoto
+2. Muestra un menú interactivo con opciones: actualizar, ver changelog, ver archivos afectados, o saltar
+3. Verifica el estado de git antes de sobrescribir (con doble confirmación si hay cambios sin commit)
+4. Aplica la actualización copiando solo los archivos gestionados por el kit
+5. Ofrece recargar VS Code para que los cambios en agentes/skills surtan efecto
+
+> **Importante:** las actualizaciones nunca tocan `docs/spec/**` ni el codebase. Solo se actualizan los archivos del kit (agentes, skills, prompts, instructions, docs/kit, tools, etc.).
 
 ---
 
@@ -42,7 +60,7 @@ bash spec-kit-template/tools/bootstrap.sh
 
 ## Pantalla de inicio
 
-Al arrancar, el script muestra un header con la versión actual y una barra de progreso:
+Al arrancar, el script muestra un header con la versión actual, branding de LKS Next y una barra de progreso:
 
 ```
   +==============================================================+
@@ -53,18 +71,21 @@ Al arrancar, el script muestra un header con la versión actual y una barra de p
   |     ___/ / ____/ /___/ /___    / /| |_/ /  / /              |
   |    /____/_/   /_____/\____/   /_/ |_/___/ /_/               |
   |                                                              |
-  |  Workspace Bootstrap                              v2.2.0     |
+  |  Workspace Bootstrap                              v2.3.0     |
+  |  by LKS Next                                                 |
   |                                                              |
   +==============================================================+
 ```
 
-En la parte inferior se muestra una barra de progreso con los 5 pasos:
+En modo instalación, la parte inferior muestra una barra de progreso con los 5 pasos:
 
 ```
   Step 0/5  ----------------------------------------  0%
 
   [ Prerequisites ] [ Project ] [ Spec repo ] [ Codebase ] [ Extras ]
 ```
+
+En modo actualización, pasa directamente al menú de actualización (ver sección más abajo).
 
 ---
 
@@ -108,15 +129,23 @@ El script verifica las herramientas disponibles:
 
 ## Paso 3 — Spec repo (repositorio de especificación)
 
+El selector interactivo permite navegar con las flechas del teclado. Al mover entre opciones, se muestra un panel contextual con una descripción detallada de cada una:
+
 ```
-  STEP 3 / 5 -- Spec repository
-  ________________________________________________________
+  How do you want to set up the spec repository?
 
-    [1] Create from GitHub template (requires gh CLI)   ← por defecto si gh está disponible
-    [2] Clone template locally (no GitHub repo)         ← por defecto si no hay gh
-    [3] I already have the spec cloned
+    --> * Create from GitHub template
+        o Clone template locally
+        o Use existing spec repo
 
-  > Choose [1]:
+    +-------------------------------------------------------+
+    |  Creates a new private/public repo in your GitHub     |
+    |  org using the spec-kit-template. Requires the        |
+    |  GitHub CLI (gh) to be installed and authenticated.   |
+    |                                                       |
+    +-------------------------------------------------------+
+
+    Up/Down Navigate   Enter Select                     1/3
 ```
 
 ### Opción 1 — Crear repo en GitHub desde el template
@@ -149,16 +178,24 @@ Simplemente apunta a una carpeta existente. El script solo generará el workspac
 
 ## Paso 4 — Codebase (repositorio del código)
 
+El selector interactivo funciona igual que el anterior:
+
 ```
-  STEP 4 / 5 -- Codebase project
-  ________________________________________________________
+  How do you want to set up the codebase project?
 
-    [1] Existing local repo     ← vincular carpeta ya existente
-    [2] Clone from URL          ← clonar desde Git
-    [3] Create empty (git init) ← proyecto nuevo desde cero
-    [4] Skip (no codebase for now)
+    --> * Existing local repo
+        o Clone from URL
+        o Create empty (git init)
+        o Skip (no codebase for now)
 
-  > Choose [1]:
+    +-------------------------------------------------------+
+    |  Link an existing codebase project already on your    |
+    |  machine. The bootstrap adds it to the VS Code        |
+    |  workspace as a second root folder.                   |
+    |                                                       |
+    +-------------------------------------------------------+
+
+    Up/Down Navigate   Enter Select                     1/4
 ```
 
 ### Opción 1 — Repo existente en local
@@ -219,12 +256,17 @@ El workspace solo tendrá la carpeta `spec`. Se puede añadir el codebase más a
   |    +-- mi-crm\                   codebase                    |
   |    +-- mi-crm.code-workspace     workspace                   |
   |                                                              |
-  +==============================================================+
+  +--------------------------------------------------------------+
   |                                                              |
   |  Next steps:                                                 |
   |    1. Open the workspace in VS Code                          |
   |    2. In Copilot Chat: @spc-spec-director                    |
   |    3. Or run /new-spec to start the specification            |
+  |                                                              |
+  +--------------------------------------------------------------+
+  |                                                              |
+  |  SPEC KIT by LKS Next                                       |
+  |  Thank you for using SPEC KIT!                               |
   |                                                              |
   +==============================================================+
 ```
@@ -244,6 +286,8 @@ Para uso automatizado o en CI, el script acepta flags que evitan las preguntas i
 | `-NoOpen`            | `--no-open`        | No abrir VS Code al terminar                        |
 | `-Yes`               | `--yes`            | Aceptar todos los valores por defecto               |
 | `-DryRun`            | `--dry-run`        | Simular sin crear ni modificar nada                 |
+| `-Check`             | `--check`          | Comprobar si hay actualización (exit 0/1, para CI)  |
+| `-Update`            | `--update`         | Forzar reaplicación aunque la versión coincida       |
 
 Ejemplos:
 
@@ -264,6 +308,107 @@ bash tools/bootstrap.sh --yes --no-open
 
 # Unix: simulación
 bash tools/bootstrap.sh --dry-run
+
+# CI: comprobar si hay actualización disponible (exit 0 = al día, exit 1 = hay update)
+bash tools/bootstrap.sh --check
+```
+
+---
+
+## Auto-actualización
+
+Si ejecutas el bootstrap en un proyecto que ya tiene SPEC KIT instalado, el script entra automáticamente en **modo actualización**.
+
+### Detección
+
+El script busca el archivo `tools/.speckit` en la carpeta del spec (relativo a la ubicación del propio script). Este archivo JSON se genera automáticamente en la primera instalación y contiene:
+
+```json
+{
+  "version": "2.3.0",
+  "installed": "2026-03-05T10:30:00Z",
+  "updated": null,
+  "template": "lksnext-ai-lab/spec-kit-template",
+  "mode": "template",
+  "managed": [
+    ".github/agents",
+    ".github/instructions",
+    "docs/kit",
+    "tools",
+    "..."
+  ]
+}
+```
+
+### Menú de actualización
+
+Cuando hay una nueva versión disponible:
+
+```
+  Existing SPEC-KIT project detected
+  Installed: v2.2.1
+
+  New version available: v2.2.1 -> v2.3.0
+
+  What would you like to do?
+
+    --> * Update to v2.3.0
+        o View changelog
+        o View files that will change
+        o Skip update
+
+    +-------------------------------------------------------+
+    |  Updates all managed files: agents, skills, prompts,  |
+    |  instructions, docs/kit, tools, and config files.     |
+    |  Your spec documents (docs/spec/**) and codebase      |
+    |  will NOT be modified.                                |
+    +-------------------------------------------------------+
+
+    Up/Down Navigate   Enter Select                     1/4
+```
+
+### Protección de cambios sin commit
+
+Si el script detecta cambios sin commit en archivos gestionados, muestra una advertencia y pide doble confirmación antes de sobrescribir:
+
+```
+  !!  You have uncommitted changes in managed files:
+       M .github/agents/spc-spec-director.agent.md
+       M tools/bootstrap.ps1
+
+  How do you want to proceed?
+
+    --> * Abort (I will commit first)
+        o Continue anyway (I can recover with git)
+```
+
+### Archivos gestionados
+
+La actualización solo afecta a los archivos "gestionados" por el kit:
+
+| Ruta                          | Contenido                              |
+|-------------------------------|----------------------------------------|
+| `.github/agents/`             | Agentes de Copilot (10 agentes)        |
+| `.github/instructions/`       | Instructions por ruta                  |
+| `.github/prompts/`            | Prompt files (comandos /)              |
+| `.github/skills/`             | Skills de framework                    |
+| `.github/workflows/`          | CI workflows                           |
+| `.github/copilot-instructions.md` | Instructions globales              |
+| `docs/kit/`                   | Documentación del kit                  |
+| `tools/`                      | Scripts del kit                        |
+| `VERSION`                     | Versión del kit                        |
+| `mkdocs.yml`                  | Configuración MkDocs                   |
+
+> **`docs/spec/**` nunca se modifica.** La especificación del proyecto y el codebase quedan intactos.
+
+### Uso en CI
+
+Para integrar la comprobación de versiones en un pipeline de CI:
+
+```yaml
+- name: Check SPEC-KIT version
+  run: bash tools/bootstrap.sh --check
+  # exit 0 = up to date, exit 1 = update available
 ```
 
 ---
@@ -281,6 +426,7 @@ C:\Dev\
       prompts/          ← comandos /new-spec, /plan-iteration, etc.
     tools/
       bootstrap.ps1     ← este script
+      .speckit          ← archivo de control de versión
     .venv/              ← entorno Python (si se instaló)
 
   mi-crm\               ← codebase del proyecto (si se configuró)

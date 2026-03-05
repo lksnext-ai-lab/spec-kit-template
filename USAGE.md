@@ -41,7 +41,7 @@ bash tools/bootstrap.sh
 
 > **¿Desde dónde ejecutarlo?** Desde **cualquier carpeta** — no hace falta estar en ninguna ubicación concreta ni crear la carpeta del proyecto previamente. El script pedirá un **directorio base** (por defecto la carpeta actual) y lo creará si no existe.
 
-El script guía por 5 pasos:
+El script guía por 5 pasos (con selectores interactivos de flechas y paneles de ayuda contextual):
 
 1. **Prerequisites** — detecta `git`, `code`, `gh`, `python`
 2. **Project name + base dir** — nombre del proyecto y directorio base donde se creará el workspace (se crea si no existe)
@@ -58,7 +58,25 @@ mi-proyecto/
 └── mi-proyecto.code-workspace ← workspace VS Code
 ```
 
-Flags disponibles: `--workspace-only`, `--no-venv`, `--no-open`, `--yes`, `--dry-run`.
+Flags disponibles: `--workspace-only`, `--no-venv`, `--no-open`, `--yes`, `--dry-run`, `--check`, `--update`.
+
+### Auto-actualización
+
+Si ejecutas el bootstrap en un proyecto con SPEC KIT ya instalado (detectado por `tools/.speckit`), el script entra automáticamente en **modo actualización**:
+
+- Compara tu versión instalada con la última versión del template remoto.
+- Muestra un menú interactivo: actualizar, ver changelog, ver archivos afectados, o saltar.
+- Antes de aplicar, verifica si hay cambios sin commit en archivos gestionados (con doble confirmación).
+- Actualiza **solo** los archivos del kit (agentes, skills, prompts, docs/kit, tools, etc.).
+- **Nunca toca `docs/spec/**` ni el codebase.**
+- Ofrece recargar VS Code automáticamente.
+
+Para CI:
+
+```bash
+# Comprobar si hay actualización disponible (exit 0 = al día, exit 1 = hay update)
+bash tools/bootstrap.sh --check
+```
 
 ---
 

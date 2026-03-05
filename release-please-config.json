@@ -1,0 +1,25 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "tools/bootstrap.ps1",
+          "glob": false
+        },
+        {
+          "type": "generic",
+          "path": "tools/bootstrap.sh",
+          "glob": false
+        },
+        {
+          "type": "generic",
+          "path": "README.md",
+          "glob": false
+        }
+      ]
+    }
+  },
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}

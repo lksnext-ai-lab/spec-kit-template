@@ -1,10 +1,13 @@
-<#
+﻿<#
 .SYNOPSIS
-    Spec Kit - Workspace Bootstrap (Windows)
+    Spec Kit - Workspace Bootstrap & Update (Windows)
 .DESCRIPTION
-    Sets up a complete spec-kit workspace: creates the spec project from the
-    GitHub template, links (or creates) a codebase project, generates the
-    VS Code .code-workspace file, and optionally installs Python/mkdocs deps.
+    First run  : wizard that creates the spec project from the GitHub template,
+                 links (or creates) a codebase project, generates the VS Code
+                 .code-workspace file, and optionally installs Python/mkdocs deps.
+    Subsequent : detects the existing SPEC-KIT installation via tools/.speckit,
+                 checks for upstream updates against the template repo, and
+                 offers an interactive update flow.
 .NOTES
     Requirements: PowerShell 5.1+, git.
     Optional: gh (GitHub CLI), python 3.8+, code (VS Code CLI).
@@ -17,7 +20,9 @@ param(
     [switch]$NoVenv,
     [switch]$NoOpen,
     [switch]$Yes,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$Check,
+    [switch]$Update
 )
 
 Set-StrictMode -Version Latest
@@ -29,49 +34,75 @@ $ErrorActionPreference = 'Stop'
 
 $TEMPLATE_REPO  = 'lksnext-ai-lab/spec-kit-template'
 $TEMPLATE_URL   = "https://github.com/${TEMPLATE_REPO}.git"
-$SCRIPT_VERSION = '2.2.1'
+$SCRIPT_VERSION = '2.3.0' # x-release-please-version
 
-# ESC character for ANSI — works in PowerShell 5.1+
+$SPECKIT_FILE   = 'tools/.speckit'
+
+$MANAGED_PATHS = @(
+    '.github/agents',
+    '.github/instructions',
+    '.github/prompts',
+    '.github/skills',
+    '.github/workflows',
+    '.github/copilot-instructions.md',
+    '.github/CODEOWNERS',
+    '.github/PULL_REQUEST_TEMPLATE.md',
+    'docs/kit',
+    'tools',
+    'VERSION',
+    'mkdocs.yml',
+    'CONTRIBUTING.md',
+    'DCO.txt',
+    'LICENSE',
+    'NOTICE',
+    'TRADEMARKS.md'
+)
+
+# ESC character for ANSI â€” works in PowerShell 5.1+
 $ESC = [char]0x1b
 
 # TUI geometry
-$HEADER_HEIGHT    = 13
+$HEADER_HEIGHT = 14
 $STEP_AREA_HEIGHT = 14
-$PROGRESS_HEIGHT  = 4
-$STEP_AREA_TOP    = $HEADER_HEIGHT
-$PROGRESS_TOP     = $HEADER_HEIGHT + $STEP_AREA_HEIGHT
+$PROGRESS_HEIGHT = 4
+$STEP_AREA_TOP = $HEADER_HEIGHT
+$PROGRESS_TOP = $HEADER_HEIGHT + $STEP_AREA_HEIGHT
 
 # Colors
-$C_RESET   = "${ESC}[0m"
-$C_BOLD    = "${ESC}[1m"
-$C_DIM     = "${ESC}[2m"
-$C_GREEN   = "${ESC}[32m"
-$C_YELLOW  = "${ESC}[33m"
-$C_CYAN    = "${ESC}[36m"
-$C_RED     = "${ESC}[31m"
-$C_BLUE    = "${ESC}[34m"
-$C_WHITE   = "${ESC}[97m"
-$C_CLR_LN  = "${ESC}[K"
+$C_RESET  = $ESC + '[0m'
+$C_BOLD   = $ESC + '[1m'
+$C_DIM    = $ESC + '[2m'
+$C_GREEN  = $ESC + '[32m'
+$C_YELLOW = $ESC + '[33m'
+$C_CYAN   = $ESC + '[38;5;208m'  # LKS brand orange
+$C_RED    = $ESC + '[31m'
+$C_BLUE   = $ESC + '[34m'
+$C_WHITE  = $ESC + '[97m'
+$C_CLR_LN = $ESC + '[K'
+$C_HIDE   = $ESC + '[?25l'
+$C_SHOW   = $ESC + '[?25h'
 
 # State
-$script:useTui       = $false
-$script:stepResults  = @{}
-$script:totalSteps   = 5
-$script:currentStep  = 0
-$script:projectName  = ''
-$script:specName     = ''
-$script:baseDir      = ''
-$script:specMode     = ''
-$script:specOrg      = ''
+$script:useTui = $false
+$script:stepResults = @{}
+$script:totalSteps = 5
+$script:currentStep = 0
+$script:projectName = ''
+$script:specName = ''
+$script:baseDir = ''
+$script:specMode = ''
+$script:specOrg = ''
 $script:specVisibility = ''
-$script:specPath     = ''
+$script:specPath = ''
 $script:codebaseMode = ''
 $script:codebasePath = ''
-$script:codebaseUrl  = ''
+$script:codebaseUrl = ''
 $script:codebaseName = ''
-$script:installVenv  = $false
+$script:installVenv = $false
 $script:installExtensions = $false
-$script:openVsCode   = $false
+$script:openVsCode = $false
+$script:runMode = 'install' # 'install' or 'update'
+$script:headerAnimated = $false
 
 $script:stepLabels = @('Prerequisites', 'Project', 'Spec repo', 'Codebase', 'Extras')
 
@@ -121,23 +152,131 @@ function Write-Pad([string]$text, [int]$indent) {
 # HEADER
 # ===================================================================
 
+function Show-BootAnimation {
+    Write-Host $C_HIDE -NoNewline
+    Clear-Host
+
+    # Raw logo lines (62 chars wide to fit the box)
+    $logo = @(
+        '      _____ ____  ___________     __ __ __________            ',
+        '     / ___// __ \/ ____/ ___/    / //_//  _/_  __/            ',
+        '     \__ \/ /_/ / __/ / /       / ,<   / /  / /               ',
+        '    ___/ / ____/ /___/ /___    / /| |_/ /  / /                ',
+        '   /____/_/   /_____/\____/   /_/ |_/___/ /_/                 '
+    )
+    $subtitle  = 'Workspace Bootstrap'
+    $byline    = 'by LKS Next'
+    $pool = '@#$%&*=+~:;!?<>{}[]|^/\-_.'.ToCharArray()
+    $rng  = [System.Random]::new()
+    $border   = "  ${C_CYAN}${C_BOLD}+==============================================================+${C_RESET}"
+    $emptyRow = "  ${C_CYAN}|${C_RESET}                                                              ${C_CYAN}|${C_RESET}"
+
+    # Draw static frame once
+    Write-C ''                       # row 0
+    Write-C $border                  # row 1
+    Write-C $emptyRow                # row 2
+    # Logo placeholder rows 3-7
+    for ($r = 0; $r -lt 5; $r++) {
+        Write-C "  ${C_CYAN}|${C_RESET}$(' ' * 62)${C_CYAN}|${C_RESET}"
+    }
+    Write-C $emptyRow                # row 8
+    # Subtitle + byline placeholder rows 9-10
+    Write-C "  ${C_CYAN}|${C_RESET}$(' ' * 62)${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}$(' ' * 62)${C_CYAN}|${C_RESET}"
+    Write-C $emptyRow                # row 11
+    Write-C $border                  # row 12
+
+    $logoStartRow = 3
+    $subRow  = 9
+    $byRow   = 10
+
+    # ── Phase 1: Scramble resolve — 12 frames ─────────────────────
+    $ratios = @(0, 0, 5, 10, 18, 28, 40, 52, 65, 78, 88, 95)
+    foreach ($pct in $ratios) {
+        for ($r = 0; $r -lt 5; $r++) {
+            [Console]::SetCursorPosition(4, $logoStartRow + $r)
+            $chars = $logo[$r].ToCharArray()
+            $output = ''
+            for ($ci = 0; $ci -lt $chars.Length; $ci++) {
+                if ($chars[$ci] -eq ' ') {
+                    $output += ' '
+                } elseif ($rng.Next(100) -lt $pct) {
+                    $output += $chars[$ci]
+                } else {
+                    $output += $pool[$rng.Next($pool.Length)]
+                }
+            }
+            Write-Host "${C_DIM}${output}${C_RESET}" -NoNewline
+        }
+        Start-Sleep -Milliseconds 90
+    }
+
+    # ── Phase 2: Full logo revealed with bold color ───────────────
+    for ($r = 0; $r -lt 5; $r++) {
+        [Console]::SetCursorPosition(4, $logoStartRow + $r)
+        # SPEC part in white bold, KIT part in orange bold
+        $raw = $logo[$r]
+        $specPart = $raw.Substring(0, 30)
+        $kitPart  = $raw.Substring(30)
+        Write-Host "${C_BOLD}${C_WHITE}${specPart}${C_RESET}${C_BOLD}${C_CYAN}${kitPart}${C_RESET}" -NoNewline
+    }
+    Start-Sleep -Milliseconds 200
+
+    # ── Phase 3: Typewriter subtitle ──────────────────────────────
+    [Console]::SetCursorPosition(6, $subRow)
+    foreach ($ch in $subtitle.ToCharArray()) {
+        Write-Host "${C_DIM}${ch}${C_RESET}" -NoNewline
+        Start-Sleep -Milliseconds 25
+    }
+    # Version number — appears instantly
+    $verText = "v${SCRIPT_VERSION}"
+    $verCol  = 4 + 62 - $verText.Length - 4
+    [Console]::SetCursorPosition($verCol, $subRow)
+    Write-Host "${C_DIM}${verText}${C_RESET}" -NoNewline
+    Start-Sleep -Milliseconds 100
+
+    # ── Phase 4: Typewriter byline ────────────────────────────────
+    [Console]::SetCursorPosition(6, $byRow)
+    foreach ($ch in $byline.ToCharArray()) {
+        Write-Host "${C_DIM}${ch}${C_RESET}" -NoNewline
+        Start-Sleep -Milliseconds 30
+    }
+
+    Start-Sleep -Milliseconds 400
+
+    # Move cursor past the frame
+    [Console]::SetCursorPosition(0, 13)
+    Write-Host $C_SHOW -NoNewline
+}
+
 function Show-Header {
+    # Animated intro: runs whenever console is interactive (not just full TUI)
+    $isInteractive = -not [Console]::IsOutputRedirected
+    if ($isInteractive -and (-not $script:headerAnimated)) {
+        $script:headerAnimated = $true
+        Show-BootAnimation
+        # Animation already drew the full header — pad to fixed height
+        $headerLines = 13
+        for ($i = $headerLines; $i -lt $HEADER_HEIGHT; $i++) { Write-C '' }
+        return
+    }
     if ($script:useTui) { Clear-Host }
 
     Write-C ''
     Write-C "  ${C_CYAN}${C_BOLD}+==============================================================+${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}                                                              ${C_CYAN}|${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}      ${C_BOLD}${C_WHITE}_____ ____  ___________${C_RESET}     ${C_BOLD}${C_CYAN}__ __ ________${C_RESET}              ${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}      ${C_BOLD}${C_WHITE}_____ ____  ___________${C_RESET}     ${C_BOLD}${C_CYAN}__ __ __________${C_RESET}            ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}     ${C_BOLD}${C_WHITE}/ ___// __ \/ ____/ ___/${C_RESET}    ${C_BOLD}${C_CYAN}/ //_//  _/_  __/${C_RESET}            ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}     ${C_BOLD}${C_WHITE}\__ \/ /_/ / __/ / /${C_RESET}       ${C_BOLD}${C_CYAN}/ ,<   / /  / /${C_RESET}               ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}    ${C_BOLD}${C_WHITE}___/ / ____/ /___/ /___${C_RESET}    ${C_BOLD}${C_CYAN}/ /| |_/ /  / /${C_RESET}                ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}   ${C_BOLD}${C_WHITE}/____/_/   /_____/\____/${C_RESET}   ${C_BOLD}${C_CYAN}/_/ |_/___/ /_/${C_RESET}                 ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}                                                              ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}  ${C_DIM}Workspace Bootstrap${C_RESET}                              ${C_DIM}v${SCRIPT_VERSION}${C_RESET}     ${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}  ${C_DIM}by LKS Next${C_RESET}                                                 ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}                                                              ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}${C_BOLD}+==============================================================+${C_RESET}"
     # Pad header to fixed height
-    $headerLines = 12
+    $headerLines = 13
     for ($i = $headerLines; $i -lt $HEADER_HEIGHT; $i++) { Write-C '' }
 }
 
@@ -147,7 +286,6 @@ function Show-Header {
 
 function Show-ProgressBar {
     if (-not $script:useTui) { return }
-    # Save cursor position
     $savedRow = [Console]::CursorTop
     $savedCol = [Console]::CursorLeft
 
@@ -179,7 +317,6 @@ function Show-ProgressBar {
     }
     Write-C $line
 
-    # Restore cursor position
     [Console]::SetCursorPosition($savedCol, $savedRow)
 }
 
@@ -216,25 +353,6 @@ function Read-Value([string]$prompt, [string]$default, [switch]$Required) {
     return $val.Trim()
 }
 
-function Read-Choice([string]$prompt, [string[]]$options, [int]$default) {
-    for ($i = 0; $i -lt $options.Count; $i++) {
-        $num = $i + 1
-        $marker = ''
-        if ($num -eq $default) { $marker = " ${C_GREEN}<- default${C_RESET}" }
-        Write-Pad "${C_BOLD}[${num}]${C_RESET} $($options[$i])${marker}" 4
-    }
-    Write-C ''
-    Write-Host "  ${C_CYAN}>${C_RESET} ${prompt} ${C_DIM}[${default}]${C_RESET}: " -NoNewline
-    $val = Read-Host
-    if ([string]::IsNullOrWhiteSpace($val)) { return $default }
-    $num = 0
-    if ([int]::TryParse($val, [ref]$num) -and $num -ge 1 -and $num -le $options.Count) {
-        return $num
-    }
-    Write-Pad "${C_RED}Invalid choice.${C_RESET}" 2
-    return (Read-Choice $prompt $options $default)
-}
-
 function Read-YesNo([string]$prompt, [bool]$default) {
     $hint = 'y/N'
     if ($default) { $hint = 'Y/n' }
@@ -248,6 +366,134 @@ function Read-Continue {
     Write-C ''
     Write-Host "  ${C_DIM}Press Enter to continue...${C_RESET}" -NoNewline
     Read-Host | Out-Null
+}
+
+# ===================================================================
+# INTERACTIVE SELECTOR (arrow keys + context hints)
+# ===================================================================
+
+function Read-InteractiveChoice {
+    param(
+        [string]$Title,
+        [string[]]$Options,
+        [string[]]$Hints,
+        [int]$Default = 0
+    )
+
+    # Fallback if output is redirected (no interactive TUI)
+    if ([Console]::IsOutputRedirected) {
+        for ($i = 0; $i -lt $Options.Count; $i++) {
+            $num = $i + 1
+            $marker = ''
+            if ($i -eq $Default) { $marker = " ${C_GREEN}<- default${C_RESET}" }
+            Write-Pad "${C_BOLD}[${num}]${C_RESET} $($Options[$i])${marker}" 4
+        }
+        Write-C ''
+        $defNum = $Default + 1
+        Write-Host "  ${C_CYAN}>${C_RESET} Choose ${C_DIM}[${defNum}]${C_RESET}: " -NoNewline
+        $val = Read-Host
+        if ([string]::IsNullOrWhiteSpace($val)) { return $Default }
+        $num = 0
+        if ([int]::TryParse($val, [ref]$num) -and $num -ge 1 -and $num -le $Options.Count) {
+            return ($num - 1)
+        }
+        return $Default
+    }
+
+    $selected = $Default
+    $optCount = $Options.Count
+    # Calculate how many lines we render so we can erase them
+    # Title(1) + blank(1) + options(n) + blank(1) + hint box(6) + blank(1) + footer(1) = n + 11
+    $hintBoxHeight = 6
+    $totalLines = 1 + 1 + $optCount + 1 + $hintBoxHeight + 1 + 1
+
+    # Hide cursor during selection
+    Write-Host $C_HIDE -NoNewline
+
+    try {
+        while ($true) {
+            # Save cursor position
+            $startRow = [Console]::CursorTop
+
+            # Title
+            Write-Pad "${C_BOLD}${C_WHITE}${Title}${C_RESET}" 2
+            Write-C ''
+
+            # Options
+            for ($i = 0; $i -lt $optCount; $i++) {
+                if ($i -eq $selected) {
+                    Write-Pad "${C_CYAN}${C_BOLD}--> * $($Options[$i])${C_RESET}" 4
+                } else {
+                    Write-Pad "${C_DIM}    o $($Options[$i])${C_RESET}" 4
+                }
+            }
+
+            Write-C ''
+
+            # Hint box
+            $hint = ''
+            if ($Hints -and $selected -lt $Hints.Count) {
+                $hint = $Hints[$selected]
+            }
+            $boxWidth = 55
+            Write-Pad "${C_DIM}+$('-' * $boxWidth)+${C_RESET}" 4
+            # Wrap hint text into lines
+            $hintLines = @()
+            if ($hint) {
+                $words = $hint -split '\s+'
+                $line = ''
+                foreach ($w in $words) {
+                    if (($line.Length + $w.Length + 1) -gt ($boxWidth - 4)) {
+                        $hintLines += $line
+                        $line = $w
+                    } else {
+                        if ($line) { $line += ' ' }
+                        $line += $w
+                    }
+                }
+                if ($line) { $hintLines += $line }
+            }
+            # Pad to fixed height (4 content lines)
+            while ($hintLines.Count -lt 4) { $hintLines += '' }
+            for ($i = 0; $i -lt 4; $i++) {
+                $content = $hintLines[$i]
+                $padLen = $boxWidth - 2 - $content.Length
+                if ($padLen -lt 0) { $padLen = 0 }
+                Write-Pad "${C_DIM}|${C_RESET}  ${content}$(' ' * $padLen)${C_DIM}|${C_RESET}" 4
+            }
+            Write-Pad "${C_DIM}+$('-' * $boxWidth)+${C_RESET}" 4
+
+            Write-C ''
+
+            # Footer
+            $pos = "$($selected + 1)/${optCount}"
+            Write-Pad "${C_DIM}Up/Down Navigate   Enter Select${C_RESET}                       ${C_DIM}${pos}${C_RESET}" 2
+
+            # Read key
+            $key = [Console]::ReadKey($true)
+            switch ($key.Key) {
+                'UpArrow'   { $selected = [Math]::Max(0, $selected - 1) }
+                'DownArrow' { $selected = [Math]::Min($optCount - 1, $selected + 1) }
+                'Enter'     {
+                    Write-Host $C_SHOW -NoNewline
+                    # Clear selector area
+                    [Console]::SetCursorPosition(0, $startRow)
+                    for ($i = 0; $i -lt $totalLines; $i++) { Write-Host "${C_CLR_LN}" }
+                    [Console]::SetCursorPosition(0, $startRow)
+                    # Show final selection
+                    Write-Pad "${C_GREEN}[ok]${C_RESET} $($Options[$selected])" 4
+                    return $selected
+                }
+            }
+
+            # Erase and redraw
+            [Console]::SetCursorPosition(0, $startRow)
+            for ($i = 0; $i -lt $totalLines; $i++) { Write-Host "${C_CLR_LN}" }
+            [Console]::SetCursorPosition(0, $startRow)
+        }
+    } finally {
+        Write-Host $C_SHOW -NoNewline
+    }
 }
 
 # ===================================================================
@@ -355,38 +601,42 @@ function Get-SpecConfig {
     $hasGh = ($null -ne $script:stepResults['gh'])
 
     $options = @()
+    $hints   = @()
     if ($hasGh) {
-        $options += 'Create from GitHub template (requires gh CLI)'
+        $options += 'Create from GitHub template'
+        $hints   += 'Creates a new private/public repo in your GitHub org using the spec-kit-template. Requires the GitHub CLI (gh) to be installed and authenticated.'
     } else {
         $options += 'Create from GitHub template (gh not found)'
+        $hints   += 'Requires the GitHub CLI (gh) which was not found. Install gh and authenticate first, then re-run the bootstrap.'
     }
-    $options += 'Clone template locally (no GitHub repo)'
-    $options += 'I already have the spec cloned'
+    $options += 'Clone template locally'
+    $hints   += 'Clones the spec-kit-template repo and reinitializes git history. You get a fresh local repo that you can push to any remote later. Best for GitLab, Bitbucket, or Azure DevOps.'
+    $options += 'Use existing spec repo'
+    $hints   += 'Point to a spec repo already cloned on your machine. The bootstrap will link it to the workspace without modifying it.'
 
-    $defaultChoice = 2
-    if ($hasGh) { $defaultChoice = 1 }
-    $choice = Read-Choice 'Choose' $options $defaultChoice
+    $defaultChoice = 1
+    if (-not $hasGh) { $defaultChoice = 1 }
+    $choice = Read-InteractiveChoice -Title 'How do you want to set up the spec repository?' -Options $options -Hints $hints -Default $defaultChoice
 
     switch ($choice) {
-        1 {
+        0 {
             if (-not $hasGh) {
                 Write-Pad "${C_YELLOW}gh CLI not found. Falling back to clone.${C_RESET}" 4
                 $script:specMode = 'clone'
             } else {
                 Write-C ''
                 $org = Read-Value 'GitHub org/user for the new repo' 'lksnext-ai-lab'
-                $vis = Read-Choice 'Visibility' @('Private', 'Public') 1
+                $visChoice = Read-InteractiveChoice -Title 'Repository visibility' -Options @('Private', 'Public') -Hints @(
+                    'The repository will only be visible to you and collaborators you explicitly grant access to.',
+                    'The repository will be visible to everyone on the internet. Choose this for open-source projects.'
+                ) -Default 0
                 $script:specMode  = 'template'
                 $script:specOrg   = $org
-                if ($vis -eq 1) {
-                    $script:specVisibility = 'private'
-                } else {
-                    $script:specVisibility = 'public'
-                }
+                $script:specVisibility = if ($visChoice -eq 0) { 'private' } else { 'public' }
             }
         }
-        2 { $script:specMode = 'clone' }
-        3 {
+        1 { $script:specMode = 'clone' }
+        2 {
             Write-C ''
             $p = Read-Value 'Path to existing spec repo' '' -Required
             if (-not (Test-Path (Join-Path $p 'docs/spec'))) {
@@ -416,10 +666,16 @@ function Get-CodebaseConfig {
         'Create empty (git init)',
         'Skip (no codebase for now)'
     )
-    $choice = Read-Choice 'Choose' $options 1
+    $hints = @(
+        'Link an existing codebase project already on your machine. The bootstrap adds it to the VS Code workspace as a second root folder (read-only from spec perspective).',
+        'Clone a remote Git repository as the codebase folder. It will be added as a second root in the VS Code workspace.',
+        'Creates a new empty folder with git initialized. Perfect for greenfield projects where the codebase does not exist yet.',
+        'Do not add a codebase folder now. You can add one later by editing the .code-workspace file manually.'
+    )
+    $choice = Read-InteractiveChoice -Title 'How do you want to set up the codebase project?' -Options $options -Hints $hints -Default 0
 
     switch ($choice) {
-        1 {
+        0 {
             Write-C ''
             $p = Read-Value 'Path to codebase repo' '' -Required
             if (-not (Test-Path $p)) {
@@ -431,7 +687,7 @@ function Get-CodebaseConfig {
             $script:codebasePath = (Resolve-Path $p).Path
             $script:codebaseName = Split-Path $p -Leaf
         }
-        2 {
+        1 {
             Write-C ''
             $url = Read-Value 'Git clone URL' '' -Required
             $dirName = Read-Value 'Local folder name' $script:projectName
@@ -439,11 +695,11 @@ function Get-CodebaseConfig {
             $script:codebaseUrl  = $url
             $script:codebaseName = $dirName
         }
-        3 {
+        2 {
             $script:codebaseMode = 'empty'
             $script:codebaseName = $script:projectName
         }
-        4 {
+        3 {
             $script:codebaseMode = 'skip'
             $script:codebaseName = $null
         }
@@ -490,11 +746,10 @@ function Get-ExtrasConfig {
 }
 
 # ===================================================================
-# EXECUTION
+# EXECUTION HELPERS
 # ===================================================================
 
 function Get-RelPath([string]$from, [string]$to) {
-    # PS 5.1 / .NET Framework compat — [IO.Path]::GetRelativePath unavailable
     try {
         return [System.IO.Path]::GetRelativePath($from, $to) -replace '\\', '/'
     } catch {
@@ -518,6 +773,73 @@ function Write-TaskDetail([string]$detail) {
     Write-Pad "${C_DIM}    ${detail}${C_RESET}" 6
 }
 
+# ===================================================================
+# .speckit FILE MANAGEMENT
+# ===================================================================
+
+function Write-SpecKitFile([string]$specDir, [string]$mode) {
+    $filePath = Join-Path $specDir $SPECKIT_FILE
+    $now = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+    $content = @"
+{
+  "version": "${SCRIPT_VERSION}",
+  "installed": "${now}",
+  "updated": null,
+  "template": "${TEMPLATE_REPO}",
+  "mode": "${mode}",
+  "managed": [
+    ".github/agents",
+    ".github/instructions",
+    ".github/prompts",
+    ".github/skills",
+    ".github/workflows",
+    ".github/copilot-instructions.md",
+    ".github/CODEOWNERS",
+    ".github/PULL_REQUEST_TEMPLATE.md",
+    "docs/kit",
+    "tools",
+    "VERSION",
+    "mkdocs.yml",
+    "CONTRIBUTING.md",
+    "DCO.txt",
+    "LICENSE",
+    "NOTICE",
+    "TRADEMARKS.md"
+  ]
+}
+"@
+    if (-not $DryRun) {
+        $content | Set-Content $filePath -Encoding UTF8
+    }
+}
+
+function Read-SpecKitFile([string]$specDir) {
+    $filePath = Join-Path $specDir $SPECKIT_FILE
+    if (-not (Test-Path $filePath)) { return $null }
+    try {
+        $raw = Get-Content $filePath -Raw -Encoding UTF8
+        return ($raw | ConvertFrom-Json)
+    } catch {
+        return $null
+    }
+}
+
+function Update-SpecKitFile([string]$specDir, [string]$newVersion) {
+    $filePath = Join-Path $specDir $SPECKIT_FILE
+    $data = Read-SpecKitFile $specDir
+    if (-not $data) { return }
+    $now = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+    $data.version = $newVersion
+    $data.updated = $now
+    if (-not $DryRun) {
+        $data | ConvertTo-Json -Depth 10 | Set-Content $filePath -Encoding UTF8
+    }
+}
+
+# ===================================================================
+# INSTALL EXECUTION
+# ===================================================================
+
 function Invoke-Setup {
     Clear-StepArea
     Write-C ''
@@ -525,8 +847,6 @@ function Invoke-Setup {
     Write-Pad "${C_DIM}$('_' * 56)${C_RESET}" 2
     Write-C ''
 
-    # Native commands (git, gh) write progress to stderr.
-    # With $ErrorActionPreference = 'Stop' this would abort the script.
     $prevEAP = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
 
@@ -647,6 +967,12 @@ ${foldersJson}
     Write-Task 'Generating workspace file' 'done'
     Write-TaskDetail (Split-Path $workspaceFile -Leaf)
 
+    # -- .speckit control file -----------------------------------------
+    Write-Task 'Generating version control file' 'running'
+    Write-SpecKitFile $specDir $script:specMode
+    Write-Task 'Generating version control file' 'done'
+    Write-TaskDetail $SPECKIT_FILE
+
     # -- Python venv ---------------------------------------------------
     if ($script:installVenv) {
         Write-Task 'Creating Python venv + dependencies' 'running'
@@ -684,22 +1010,21 @@ ${foldersJson}
     }
 
     # -- Summary -------------------------------------------------------
-    Show-Summary $workspaceFile $specDir $codebaseDir
+    Show-InstallSummary $workspaceFile $specDir $codebaseDir
 
     # -- Open VS Code --------------------------------------------------
     if ($script:openVsCode -and (-not $DryRun)) {
         & code $workspaceFile 2>&1 | Out-Null
     }
 
-    # Restore strict error handling (native commands above write to stderr)
     $ErrorActionPreference = $prevEAP
 }
 
 # ===================================================================
-# SUMMARY
+# INSTALL SUMMARY
 # ===================================================================
 
-function Show-Summary([string]$workspaceFile, [string]$specDir, [string]$codebaseDir) {
+function Show-InstallSummary([string]$workspaceFile, [string]$specDir, [string]$codebaseDir) {
     if ($script:useTui) {
         Set-CursorAt ($PROGRESS_TOP + $PROGRESS_HEIGHT + 1) 0
     }
@@ -723,15 +1048,501 @@ function Show-Summary([string]$workspaceFile, [string]$specDir, [string]$codebas
 
     Write-C "  ${C_GREEN}|${C_RESET}    +-- ${C_WHITE}${wsName}${C_RESET}          ${C_DIM}workspace${C_RESET}"
     Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}+==============================================================+${C_RESET}"
+    Write-C "  ${C_GREEN}+--------------------------------------------------------------+${C_RESET}"
     Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
     Write-C "  ${C_GREEN}|${C_RESET}  ${C_BOLD}Next steps:${C_RESET}"
     Write-C "  ${C_GREEN}|${C_RESET}    1. Open the workspace in VS Code"
     Write-C "  ${C_GREEN}|${C_RESET}    2. In Copilot Chat: ${C_CYAN}@spc-spec-director${C_RESET}"
     Write-C "  ${C_GREEN}|${C_RESET}    3. Or run ${C_CYAN}/new-spec${C_RESET} to start the specification"
     Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}+--------------------------------------------------------------+${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_BOLD}SPEC KIT${C_RESET} by ${C_CYAN}LKS Next${C_RESET}                                       ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_DIM}Thank you for using SPEC KIT!${C_RESET}                               ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
     Write-C "  ${C_GREEN}${C_BOLD}+==============================================================+${C_RESET}"
     Write-C ''
+}
+
+# ===================================================================
+# UPDATE: REMOTE VERSION CHECK
+# ===================================================================
+
+function Get-RemoteVersion {
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $remoteVersion = $null
+
+    # Strategy 1: gh api (fast, no clone)
+    $hasGh = $null -ne $script:stepResults['gh']
+    if ($hasGh) {
+        try {
+            $raw = & gh api "repos/${TEMPLATE_REPO}/contents/VERSION" --jq '.content' 2>$null
+            if ($raw) {
+                $decoded = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($raw.Trim()))
+                $remoteVersion = $decoded.Trim()
+            }
+        } catch { }
+    }
+
+    # Strategy 2: git archive (no full clone)
+    if (-not $remoteVersion) {
+        try {
+            $tmpFile = [System.IO.Path]::GetTempFileName()
+            & git archive --remote=$TEMPLATE_URL HEAD VERSION 2>$null | Set-Content $tmpFile -Encoding Byte
+            # git archive might not work with GitHub HTTPS, fallback below
+        } catch { }
+    }
+
+    # Strategy 3: shallow clone (universal fallback)
+    if (-not $remoteVersion) {
+        try {
+            $tmpDir = Join-Path ([System.IO.Path]::GetTempPath()) "speckit-update-$([guid]::NewGuid().ToString('N').Substring(0,8))"
+            & git clone --depth 1 --filter=blob:none --sparse $TEMPLATE_URL $tmpDir 2>$null
+            Push-Location $tmpDir
+            & git sparse-checkout set VERSION CHANGELOG.md 2>$null
+            Pop-Location
+            $versionFile = Join-Path $tmpDir 'VERSION'
+            if (Test-Path $versionFile) {
+                $remoteVersion = (Get-Content $versionFile -Raw).Trim()
+            }
+            # Keep tmpDir for potential update use
+            $script:updateTmpDir = $tmpDir
+        } catch { }
+    }
+
+    $ErrorActionPreference = $prevEAP
+    return $remoteVersion
+}
+
+function Get-RemoteChangelog {
+    param([string]$fromVersion, [string]$toVersion)
+    $changelog = ''
+
+    # Try to read from the clone tmp dir
+    if ($script:updateTmpDir) {
+        $clFile = Join-Path $script:updateTmpDir 'CHANGELOG.md'
+        if (Test-Path $clFile) {
+            $changelog = Get-Content $clFile -Raw -Encoding UTF8
+        }
+    }
+
+    # Try gh api as fallback
+    if (-not $changelog -and ($null -ne $script:stepResults['gh'])) {
+        try {
+            $raw = & gh api "repos/${TEMPLATE_REPO}/contents/CHANGELOG.md" --jq '.content' 2>$null
+            if ($raw) {
+                $changelog = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($raw.Trim()))
+            }
+        } catch { }
+    }
+
+    if (-not $changelog) { return $null }
+
+    # Extract entries between versions
+    $lines = $changelog -split "`n"
+    $capture = $false
+    $result = @()
+    foreach ($line in $lines) {
+        if ($line -match '^\#\#\s+\[') {
+            if ($capture) { break }
+            if ($line -notmatch [regex]::Escape($fromVersion)) {
+                $capture = $true
+            }
+        }
+        if ($capture) { $result += $line }
+    }
+    if ($result.Count -eq 0) { return $null }
+    return ($result -join "`n")
+}
+
+# ===================================================================
+# UPDATE: FULL CLONE FOR FILE COPY
+# ===================================================================
+
+function Get-UpdateSource {
+    # If we already have a sparse clone, convert it to full for managed paths
+    if ($script:updateTmpDir -and (Test-Path $script:updateTmpDir)) {
+        $prevEAP = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        Push-Location $script:updateTmpDir
+        # Expand sparse checkout to include all managed paths
+        & git sparse-checkout set $MANAGED_PATHS 2>$null
+        Pop-Location
+        $ErrorActionPreference = $prevEAP
+        return $script:updateTmpDir
+    }
+
+    # Full shallow clone
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $tmpDir = Join-Path ([System.IO.Path]::GetTempPath()) "speckit-update-$([guid]::NewGuid().ToString('N').Substring(0,8))"
+    & git clone --depth 1 $TEMPLATE_URL $tmpDir 2>$null
+    $script:updateTmpDir = $tmpDir
+    $ErrorActionPreference = $prevEAP
+    return $tmpDir
+}
+
+# ===================================================================
+# UPDATE: GIT STATUS CHECK
+# ===================================================================
+
+function Test-GitClean([string]$specDir) {
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    Push-Location $specDir
+
+    $dirtyFiles = @()
+    foreach ($managedPath in $MANAGED_PATHS) {
+        $fullPath = Join-Path $specDir $managedPath
+        if (Test-Path $fullPath) {
+            $status = & git status --porcelain -- $managedPath 2>$null
+            if ($status) {
+                $dirtyFiles += ($status -split "`n" | ForEach-Object { $_.Trim() })
+            }
+        }
+    }
+
+    Pop-Location
+    $ErrorActionPreference = $prevEAP
+    return $dirtyFiles
+}
+
+# ===================================================================
+# UPDATE: APPLY
+# ===================================================================
+
+function Invoke-Update([string]$specDir, [string]$sourceDir) {
+    Write-C ''
+    Write-Pad "${C_BOLD}${C_WHITE}Updating SPEC-KIT...${C_RESET}" 2
+    Write-Pad "${C_DIM}$('_' * 56)${C_RESET}" 2
+    Write-C ''
+
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+
+    $stats = @{ updated = 0; added = 0; folders = @() }
+
+    foreach ($managedPath in $MANAGED_PATHS) {
+        $src = Join-Path $sourceDir $managedPath
+        $dst = Join-Path $specDir $managedPath
+
+        if (-not (Test-Path $src)) { continue }
+
+        $label = $managedPath
+        $isDir = (Test-Path $src -PathType Container)
+
+        if ($isDir) {
+            Write-Task "Updating ${label}" 'running'
+            if (-not $DryRun) {
+                if (Test-Path $dst) {
+                    Remove-Item $dst -Recurse -Force
+                }
+                Copy-Item $src $dst -Recurse -Force
+            }
+            $count = (Get-ChildItem $src -Recurse -File).Count
+            $stats.updated += $count
+            $stats.folders += $label
+            Write-Task "Updating ${label}" 'done'
+            Write-TaskDetail "${count} files"
+        } else {
+            $existed = Test-Path $dst
+            Write-Task "Updating ${label}" 'running'
+            if (-not $DryRun) {
+                $parentDir = Split-Path $dst -Parent
+                if (-not (Test-Path $parentDir)) {
+                    New-Item -Path $parentDir -ItemType Directory -Force | Out-Null
+                }
+                Copy-Item $src $dst -Force
+            }
+            if ($existed) { $stats.updated++ } else { $stats.added++ }
+            Write-Task "Updating ${label}" 'done'
+        }
+    }
+
+    $ErrorActionPreference = $prevEAP
+    return $stats
+}
+
+# ===================================================================
+# UPDATE: CLEANUP
+# ===================================================================
+
+function Remove-UpdateTemp {
+    if ($script:updateTmpDir -and (Test-Path $script:updateTmpDir)) {
+        Remove-Item $script:updateTmpDir -Recurse -Force -ErrorAction SilentlyContinue
+        $script:updateTmpDir = $null
+    }
+}
+
+# ===================================================================
+# UPDATE SUMMARY
+# ===================================================================
+
+function Show-UpdateSummary([string]$fromVersion, [string]$toVersion, $stats) {
+    Write-C ''
+    Write-C "  ${C_GREEN}${C_BOLD}+==============================================================+${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_BOLD}${C_GREEN}Updated: v${fromVersion} -> v${toVersion}${C_RESET}"
+    Write-C "  ${C_GREEN}+==============================================================+${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_BOLD}Updated areas:${C_RESET}"
+
+    foreach ($folder in $stats.folders) {
+        Write-C "  ${C_GREEN}|${C_RESET}    ${C_CYAN}*${C_RESET} ${folder}"
+    }
+
+    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_DIM}Total: $($stats.updated) files updated, $($stats.added) files added${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}+--------------------------------------------------------------+${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_YELLOW}!!${C_RESET}  ${C_BOLD}Reload VS Code to apply changes${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}     Ctrl+Shift+P -> ${C_CYAN}Reload Window${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}+--------------------------------------------------------------+${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_BOLD}SPEC KIT${C_RESET} by ${C_CYAN}LKS Next${C_RESET}                                       ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_DIM}Thank you for using SPEC KIT!${C_RESET}                               ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}${C_BOLD}+==============================================================+${C_RESET}"
+    Write-C ''
+}
+
+# ===================================================================
+# UPDATE FLOW
+# ===================================================================
+
+function Invoke-UpdateFlow([string]$specDir) {
+    $speckitData = Read-SpecKitFile $specDir
+    $localVersion = $speckitData.version
+
+    Write-C ''
+    Write-Pad "${C_BOLD}Existing SPEC-KIT project detected${C_RESET}" 2
+    Write-Pad "${C_DIM}Installed: v${localVersion}${C_RESET}" 2
+    Write-C ''
+    Write-Pad "${C_DIM}Checking for updates...${C_RESET}" 2
+
+    # Check prerequisites (minimal: just git)
+    $script:stepResults = @{}
+    $gitVer = Get-ToolVersion 'git' @('--version')
+    if (-not $gitVer) {
+        Write-Pad "${C_RED}Git is required. Aborting.${C_RESET}" 2
+        exit 1
+    }
+    $script:stepResults['git'] = $gitVer
+    $ghVer = Get-ToolVersion 'gh' @('--version')
+    if ($ghVer) { $script:stepResults['gh'] = $ghVer }
+    $codeVer = Get-ToolVersion 'code' @('--version')
+    if ($codeVer) { $script:stepResults['code'] = $codeVer }
+
+    $remoteVersion = Get-RemoteVersion
+    if (-not $remoteVersion) {
+        Write-C ''
+        Write-Pad "${C_RED}Could not check remote version. Verify internet connection and try again.${C_RESET}" 2
+        exit 1
+    }
+
+    # --check flag: just report and exit
+    if ($Check) {
+        if ($remoteVersion -eq $localVersion) {
+            Write-Pad "${C_GREEN}[ok] SPEC-KIT is up to date (v${localVersion})${C_RESET}" 2
+            Remove-UpdateTemp
+            exit 0
+        } else {
+            Write-Pad "${C_YELLOW}Update available: v${localVersion} -> v${remoteVersion}${C_RESET}" 2
+            Remove-UpdateTemp
+            exit 1
+        }
+    }
+
+    if ($remoteVersion -eq $localVersion) {
+        Write-C ''
+        Write-Pad "${C_GREEN}[ok] SPEC-KIT is up to date (v${localVersion})${C_RESET}" 2
+        Write-C ''
+        Write-Pad "${C_BOLD}SPEC KIT${C_RESET} by ${C_CYAN}LKS Next${C_RESET}" 2
+        Write-Pad "${C_DIM}Thank you for using SPEC KIT!${C_RESET}" 2
+        Write-C ''
+        if (-not $Update) {
+            Remove-UpdateTemp
+            return
+        }
+        Write-Pad "${C_YELLOW}--Update flag set. Forcing re-application of v${localVersion}.${C_RESET}" 2
+    } else {
+        Write-C ''
+        Write-Pad "${C_CYAN}New version available: v${localVersion} -> v${remoteVersion}${C_RESET}" 2
+    }
+
+    Write-C ''
+
+    # Interactive update menu
+    $updateDone = $false
+    while (-not $updateDone) {
+        $targetLabel = if ($remoteVersion -eq $localVersion) { "Re-apply v${remoteVersion}" } else { "Update to v${remoteVersion}" }
+
+        $menuOptions = @(
+            $targetLabel,
+            'View changelog',
+            'View files that will change',
+            'Skip update'
+        )
+        $menuHints = @(
+            "Updates all managed files: agents, skills, prompts, instructions, docs/kit, tools, and config files. Your spec documents (docs/spec/**) and codebase will NOT be modified.",
+            "Shows the changelog entries between your installed version (v${localVersion}) and the available version (v${remoteVersion}).",
+            "Shows which files in your project will be overwritten by the update. Only managed SPEC-KIT files are affected.",
+            "Exit without making any changes. You can run the bootstrap again later to update."
+        )
+
+        $menuChoice = Read-InteractiveChoice -Title 'What would you like to do?' -Options $menuOptions -Hints $menuHints -Default 0
+
+        switch ($menuChoice) {
+            0 {
+                # UPDATE
+                # Check git status
+                $dirtyFiles = Test-GitClean $specDir
+                if ($dirtyFiles.Count -gt 0) {
+                    Write-C ''
+                    Write-Pad "${C_YELLOW}!!  You have uncommitted changes in managed files:${C_RESET}" 2
+                    foreach ($f in $dirtyFiles | Select-Object -First 10) {
+                        Write-Pad "${C_DIM}    ${f}${C_RESET}" 4
+                    }
+                    if ($dirtyFiles.Count -gt 10) {
+                        Write-Pad "${C_DIM}    ... and $($dirtyFiles.Count - 10) more${C_RESET}" 4
+                    }
+                    Write-C ''
+                    Write-Pad "The update will overwrite these files. Make sure your" 2
+                    Write-Pad "Git repository is up to date so you can recover if needed." 2
+                    Write-C ''
+
+                    $confirmChoice = Read-InteractiveChoice -Title 'How do you want to proceed?' -Options @(
+                        'Continue anyway (I can recover with git)',
+                        'Abort (I will commit first)'
+                    ) -Hints @(
+                        'The update will proceed and overwrite the changed files. You can always use git checkout or git stash to recover them later.',
+                        'Stops the update so you can commit or stash your changes first. Run the bootstrap again when ready.'
+                    ) -Default 1
+
+                    if ($confirmChoice -eq 1) {
+                        Write-C ''
+                        Write-Pad "${C_DIM}Update cancelled. Commit your changes and try again.${C_RESET}" 2
+                        Remove-UpdateTemp
+                        return
+                    }
+                } else {
+                    Write-C ''
+                    Write-Pad "${C_GREEN}[ok] Working tree is clean -- safe to update.${C_RESET}" 2
+                }
+
+                # Get full source
+                Write-C ''
+                Write-Pad "${C_DIM}Downloading update files...${C_RESET}" 2
+                $sourceDir = Get-UpdateSource
+
+                if (-not $sourceDir -or -not (Test-Path $sourceDir)) {
+                    Write-Pad "${C_RED}Failed to download update source. Try again.${C_RESET}" 2
+                    Remove-UpdateTemp
+                    return
+                }
+
+                # Apply update
+                $stats = Invoke-Update $specDir $sourceDir
+
+                # Update .speckit
+                Update-SpecKitFile $specDir $remoteVersion
+
+                # Cleanup
+                Remove-UpdateTemp
+
+                # Summary
+                Show-UpdateSummary $localVersion $remoteVersion $stats
+
+                # Offer VS Code reload
+                if ($null -ne $script:stepResults['code']) {
+                    $reloadChoice = Read-InteractiveChoice -Title 'VS Code needs to reload to apply agent/skill changes.' -Options @(
+                        'Reload VS Code now (reopens workspace)',
+                        'I will reload manually (Ctrl+Shift+P -> Reload Window)'
+                    ) -Hints @(
+                        'Opens the workspace file which will trigger VS Code to reload and pick up the updated agents, skills, and instructions.',
+                        'You will need to manually reload VS Code by pressing Ctrl+Shift+P and typing "Reload Window" to apply the changes.'
+                    ) -Default 0
+
+                    if ($reloadChoice -eq 0 -and -not $DryRun) {
+                        # Find the workspace file
+                        $wsFiles = Get-ChildItem (Split-Path $specDir -Parent) -Filter '*.code-workspace' -File 2>$null
+                        if ($wsFiles) {
+                            & code $wsFiles[0].FullName --reuse-window 2>&1 | Out-Null
+                        }
+                    }
+                }
+
+                $updateDone = $true
+            }
+            1 {
+                # VIEW CHANGELOG
+                Write-C ''
+                $clContent = Get-RemoteChangelog $localVersion $remoteVersion
+                if ($clContent) {
+                    Write-C "  ${C_CYAN}+--- Changelog: v${localVersion} -> v${remoteVersion} ---+${C_RESET}"
+                    foreach ($line in ($clContent -split "`n")) {
+                        Write-C "  ${C_DIM}|${C_RESET}  ${line}"
+                    }
+                    Write-C "  ${C_CYAN}+$('-' * 50)+${C_RESET}"
+                } else {
+                    Write-Pad "${C_DIM}No changelog available. Check the GitHub releases page for details.${C_RESET}" 2
+                }
+                Read-Continue
+                Write-C ''
+            }
+            2 {
+                # VIEW FILES THAT WILL CHANGE
+                Write-C ''
+                Write-C "  ${C_CYAN}+--- Files managed by SPEC-KIT ---+${C_RESET}"
+                foreach ($mp in $MANAGED_PATHS) {
+                    $fullPath = Join-Path $specDir $mp
+                    if (Test-Path $fullPath -PathType Container) {
+                        $fileCount = (Get-ChildItem $fullPath -Recurse -File -ErrorAction SilentlyContinue).Count
+                        Write-C "  ${C_DIM}|${C_RESET}  ${C_CYAN}${mp}/${C_RESET}  ${C_DIM}(${fileCount} files)${C_RESET}"
+                    } elseif (Test-Path $fullPath) {
+                        Write-C "  ${C_DIM}|${C_RESET}  ${mp}"
+                    } else {
+                        Write-C "  ${C_DIM}|${C_RESET}  ${C_GREEN}+ ${mp}${C_RESET}  ${C_DIM}(new)${C_RESET}"
+                    }
+                }
+                Write-C "  ${C_CYAN}+$('-' * 35)+${C_RESET}"
+                Write-C ''
+                Write-Pad "${C_DIM}These paths will be overwritten. docs/spec/** is NOT affected.${C_RESET}" 2
+                Read-Continue
+                Write-C ''
+            }
+            3 {
+                # SKIP
+                Write-C ''
+                Write-Pad "${C_DIM}Update skipped. Run bootstrap again when ready.${C_RESET}" 2
+                Write-C ''
+                Remove-UpdateTemp
+                $updateDone = $true
+            }
+        }
+    }
+}
+
+# ===================================================================
+# MODE DETECTION
+# ===================================================================
+
+function Find-RunMode {
+    # Check if tools/.speckit exists relative to the script location
+    $scriptDir = Split-Path $PSCommandPath -Parent
+    $specDir   = Split-Path $scriptDir -Parent
+    $speckitPath = Join-Path $specDir $SPECKIT_FILE
+
+    if (Test-Path $speckitPath) {
+        $script:runMode = 'update'
+        return $specDir
+    }
+
+    # No .speckit found -> install mode
+    $script:runMode = 'install'
+    return $null
 }
 
 # ===================================================================
@@ -740,6 +1551,7 @@ function Show-Summary([string]$workspaceFile, [string]$specDir, [string]$codebas
 
 function Main {
     $script:useTui = Test-TuiSupport
+    $script:updateTmpDir = $null
 
     if ($DryRun) {
         Write-C "${C_YELLOW}[DRY RUN] No files will be created or modified.${C_RESET}"
@@ -747,12 +1559,19 @@ function Main {
     }
 
     Show-Header
-    Test-Prerequisites
-    Get-ProjectConfig
-    Get-SpecConfig
-    Get-CodebaseConfig
-    Get-ExtrasConfig
-    Invoke-Setup
+
+    $specDir = Find-RunMode
+
+    if ($script:runMode -eq 'update') {
+        Invoke-UpdateFlow $specDir
+    } else {
+        Test-Prerequisites
+        Get-ProjectConfig
+        Get-SpecConfig
+        Get-CodebaseConfig
+        Get-ExtrasConfig
+        Invoke-Setup
+    }
 }
 
 Main
