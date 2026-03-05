@@ -1,5 +1,4 @@
 ﻿site_name: Spec Kit
-site_version: "2.2.1"
 docs_dir: docs
 watch:
   - docs
