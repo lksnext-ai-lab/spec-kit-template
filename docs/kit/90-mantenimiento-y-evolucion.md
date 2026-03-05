@@ -149,7 +149,20 @@ FR → UI/API → pruebas → validación.
 
 ---
 
-### 2.5 Observabilidad y operación
+### 2.5 Refresh de documentación del codebase
+
+Si el proyecto usa modo evolutivo y el codebase cambia significativamente (nuevos módulos, refactors de arquitectura, cambio de framework), conviene actualizar la documentación derivada:
+
+- `docs/spec/_inputs/codebase-map.md`
+- Evidence Packs afectados en `docs/spec/_inputs/evidence/EP-*`
+
+El agente `spc-codebase-discovery` (modo refresh) automatiza esta actualización. El Director la propondrá automáticamente tras implementar tareas que afecten áreas documentadas en el mapa.
+
+El skill `codebase-maintenance` define señales de obsolescencia (>60 días, áreas no cubiertas, OPENQs resueltas) y una tabla cambio→acción para decidir cuándo y cómo actualizar.
+
+---
+
+### 2.6 Observabilidad y operación
 
 Posibilidad: elevar el nivel de “operación real” en la spec y conectarlo con artefactos de implementación:
 
@@ -160,7 +173,7 @@ Posibilidad: elevar el nivel de “operación real” en la spec y conectarlo co
 
 ---
 
-### 2.6 Publicación y gobernanza de specs
+### 2.7 Publicación y gobernanza de specs
 
 Posibilidad: mejorar la forma de compartir y gobernar specs dentro de la empresa:
 

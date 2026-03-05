@@ -48,6 +48,7 @@ Determina el scope en este orden:
   - Evidence Pack referenciado en `docs/spec/_inputs/evidence/`, o
   - `OPENQ-###` explícita.
 - Si hay info externa (SDK/API/licencia/límites): debe existir `### Fuentes` (URL + fecha + 1 línea).
+- Si existe `docs/spec/_inputs/codebase-map.md`: verificar que los módulos/componentes mencionados en la SPEC son consistentes con el mapa. Discrepancias → WARN con acción concreta.
 
 ### C) Trazabilidad mínima
 - `docs/spec/02-trazabilidad.md` no debe quedar abandonado:

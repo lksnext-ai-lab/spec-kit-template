@@ -95,6 +95,8 @@ Cuando el proyecto ya tiene código implementado, el modo evolutivo permite:
 - Verificar información externa (integraciones, SDKs, APIs) con **playwright-mcp**.
 - Citar evidencia concreta del codebase en la spec.
 
+El agente `spc-codebase-discovery` automatiza esta exploración, generando `codebase-map.md` y Evidence Packs mediante análisis del código. El Director ofrece esta fase como **opción después del Intake** si el proyecto tiene codebase; es totalmente opcional y se puede rechazar sin fricción.
+
 Regla: **no inventar** — cualquier afirmación técnica debe tener evidencia del codebase o registrarse como `OPENQ-###`.
 
 ### Evidence Packs (EP-###)

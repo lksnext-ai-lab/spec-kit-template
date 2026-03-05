@@ -73,7 +73,11 @@ Prohibido marcar READY algo que dependa de suposiciones críticas.
   - rutas `codebase/...` (EVIDENCE), o
   - Evidence Pack `docs/spec/_inputs/evidence/EP-###-<tema>.md`, o
   - `OPENQ-###` si no se puede verificar aún.
-
+### Documentación derivada del codebase (discovery)
+Si `spc-codebase-discovery` ha generado artefactos (`codebase-map.md`, Evidence Packs):
+- Úsalos como fuente de contexto técnico para dimensionar tareas y detectar riesgos.
+- Verifica que el mapa cubre las áreas afectadas por el plan. Si no, planifica una tarea Pxx de tipo "discovery focalizado" antes de las tareas técnicas dependientes.
+- No repitas información del mapa en el plan: enlaza.
 ---
 
 ## Verificación externa (solo si es necesario para no inventar)

@@ -102,6 +102,11 @@ Estos skills forman parte del funcionamiento general del template y se considera
 **Objetivo:** explorar `codebase/**` para construir un mapa técnico derivado (modo evolutivo).  
 **Salida típica:** `docs/spec/_inputs/codebase-map.md`.
 
+8b) `codebase-maintenance`  
+**Ruta:** `.github/skills/spec-kit-codebase-maintenance/SKILL.md`  
+**Objetivo:** decidir cuándo y cómo actualizar la documentación derivada del codebase (mapa y Evidence Packs) tras cambios en el proyecto.  
+**Usado por:** `spc-codebase-discovery` (modo refresh) y el Director (señales de obsolescencia).
+
 9) `evidence-pack`  
 **Ruta:** `.github/skills/spec-kit-evidence-pack/SKILL.md`  
 **Objetivo:** investigar un tema específico en `codebase/**` y generar un Evidence Pack con hallazgos sustentados.  

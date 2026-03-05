@@ -60,7 +60,24 @@ Objetivo:
 Importante:
 
 - evita leer `docs/spec/history/**` para planificar o redactar. El histórico es referencia, no material “activo”.
+---
 
+### 1.3 Discovery del codebase (opcional, solo modo evolutivo)
+
+Si trabajas sobre un proyecto existente (hay `codebase/` con contenido en el workspace):
+
+- Verifica si existe `docs/spec/_inputs/codebase-map.md`.
+  - Si no existe o tiene más de 60 días → considera ejecutar discovery (`spc-codebase-discovery` vía el Director).
+  - Si existe y está actualizado → úsalo como referencia durante la redacción.
+- Los Evidence Packs en `docs/spec/_inputs/evidence/EP-*` complementan el mapa con análisis detallados de áreas específicas.
+
+El discovery es siempre opcional. El Director lo propondrá automáticamente cuando detecte las condiciones, pero el usuario puede rechazarlo.
+
+Tipos de discovery:
+
+- **Inicial:** mapa completo + Evidence Packs principales. Ideal al inicio.
+- **Focalizado:** un Evidence Pack sobre un tema concreto. Útil antes de redactar arquitectura, backend, datos, etc.
+- **Refresh:** actualización incremental tras implementar cambios en el codebase.
 ---
 
 ## 2) Durante la redacción (Write)

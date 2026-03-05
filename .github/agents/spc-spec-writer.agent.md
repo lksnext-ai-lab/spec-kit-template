@@ -33,7 +33,11 @@ Regla:
 - No “corrijas” un to-be por no existir aún en codebase.
 - Si el texto depende de una suposición técnica crítica y no puede verificarse:
   - OPENQ + bloqueo explícito (ver “STOP policy”).
-
+### Documentación derivada del codebase
+Si existe `docs/spec/_inputs/codebase-map.md` o Evidence Packs en `docs/spec/_inputs/evidence/`:
+- Consúltalos antes de redactar secciones técnicas (arquitectura, backend, datos, infra, seguridad).
+- Usa la información como evidencia citada, no la copies literalmente.
+- Si detectas que el mapa o un EP está desactualizado respecto a `codebase/`, registra `TODO-###` recomendando refresh.
 ---
 
 ## STOP policy (anti-invención)

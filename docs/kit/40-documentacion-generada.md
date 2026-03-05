@@ -87,7 +87,7 @@ Regla práctica:
 | `docs/spec/97-review-notes.md` | Hallazgos y feedback accionable (estado vivo) | En cada revisión | bloqueantes/importantes + cambios sugeridos |
 | `docs/spec/adr/*` | Decisiones relevantes (ADR) | Cuando hay `DECISION:` | ADR con alternativas y consecuencias |
 | `docs/spec/history/<Ixx>/*` | Snapshots de una iteración cerrada + resumen | Al cerrar iteración (`/close-iteration`) | plan/OPENQ/TODO/review de cierre + `00-summary.md` |
-| `docs/spec/_inputs/codebase-map.md` | Mapa técnico del codebase (modo evolutivo) | Al inicio de evolutivo y cuando cambie la arquitectura | Estructura, módulos, tecnologías, rutas clave |
+| `docs/spec/_inputs/codebase-map.md` | Mapa técnico del codebase (modo evolutivo) | Al ejecutar discovery (opcional, post-intake) y cuando cambie la arquitectura del codebase | Estructura, módulos, tecnologías, rutas clave |
 | `docs/spec/_inputs/evidence/EP-###-<tema>.md` | Evidence Pack (modo evolutivo) | Cuando se requiera precisión técnica sobre el codebase | Rutas/archivos analizados, contenido confirmado vs inferido |
 | `docs/spec/_inputs/rfc/<RFC_ID>/*` | Artefactos auxiliares RFC | Durante flujo RFC | Análisis, alternativas, borradores |
 | `docs/spec/_inputs/spc-imp-backlog/*` | Artefactos SPC-IMP | Durante flujo SPC-IMP | Análisis de cobertura, slicing, backlog |

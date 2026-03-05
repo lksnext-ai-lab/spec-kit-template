@@ -90,6 +90,9 @@ Orden de decisión para fijar RFC objetivo:
 3) Si no hay índice claro:
    - proceder best-effort por carpetas/nombres (FR/NFR/arquitectura/datos/backend/frontend/seguridad/infra/ADR/OPENQ)
    - registrar `OPENQ: Falta índice de lectura claro para la spec`
+4) Si existe documentación derivada del codebase:
+   - `docs/spec/_inputs/codebase-map.md` — contexto técnico as-is para fundamentar análisis de impacto.
+   - Evidence Packs en `docs/spec/_inputs/evidence/EP-*` — evidencias verificadas para citar en el RFC.
 
 ---
 

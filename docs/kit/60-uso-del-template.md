@@ -111,6 +111,19 @@ Objetivo:
 
 ---
 
+### Paso 1.5 — Discovery del codebase (opcional, solo si hay codebase/)
+
+Si el proyecto tiene código implementado (`codebase/` con contenido), el Director ofrecerá automáticamente ejecutar discovery. También se puede solicitar explícitamente.
+
+El agente `spc-codebase-discovery` genera:
+
+* `docs/spec/_inputs/codebase-map.md` (mapa técnico del proyecto)
+* Evidence Packs en `docs/spec/_inputs/evidence/EP-###-<tema>.md`
+
+Esto fundamenta decisiones técnicas con evidencia real del código. Es **totalmente opcional**: se puede rechazar y el flujo continúa con normalidad.
+
+---
+
 ### Paso 2 — Planificar la primera iteración con `/plan-iteration` (o agente Planner)
 
 Ejecuta `/plan-iteration` (o usa el agente `spc-spec-planner`) para actualizar:

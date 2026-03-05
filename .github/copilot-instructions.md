@@ -5,7 +5,7 @@ Además, existen instrucciones **por ruta** en `.github/instructions/*.instructi
 
 ## Principios globales (siempre)
 
-1) **Director-first (obligatorio en modo agente):** el flujo se orquesta desde `spc-spec-director`, la única puerta de entrada visible al usuario. Los 9 subagentes operan con `user-invocable: false` y solo se activan por delegación del Director. El usuario expresa intención ("qué quiere"), no el procedimiento interno.
+1) **Director-first (obligatorio en modo agente):** el flujo se orquesta desde `spc-spec-director`, la única puerta de entrada visible al usuario. Los 10 subagentes operan con `user-invocable: false` y solo se activan por delegación del Director. El usuario expresa intención ("qué quiere"), no el procedimiento interno.
 2) **No inventar:** si falta información o evidencia, registrar `OPENQ-###` (o `TODO-###` si es trabajo pendiente) en los ficheros correspondientes.
 3) **Cambios pequeños y diff-friendly:** evitar reescrituras masivas y cambios cosméticos. Cambiar solo lo necesario.
 4) **Sin operaciones destructivas:** no usar comandos de shell/PowerShell/Bash para borrar/limpiar ni modificar cosas fuera del alcance pedido.
@@ -22,11 +22,12 @@ Además, existen instrucciones **por ruta** en `.github/instructions/*.instructi
 
 ## Arquitectura agéntica
 
-El sistema usa un patrón Director + 9 subagentes organizados en 4 fases secuenciales con gates humanos entre ellas:
+El sistema usa un patrón Director + 10 subagentes organizados en 4 fases secuenciales con gates humanos entre ellas:
 
 | Fase | Propósito | Agentes |
 |------|-----------|----------|
 | 1 — Entender | Capturar contexto y requisitos | `spc-spec-intake` |
+| (discovery) | Documentar codebase as-is (opcional) | `spc-codebase-discovery` |
 | 2 — Especificar | Planificar, redactar y revisar spec | `spc-spec-planner` → `spc-spec-writer` ⇄ `spc-spec-reviewer` |
 | 3 — RFC | Formalizar cambios relevantes | `spc-rfc-writer` ⇄ `spc-rfc-reviewer` |
 | 4 — Implementar | Backlog, fichas y cobertura | `spc-imp-backlog-slicer` → `spc-imp-task-detailer` ⇄ `spc-imp-coverage-auditor` |
@@ -38,6 +39,7 @@ Reglas de delegación:
 - Los subagentes tienen `user-invocable: false` y NO aparecen en el selector de agentes. Solo son accesibles vía delegación programática del Director.
 - No invocar más de 2 subagentes programáticamente sin presentar resultados intermedios al usuario.
 - El Director NO hace el trabajo de los subagentes: analiza, decide la fase, explica, pide confirmación, delega y consolida resultados.
+- Si existe `codebase/` con contenido, el Director evalúa si conviene ejecutar **discovery** (documentación del codebase) antes de planificar. El discovery es opcional y requiere confirmación del usuario.
 
 ### Política CHANGE: Patch vs RFC
 

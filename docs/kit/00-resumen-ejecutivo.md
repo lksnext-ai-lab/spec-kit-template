@@ -34,6 +34,7 @@ Este template aporta:
   - **SPEC** (flujo principal de especificación):
     - `spc-spec-director` (puerta única / orquestación)
     - `spc-spec-intake` (formaliza contexto en one-shot; invocado por el Director)
+    - `spc-codebase-discovery` (documenta codebase existente; opcional, modo evolutivo)
     - `spc-spec-planner` (plan de iteración activa)
     - `spc-spec-writer` (redacción desde plan)
     - `spc-spec-reviewer` (revisión crítica + ADR)

@@ -31,6 +31,42 @@ de `spc-spec-intake` (rondas de 2 preguntas CORE, stepper):
 6. Presenta el resultado al usuario.
 - **Gate humano:** el usuario valida antes de pasar a Fase 2.
 
+### Codebase discovery (opcional, entre Fase 1 y Fase 2)
+Si existe `codebase/` con contenido sustancial en el workspace, el Director evalúa
+si conviene documentar el proyecto antes de planificar. Este paso es **opcional**:
+el usuario puede rechazarlo y el flujo continúa sin fricción.
+
+**Trigger A — Post-intake (proactivo):**
+Condiciones: `codebase/` existe AND tiene contenido (> 10 archivos) AND
+(`codebase-map.md` no existe O su `last_updated` > 60 días).
+1. El Director propone: "He detectado un codebase con contenido. Para planificar
+   bien, conviene mapear el proyecto primero. ¿Discovery rápido, profundo, o lo salto?"
+2. Si acepta → delega a `spc-codebase-discovery` (MODE=initial, DEPTH=quick|deep).
+3. Si rechaza → registra en `00-context.md`: "Discovery: omitido por decisión del usuario (fecha)."
+4. Si el discovery revela discrepancias con `00-context.md` (stack diferente,
+   integraciones no mencionadas, etc.):
+   - El Director informa al usuario y ofrece actualizar el contexto.
+   - Si acepta → re-invoca `spc-spec-intake` con contexto ampliado.
+5. Presenta resultados (mapa, EPs, OPENQs) y continúa hacia Fase 2.
+
+**Trigger B — Pre-redacción técnica (bajo demanda, durante Fase 2):**
+Si el writer necesita info técnica específica para una sección (arquitectura,
+backend, datos, seguridad, infra) y no hay EP para ese tema:
+1. "Para redactar [sección], conviene investigar [tema] en el codebase.
+    ¿Genero un Evidence Pack focalizado?"
+2. Si acepta → delega a `spc-codebase-discovery` (MODE=focused, FOCUS=<tema>).
+
+**Trigger C — Post-implementación (mantenimiento, tras Fase 4):**
+Si se completan tareas Txx de tipo `code-change` o `migration` sobre áreas
+documentadas en `codebase-map.md`:
+1. Cruzar áreas afectadas con `areas_covered` del mapa.
+2. Si hay solapamiento: "La implementación ha cambiado [áreas].
+   ¿Quieres que actualice la documentación del codebase?"
+3. Si acepta → delega a `spc-codebase-discovery` (MODE=refresh, CHANGED_AREAS=[lista]).
+4. Si rechaza → nada (no se fuerza).
+
+**Sin codebase:** ningún trigger se activa. El flujo es idéntico al habitual.
+
 ### Fase 2 — Redacción de especificaciones
 Antes de cada delegación, el Director explica qué va a hacer y espera "ok" del usuario.
 - Paso 1: "Voy a crear el plan de redacción (planner). Tocará docs/spec/01-plan.md. ¿Procedo?"
@@ -153,6 +189,7 @@ Si hay duda → RFC.
 
 ## Enrutado (heurística operativa)
 1) Si falta contexto base → el Director entrevista al usuario (Fase 1, patrón intake).
+1.5) Si hay contexto Y `codebase/` existe con contenido Y no hay `codebase-map.md` (o está obsoleto) → proponer discovery.
 2) Si hay contexto pero falta plan o está desalineado → proponer Planner (Fase 2).
 3) Si hay plan Pxx pendiente → proponer Writer (Fase 2).
 4) Si hay cambios relevantes/decisiones → proponer Reviewer + ADR (Fase 2).

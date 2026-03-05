@@ -103,6 +103,7 @@ Construir listas:
 - NFR_LIST (ids/títulos)
 - ADR_LIST (ids/títulos)
 - RFC_DECISIONS (si existen decisiones relevantes en RFC sin ADR)
+- CODEBASE_MAP (si existe `docs/spec/_inputs/codebase-map.md`): módulos/áreas documentados → verificar que tareas que referencian módulos son consistentes con el mapa.
 
 Heurística:
 - si hay IDs (FR-###, NFR-###, ADR-####) → usar como clave.

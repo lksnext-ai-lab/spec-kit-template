@@ -68,7 +68,7 @@ Para simplificar la experiencia del desarrollador, el modelo recomendado es:
 
 ## Agentes SPEC — Workflow de especificación
 
-### Suite SPEC (4 agentes)
+### Suite SPEC (5 agentes)
 
 Estos agentes implementan el ciclo **Plan → Redacción → Revisión → Iteración**.
 
@@ -101,6 +101,36 @@ Estos agentes implementan el ciclo **Plan → Redacción → Revisión → Itera
 **Invocado por:** el Director, tras completar la entrevista con el usuario
 
 **Siguiente paso típico:** el Director presenta el resultado al usuario y propone Planner
+
+---
+
+#### 1b) `spc-codebase-discovery` — Documentación del codebase (opcional)
+
+**Archivo:** [../../.github/agents/spc-codebase-discovery.agent.md](../../.github/agents/spc-codebase-discovery.agent.md)
+
+**Propósito:** Explorar y documentar un codebase existente cuando se trabaja en modo evolutivo. Genera artefactos consumibles por el resto de agentes.
+
+**Cuándo se invoca:**
+- Después del intake, si existe `codebase/` con contenido sustancial (>10 archivos) y no hay mapa o está obsoleto (>60 días).
+- Durante la redacción (Fase 2), si el writer necesita un Evidence Pack para una sección técnica.
+- Tras la implementación (Fase 4), si las tareas completadas afectan áreas documentadas en el mapa.
+
+**3 modos:**
+- `initial` — Mapa completo + hasta 3 Evidence Packs de las áreas principales.
+- `focused` — Un solo Evidence Pack sobre un tema específico (FOCUS).
+- `refresh` — Actualización incremental de mapa y EPs afectados por cambios recientes.
+
+**Salidas:**
+- `docs/spec/_inputs/codebase-map.md` (mapa del proyecto)
+- `docs/spec/_inputs/evidence/EP-###-<tema>.md` (Evidence Packs)
+- OPENQs registradas en `docs/spec/95-open-questions.md`
+
+**Qué NO hace:**
+- No modifica el codebase ni la spec.
+- No se invoca en proyectos greenfield (sin `codebase/`).
+- No reemplaza la lectura directa de `codebase/` por otros agentes cuando necesiten info puntual.
+
+**Siguiente paso típico:** el Director presenta los artefactos al usuario y continúa hacia Planner o Writer
 
 ---
 
@@ -272,6 +302,13 @@ Usuario ←→ spc-spec-director (conversación continua)
   │   → confirma → delega a spc-spec-intake (one-shot, formaliza docs)
   │   → presenta resultado → gate humano
   │
+  ├─ [si hay codebase/ con contenido y no hay mapa]
+  │   Director propone discovery (opcional: rápido/profundo/saltar)
+  │   → si acepta → delega a spc-codebase-discovery (MODE=initial)
+  │   → presenta artefactos (mapa, EPs, OPENQs)
+  │   → si el discovery revela discrepancias con contexto → ofrece re-intake
+  │   → gate humano
+  │
   ├─ [si falta plan]
   │   Director explica → confirma → delega a spc-spec-planner
   │   → presenta resultado
@@ -314,6 +351,14 @@ Reglas clave:
 - Afirmaciones técnicas relevantes requieren:
   - rutas `codebase/...` o Evidence Pack
   - o `OPENQ-###` si no se puede verificar
+
+Flujo de discovery (opcional, orquestado por el Director):
+
+1. **Post-intake:** si hay `codebase/` con contenido y no hay mapa → el Director propone discovery (rápido/profundo/saltar).
+2. **Pre-redacción técnica:** si el writer necesita info para una sección (arquitectura, backend, datos, seguridad, infra) y no hay EP → el Director propone Evidence Pack focalizado.
+3. **Post-implementación:** si las tareas Txx completadas afectan áreas documentadas en el mapa → el Director propone refresh del mapa.
+
+En todos los casos, el usuario puede rechazar el discovery sin fricción. El flujo continúa normalmente.
 
 ---
 

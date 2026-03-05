@@ -49,10 +49,11 @@ En este template, los agentes se nombran con convención:
 
 Existen 3 suites principales de agentes:
 
-#### Suite SPEC (5 agentes) — Workflow de especificación (director-first)
+#### Suite SPEC (6 agentes) — Workflow de especificación (director-first)
 
 - **spc-spec-director**: puerta única de entrada (orquesta el resto)
 - **spc-spec-intake**: formaliza el contexto recogido por el Director en `docs/spec/00-context.md` (invocado en one-shot)
+- **spc-codebase-discovery**: documenta el codebase existente generando mapa y Evidence Packs (opcional, solo modo evolutivo)
 - **spc-spec-planner**: convierte estado actual en plan ejecutable (**P01..Pnn** en `docs/spec/01-plan.md`)
 - **spc-spec-writer**: ejecuta tareas del plan editando `docs/spec/**`
 - **spc-spec-reviewer**: revisión crítica + creación de ADRs
@@ -226,7 +227,7 @@ Cuando el workspace contiene un repositorio de código (normalmente root `codeba
 
 **Qué agentes/prompts soportan modo evolutivo:**
 
-- Agentes SPEC: director, intake, planner, writer, reviewer
+- Agentes SPEC: director, intake, **codebase-discovery**, planner, writer, reviewer
 - Prompts: `/new-spec`, `/plan-iteration`, `/write-from-plan`, `/review-and-adr`, `/audit-spec-vs-codebase`, `/evidence-pack`
 
 ---

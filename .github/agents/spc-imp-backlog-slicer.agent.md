@@ -157,6 +157,9 @@ Prioridad de fuentes:
 4) Arquitectura/datos/backend/frontend/seguridad/infra
 5) Plan (`docs/spec/01-plan.md`) solo como ayuda de priorización (no como verdad funcional)
 6) OPENQs (`docs/spec/95-open-questions.md`) solo lectura
+7) Documentación derivada del codebase (si existe):
+   - `docs/spec/_inputs/codebase-map.md` — para dimensionar, identificar módulos afectados y dependencias técnicas reales.
+   - Evidence Packs en `docs/spec/_inputs/evidence/EP-*` — para evidencias verificadas de áreas específicas.
 
 ---
 

@@ -162,6 +162,8 @@ Si `ALLOW_SPLIT=true`:
 
 Opcional codebase:
 - solo para evitar suposiciones (no inventar rutas).
+- Si existe `docs/spec/_inputs/codebase-map.md`, consultar módulos/rutas relevantes para la tarea.
+- Si existe Evidence Pack relevante en `docs/spec/_inputs/evidence/`, citarlo como evidencia adicional en la ficha.
 
 ### Paso 2 — Generar/patch de ficha (skill)
 - Aplicar `spc-imp-task-definition`.
