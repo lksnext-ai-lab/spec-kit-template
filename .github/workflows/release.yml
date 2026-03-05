@@ -14,9 +14,11 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@v4
         with:
-          # Use a PAT (repo + workflow scopes) stored as RELEASE_PLEASE_TOKEN if
-          # "Allow GitHub Actions to create and approve pull requests" is disabled
-          # in Settings → Actions → General. Otherwise GITHUB_TOKEN is sufficient.
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          # GITHUB_TOKEN is sufficient when "Allow GitHub Actions to create and
+          # approve pull requests" is enabled in Settings → Actions → General.
+          # If that option is disabled, replace with a PAT (repo + workflow
+          # scopes) stored as a repository secret, e.g.:
+          #   token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
