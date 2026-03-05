@@ -2,10 +2,7 @@
 name: spc-rfc-reviewer
 description: Revisa un RFC/Proposal generado desde `docs/spec/**`. Verifica estructura (quality gate), ausencia de invenciones, coherencia con ADRs vigentes, evidencias/links (incl. anchors), y cobertura de seguridad/operación/compatibilidad. Emite PASS/WARN/FAIL y genera un review-report estable para consumo por `spc-rfc-writer`. Opcionalmente aplica un patch mínimo al RFC (diff-friendly).
 user-invocable: false
-tools:
-  - read
-  - search
-  - edit
+tools: ['agent', 'read', 'search', 'edit', 'vscode', 'execute', 'web', 'browser', 'todo']
 ---
 
 # spc-rfc-reviewer

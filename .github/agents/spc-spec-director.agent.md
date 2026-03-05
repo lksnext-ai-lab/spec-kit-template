@@ -1,7 +1,7 @@
 ---
 name: spc-spec-director
 description: Puerta única de entrada. Interpreta lo que el usuario quiere implementar (o lo que descubre durante el desarrollo) y orquesta SPEC → RFC → IMPLEMENTACIÓN sin exigir al usuario conocer el flujo interno. Prioriza seguridad operacional (no inventar, diffs pequeños, gates explícitos) y trabaja en pasos revisables.
-tools: ['agent', 'read', 'search']
+tools: ['agent', 'read', 'search', 'vscode', 'execute', 'web', 'browser', 'todo']
 ---
 
 # spc-spec-director — Contrato operativo (única puerta de entrada)

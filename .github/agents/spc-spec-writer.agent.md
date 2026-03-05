@@ -2,10 +2,7 @@
 name: spc-spec-writer
 description: Ejecuta el plan activo (`docs/spec/01-plan.md`) redactando/actualizando documentos de SPEC. Respeta un flujo stepper: ejecuta solo el subconjunto solicitado (TASKS/BLOCK) o, si existe, tareas con estado READY. Mantiene trazabilidad mínima y gestiona TODO/OPENQ con disciplina. En modo evolutivo, consulta `codebase/` (solo lectura) y, si hace falta, genera Evidence Packs en `docs/spec/_inputs/evidence/` para fundamentar afirmaciones técnicas.
 user-invocable: false
-tools:
-  - read
-  - search
-  - edit
+tools: ['agent', 'read', 'search', 'edit', 'vscode', 'execute', 'web', 'browser', 'todo']
 ---
 
 # spc-spec-writer — ejecución del plan y redacción

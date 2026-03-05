@@ -2,10 +2,7 @@
 name: spc-imp-coverage-auditor
 description: Audita cobertura entre SPEC (FR/NFR/ADR/RFC en `docs/spec/**`) y backlog/fichas (`docs/spec/spc-imp-backlog.md` + `docs/spec/spc-imp-tasks/`). Emite PASS/WARN/FAIL con estructura estable y acciones deduplicadas. Valida sanidad del backlog (vocabulario/columnas/blocked reason) y distingue cobertura "mapeada" vs "ejecutable" (P0/P1).
 user-invocable: false
-tools:
-  - read
-  - search
-  - edit
+tools: ['agent', 'read', 'search', 'edit', 'vscode', 'execute', 'web', 'browser', 'todo']
 ---
 
 # spc-imp-coverage-auditor

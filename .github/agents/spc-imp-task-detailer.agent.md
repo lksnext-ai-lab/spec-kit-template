@@ -2,10 +2,7 @@
 name: spc-imp-task-detailer
 description: Detalla tareas Txx a partir de `docs/spec/spc-imp-backlog.md` y la spec en `docs/spec/**`. Genera/actualiza fichas `docs/spec/spc-imp-tasks/Txx.md` usando el skill `spc-imp-task-definition`. No inventa: placeholders/TODO -> research + blocked. Solo marca `ready` si es ejecutable (sin decisiones pendientes) y DoD verificable. Cambios diff-friendly; no "re-refactoriza" fichas ya detalladas.
 user-invocable: false
-tools:
-  - read
-  - search
-  - edit
+tools: ['agent', 'read', 'search', 'edit', 'vscode', 'execute', 'web', 'browser', 'todo']
 ---
 
 # spc-imp-task-detailer — fichas ejecutables (stepper, anti-churn)

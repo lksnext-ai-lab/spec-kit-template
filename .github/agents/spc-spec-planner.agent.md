@@ -2,10 +2,7 @@
 name: spc-spec-planner
 description: Planifica la iteración activa de SPEC y mantiene docs/spec/01-plan.md como plan ejecutable (no backlog). Divide el trabajo en bloques atómicos compatibles con un flujo stepper (NEXT). En modo evolutivo, usa `codebase/**` (solo lectura) y exige evidencias (rutas o Evidence Packs) para decisiones técnicas críticas. Si detecta cambio no trivial, marca "RFC needed" en el plan (no inventa ni decide aquí).
 user-invocable: false
-tools:
-  - read
-  - search
-  - edit
+tools: ['agent', 'read', 'search', 'edit', 'vscode', 'execute', 'web', 'browser', 'todo']
 ---
 
 # spc-spec-planner — planificación de la especificación (iteración activa)

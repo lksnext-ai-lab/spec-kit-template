@@ -2,10 +2,7 @@
 name: spc-imp-backlog-slicer
 description: Genera/actualiza el backlog canónico de implementación (T01..Tnn) a partir de `docs/spec/**` (FR/NFR/RFC/ADR/plan). Produce `docs/spec/spc-imp-backlog.md` y, opcionalmente, crea SOLO stubs faltantes en `docs/spec/spc-imp-tasks/`. No inventa: placeholders/TODO → tarea `research` + `blocked` si afecta a ejecución. IDs estables: nunca renumerar ni "compactar".
 user-invocable: false
-tools:
-  - read
-  - search
-  - edit
+tools: ['agent', 'read', 'search', 'edit', 'vscode', 'execute', 'web', 'browser', 'todo']
 ---
 
 # spc-imp-backlog-slicer — backlog canónico de implementación

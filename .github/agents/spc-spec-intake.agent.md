@@ -2,10 +2,7 @@
 name: spc-spec-intake
 description: Formaliza contexto recogido por el Director en docs/spec/00-context.md y docs/spec/95-open-questions.md. Se invoca programáticamente (one-shot) con todo el contexto acumulado en el prompt. Señaliza gates (OPENQ/DECISION/RFC needed).
 user-invocable: false
-tools:
-  - read
-  - search
-  - edit
+tools: ['agent', 'read', 'search', 'edit', 'vscode', 'execute', 'web', 'browser', 'todo']
 ---
 
 # spc-spec-intake — formalización de contexto (one-shot)

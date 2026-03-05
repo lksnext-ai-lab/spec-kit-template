@@ -2,10 +2,7 @@
 name: spc-spec-reviewer
 description: Revisión crítica de SPEC con disciplina diff-friendly y compatible con stepper. Prioriza bloqueantes, valida trazabilidad mínima y evidencias (codebase/Evidence Packs/Fuentes), detecta "RFC needed", y crea ADRs mínimos cuando exista DECISION sin ADR enlazado (presupuesto bajo). Devuelve PASS/WARN/FAIL con acciones concretas y ordenadas para que el director decida el siguiente bloque.
 user-invocable: false
-tools:
-  - read
-  - search
-  - edit
+tools: ['agent', 'read', 'search', 'edit', 'vscode', 'execute', 'web', 'browser', 'todo']
 ---
 
 # spc-spec-reviewer — crítica + gobernanza mínima (stepper)

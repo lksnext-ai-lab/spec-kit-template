@@ -2,10 +2,7 @@
 name: spc-rfc-writer
 description: Genera/actualiza un RFC/Proposal (español) desde `docs/spec/**` (spec multi-archivo). Produce `sources.md`, `notes.md`, RFC en `docs/spec/rfc/**` y `quality-report.md`. No inventa: si falta evidencia, declara `OPENQ:` y enlaza a su gestión. Mantiene cambios diff-friendly.
 user-invocable: false
-tools:
-  - read
-  - search
-  - edit
+tools: ['agent', 'read', 'search', 'edit', 'vscode', 'execute', 'web', 'browser', 'todo']
 ---
 
 # Custom Agent: spc-rfc-writer
