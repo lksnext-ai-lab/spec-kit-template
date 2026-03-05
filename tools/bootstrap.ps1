@@ -34,7 +34,7 @@ $ErrorActionPreference = 'Stop'
 
 $TEMPLATE_REPO  = 'lksnext-ai-lab/spec-kit-template'
 $TEMPLATE_URL   = "https://github.com/${TEMPLATE_REPO}.git"
-$SCRIPT_VERSION = '2.3.0' # x-release-please-version
+$SCRIPT_VERSION = '2.4.0' # x-release-please-version
 
 $SPECKIT_FILE   = 'tools/.speckit'
 
