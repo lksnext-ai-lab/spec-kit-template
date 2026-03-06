@@ -32,7 +32,7 @@ $ErrorActionPreference = 'Stop'
 
 $TEMPLATE_REPO  = 'lksnext-ai-lab/spec-kit-template'
 $TEMPLATE_URL   = "https://github.com/${TEMPLATE_REPO}.git"
-$SCRIPT_VERSION = '2.5.2' # x-release-please-version
+$SCRIPT_VERSION = '2.5.3' # x-release-please-version
 
 $SPECKIT_FILE   = 'tools/.speckit'
 
@@ -1519,8 +1519,11 @@ function Get-UpdateSource {
         $prevEAP = $ErrorActionPreference
         $ErrorActionPreference = 'Continue'
         Push-Location $script:updateTmpDir
-        # Expand sparse checkout to include all managed paths
-        & git sparse-checkout set $MANAGED_PATHS 2>$null
+        # Strategy 2 leaves a sparse (cone-mode) clone with only VERSION+CHANGELOG.
+        # 'sparse-checkout set' in cone mode silently ignores subdirectory paths like
+        # .github/agents or docs/kit. Use 'disable' instead: exits sparse mode and
+        # fetches all missing blobs on-demand (works with --filter=blob:none clones).
+        & git sparse-checkout disable 2>$null
         Pop-Location
         $ErrorActionPreference = $prevEAP
         return $script:updateTmpDir

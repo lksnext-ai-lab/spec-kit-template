@@ -17,7 +17,7 @@ set -euo pipefail
 
 TEMPLATE_REPO="lksnext-ai-lab/spec-kit-template"
 TEMPLATE_URL="https://github.com/$TEMPLATE_REPO.git"
-SCRIPT_VERSION="2.5.2" # x-release-please-version
+SCRIPT_VERSION="2.5.3" # x-release-please-version
 
 SPECKIT_FILE="tools/.speckit"
 
@@ -1546,7 +1546,11 @@ get_remote_changelog() {
 get_update_source() {
     if [[ -n "$UPDATE_TMP_DIR" ]] && [[ -d "$UPDATE_TMP_DIR" ]]; then
         pushd "$UPDATE_TMP_DIR" >/dev/null 2>&1
-        git sparse-checkout set "${MANAGED_PATHS[@]}" 2>/dev/null || true
+        # Strategy 2 leaves a sparse (cone-mode) clone with only VERSION+CHANGELOG.
+        # Expanding it with 'sparse-checkout set' in cone mode silently drops
+        # subdirectory paths like .github/agents or docs/kit. Use 'disable' instead:
+        # it exits sparse mode and fetches all missing blobs on-demand (--filter=blob:none).
+        git sparse-checkout disable 2>/dev/null || true
         popd >/dev/null 2>&1
         echo "$UPDATE_TMP_DIR"
         return
