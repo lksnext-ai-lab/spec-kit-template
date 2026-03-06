@@ -14,6 +14,12 @@
 .LINK
     https://github.com/lksnext-ai-lab/spec-kit-template
 #>
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification='Interactive TUI rendering requires direct console output and cursor control.')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification='This is an interactive bootstrap script, not an advanced cmdlet module.')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', '', Justification='Positional arguments keep this script concise and readable.')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification='Function names are kept stable for compatibility in this script.')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '', Justification='Best-effort fallback paths intentionally ignore non-fatal probe errors.')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '', Justification='Some compatibility and future-use parameters are intentionally retained.')]
 [CmdletBinding()]
 param(
     [switch]$WorkspaceOnly,
@@ -34,7 +40,7 @@ $ErrorActionPreference = 'Stop'
 
 $TEMPLATE_REPO  = 'lksnext-ai-lab/spec-kit-template'
 $TEMPLATE_URL   = "https://github.com/${TEMPLATE_REPO}.git"
-$SCRIPT_VERSION = '2.3.0' # x-release-please-version
+$SCRIPT_VERSION = '2.4.1' # x-release-please-version
 
 $SPECKIT_FILE   = 'tools/.speckit'
 
@@ -62,9 +68,9 @@ $MANAGED_PATHS = @(
 $ESC = [char]0x1b
 
 # TUI geometry
-$HEADER_HEIGHT = 14
+$HEADER_HEIGHT = 12
 $STEP_AREA_HEIGHT = 14
-$PROGRESS_HEIGHT = 4
+$PROGRESS_HEIGHT = 0
 $STEP_AREA_TOP = $HEADER_HEIGHT
 $PROGRESS_TOP = $HEADER_HEIGHT + $STEP_AREA_HEIGHT
 
@@ -85,7 +91,7 @@ $C_SHOW   = $ESC + '[?25h'
 # State
 $script:useTui = $false
 $script:stepResults = @{}
-$script:totalSteps = 5
+$script:totalSteps = 6
 $script:currentStep = 0
 $script:projectName = ''
 $script:specName = ''
@@ -101,10 +107,11 @@ $script:codebaseName = ''
 $script:installVenv = $false
 $script:installExtensions = $false
 $script:openVsCode = $false
+$script:createBaseDir = $false
 $script:runMode = 'install' # 'install' or 'update'
 $script:headerAnimated = $false
 
-$script:stepLabels = @('Prerequisites', 'Project', 'Spec repo', 'Codebase', 'Extras')
+$script:stepLabels = @('Prerequisites', 'Project', 'Spec repo', 'Codebase', 'Extras', 'Confirm')
 
 # ===================================================================
 # TUI HELPERS
@@ -127,16 +134,23 @@ function Set-CursorAt([int]$row, [int]$col) {
 }
 
 function Clear-StepArea {
-    if (-not $script:useTui) {
+    if ($script:useTui) {
+        Set-CursorAt $STEP_AREA_TOP 0
+        for ($i = 0; $i -lt $STEP_AREA_HEIGHT; $i++) {
+            Write-Host "${C_CLR_LN}"
+        }
+        Set-CursorAt $STEP_AREA_TOP 0
+    } elseif ($script:headerAnimated -and -not [Console]::IsOutputRedirected) {
+        # Animation already drew the header in place — just clear the step area below it
+        [Console]::SetCursorPosition(0, $STEP_AREA_TOP)
+        for ($i = 0; $i -lt $STEP_AREA_HEIGHT; $i++) {
+            Write-Host "${C_CLR_LN}"
+        }
+        [Console]::SetCursorPosition(0, $STEP_AREA_TOP)
+    } else {
         Clear-Host
         Show-Header
-        return
     }
-    Set-CursorAt $STEP_AREA_TOP 0
-    for ($i = 0; $i -lt $STEP_AREA_HEIGHT; $i++) {
-        Write-Host "${C_CLR_LN}"
-    }
-    Set-CursorAt $STEP_AREA_TOP 0
 }
 
 function Write-C([string]$text) {
@@ -156,20 +170,20 @@ function Show-BootAnimation {
     Write-Host $C_HIDE -NoNewline
     Clear-Host
 
-    # Raw logo lines (62 chars wide to fit the box)
+    # Raw logo lines (61 chars wide — interior width 62, start at col 4, end at col 64, leaving col 65 for the right border)
     $logo = @(
-        '      _____ ____  ___________     __ __ __________            ',
-        '     / ___// __ \/ ____/ ___/    / //_//  _/_  __/            ',
-        '     \__ \/ /_/ / __/ / /       / ,<   / /  / /               ',
-        '    ___/ / ____/ /___/ /___    / /| |_/ /  / /                ',
-        '   /____/_/   /_____/\____/   /_/ |_/___/ /_/                 '
+        '      _____ ____  ___________     __ __ __________           ',
+        '     / ___// __ \/ ____/ ___/    / //_//  _/_  __/           ',
+        '     \__ \/ /_/ / __/ / /       / ,<   / /  / /              ',
+        '    ___/ / ____/ /___/ /___    / /| |_/ /  / /               ',
+        '   /____/_/   /_____/\____/   /_/ |_/___/ /_/                '
     )
     $subtitle  = 'Workspace Bootstrap'
     $byline    = 'by LKS Next'
     $pool = '@#$%&*=+~:;!?<>{}[]|^/\-_.'.ToCharArray()
     $rng  = [System.Random]::new()
     $border   = "  ${C_CYAN}${C_BOLD}+==============================================================+${C_RESET}"
-    $emptyRow = "  ${C_CYAN}|${C_RESET}                                                              ${C_CYAN}|${C_RESET}"
+    $emptyRow = "  ${C_CYAN}|${C_RESET}$(' ' * 62)${C_CYAN}|${C_RESET}"
 
     # Draw static frame once
     Write-C ''                       # row 0
@@ -179,16 +193,14 @@ function Show-BootAnimation {
     for ($r = 0; $r -lt 5; $r++) {
         Write-C "  ${C_CYAN}|${C_RESET}$(' ' * 62)${C_CYAN}|${C_RESET}"
     }
-    Write-C $emptyRow                # row 8
     # Subtitle + byline placeholder rows 9-10
     Write-C "  ${C_CYAN}|${C_RESET}$(' ' * 62)${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}|${C_RESET}$(' ' * 62)${C_CYAN}|${C_RESET}"
-    Write-C $emptyRow                # row 11
     Write-C $border                  # row 12
 
-    $logoStartRow = 3
-    $subRow  = 9
-    $byRow   = 10
+    $logoStartRow = 2
+    $subRow  = 8
+    $byRow   = 9
 
     # ── Phase 1: Scramble resolve — 12 frames ─────────────────────
     $ratios = @(0, 0, 5, 10, 18, 28, 40, 52, 65, 78, 88, 95)
@@ -264,61 +276,36 @@ function Show-Header {
 
     Write-C ''
     Write-C "  ${C_CYAN}${C_BOLD}+==============================================================+${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}                                                              ${C_CYAN}|${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}      ${C_BOLD}${C_WHITE}_____ ____  ___________${C_RESET}     ${C_BOLD}${C_CYAN}__ __ __________${C_RESET}            ${C_CYAN}|${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}     ${C_BOLD}${C_WHITE}/ ___// __ \/ ____/ ___/${C_RESET}    ${C_BOLD}${C_CYAN}/ //_//  _/_  __/${C_RESET}            ${C_CYAN}|${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}     ${C_BOLD}${C_WHITE}\__ \/ /_/ / __/ / /${C_RESET}       ${C_BOLD}${C_CYAN}/ ,<   / /  / /${C_RESET}               ${C_CYAN}|${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}    ${C_BOLD}${C_WHITE}___/ / ____/ /___/ /___${C_RESET}    ${C_BOLD}${C_CYAN}/ /| |_/ /  / /${C_RESET}                ${C_CYAN}|${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}   ${C_BOLD}${C_WHITE}/____/_/   /_____/\____/${C_RESET}   ${C_BOLD}${C_CYAN}/_/ |_/___/ /_/${C_RESET}                 ${C_CYAN}|${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}                                                              ${C_CYAN}|${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}  ${C_DIM}Workspace Bootstrap${C_RESET}                              ${C_DIM}v${SCRIPT_VERSION}${C_RESET}     ${C_CYAN}|${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}  ${C_DIM}by LKS Next${C_RESET}                                                 ${C_CYAN}|${C_RESET}"
-    Write-C "  ${C_CYAN}|${C_RESET}                                                              ${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}       ${C_BOLD}${C_WHITE}_____ ____  ___________${C_RESET}     ${C_BOLD}${C_CYAN}__ __ __________${C_RESET}            ${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}      ${C_BOLD}${C_WHITE}/ ___// __ \/ ____/ ___/${C_RESET}    ${C_BOLD}${C_CYAN}/ //_//  _/_  __/${C_RESET}            ${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}      ${C_BOLD}${C_WHITE}\__ \/ /_/ / __/ / /${C_RESET}       ${C_BOLD}${C_CYAN}/ ,<   / /  / /${C_RESET}               ${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}     ${C_BOLD}${C_WHITE}___/ / ____/ /___/ /___${C_RESET}    ${C_BOLD}${C_CYAN}/ /| |_/ /  / /${C_RESET}                ${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}    ${C_BOLD}${C_WHITE}/____/_/   /_____/\____/${C_RESET}   ${C_BOLD}${C_CYAN}/_/ |_/___/ /_/${C_RESET}                 ${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}                                                               ${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}   ${C_DIM}Workspace Bootstrap${C_RESET}                              ${C_DIM}v${SCRIPT_VERSION}${C_RESET}     ${C_CYAN}|${C_RESET}"
+    Write-C "  ${C_CYAN}|${C_RESET}   ${C_DIM}by LKS Next${C_RESET}                                                 ${C_CYAN}|${C_RESET}"
     Write-C "  ${C_CYAN}${C_BOLD}+==============================================================+${C_RESET}"
     # Pad header to fixed height
-    $headerLines = 13
+    $headerLines = 11
     for ($i = $headerLines; $i -lt $HEADER_HEIGHT; $i++) { Write-C '' }
 }
 
 # ===================================================================
-# PROGRESS BAR
+# PROGRESS BAR (rendered as the step divider line)
 # ===================================================================
 
-function Show-ProgressBar {
-    if (-not $script:useTui) { return }
-    $savedRow = [Console]::CursorTop
-    $savedCol = [Console]::CursorLeft
-
-    Set-CursorAt $PROGRESS_TOP 0
-    for ($i = 0; $i -lt $PROGRESS_HEIGHT; $i++) { Write-Host "${C_CLR_LN}" }
-    Set-CursorAt $PROGRESS_TOP 0
-
-    $pct = 0
-    if ($script:totalSteps -gt 0) {
-        $pct = [math]::Floor(($script:currentStep / $script:totalSteps) * 100)
-    }
-    $filled = [math]::Floor(($script:currentStep / $script:totalSteps) * 40)
-    $empty  = 40 - $filled
-    $barFill  = '=' * $filled
-    $barEmpty = '-' * $empty
-    Write-C "  ${C_DIM}Step $($script:currentStep)/${script:totalSteps}${C_RESET} ${C_CYAN}${barFill}${barEmpty}${C_RESET}  ${C_BOLD}${pct}%${C_RESET}"
-    Write-C ''
-
-    $line = '  '
-    for ($i = 0; $i -lt $script:stepLabels.Count; $i++) {
-        $lbl = $script:stepLabels[$i]
-        if ($i -lt $script:currentStep) {
-            $line += "${C_GREEN}[ok] ${lbl}${C_RESET}  "
-        } elseif ($i -eq $script:currentStep) {
-            $line += "${C_CYAN}${C_BOLD}> ${lbl}${C_RESET}  "
-        } else {
-            $line += "${C_DIM}[ ] ${lbl}${C_RESET}  "
-        }
-    }
-    Write-C $line
-
-    [Console]::SetCursorPosition($savedCol, $savedRow)
+function Get-ProgressDivider {
+    $pct = if ($script:totalSteps -gt 0) { [math]::Floor(($script:currentStep / $script:totalSteps) * 100) } else { 0 }
+    $left  = "Step $($script:currentStep)/$($script:totalSteps) "
+    $right = " ${pct}%"
+    $barWidth = 62 - $left.Length - $right.Length
+    if ($barWidth -lt 4) { $barWidth = 4 }
+    $f   = if ($script:totalSteps -gt 0) { [math]::Floor(($script:currentStep / $script:totalSteps) * $barWidth) } else { 0 }
+    $bar = ('=' * $f) + ('-' * ($barWidth - $f))
+    return "${C_DIM}${left}${C_RESET}${C_CYAN}${bar}${C_RESET}${C_DIM}${right}${C_RESET}"
 }
+
+function Show-ProgressBar { }
 
 # ===================================================================
 # STEP DISPLAY
@@ -326,10 +313,8 @@ function Show-ProgressBar {
 
 function Show-StepHeader([string]$title) {
     Clear-StepArea
-    $num = $script:currentStep + 1
-    Write-C ''
-    Write-Pad "${C_BOLD}${C_WHITE}STEP ${num} / $($script:totalSteps) -- ${title}${C_RESET}" 2
-    Write-Pad "${C_DIM}$('_' * 56)${C_RESET}" 2
+    Write-Pad "${C_BOLD}${C_WHITE}${title}${C_RESET}" 2
+    Write-Pad (Get-ProgressDivider) 2
     Write-C ''
 }
 
@@ -337,34 +322,193 @@ function Show-StepHeader([string]$title) {
 # INPUT HELPERS
 # ===================================================================
 
-function Read-Value([string]$prompt, [string]$default, [switch]$Required) {
-    $dd = ''
-    if ($default) { $dd = " ${C_DIM}[${default}]${C_RESET}" }
-    Write-Host "  ${C_CYAN}>${C_RESET} ${prompt}${dd}: " -NoNewline
-    $val = Read-Host
-    if ([string]::IsNullOrWhiteSpace($val)) {
-        if ($default) { return $default }
-        if ($Required) {
-            Write-Pad "${C_RED}Value required.${C_RESET}" 2
-            return (Read-Value $prompt $default -Required:$Required)
-        }
-        return ''
+# Atomically paints the entire step area for a text/yesno question.
+# Clears the region, renders header + summaries + label + input prompt +
+# footer, then positions cursor on the input line.
+function Show-StepContent {
+    param(
+        [string]$StepTitle,
+        [string[]]$SummaryLines = @(),
+        [string]$Label = '',
+        [string]$InputLine = '',
+        [string]$Hint = '',
+        [string]$Footer = '',
+        [string]$ErrorMsg = ''
+    )
+
+    Clear-StepArea
+
+    # Row 0-1: step header + divider
+    Write-Pad "${C_BOLD}${C_WHITE}${StepTitle}${C_RESET}" 2
+    Write-Pad (Get-ProgressDivider) 2
+    Write-C ''
+    # Summary lines (previous answers)
+    foreach ($line in $SummaryLines) {
+        Write-Pad $line 2
     }
-    return $val.Trim()
+    # Label + input on the same line
+    $inputRow = 0; $inputCol = 0
+    if ($Label -and $InputLine) {
+        Write-Host "  ${C_BOLD}${C_WHITE}${Label}${C_RESET}  ${InputLine}" -NoNewline
+        $inputRow = [Console]::CursorTop
+        $inputCol = [Console]::CursorLeft
+        Write-Host ''
+    } elseif ($Label) {
+        Write-Pad "${C_BOLD}${C_WHITE}${Label}${C_RESET}" 2
+    } elseif ($InputLine) {
+        Write-Host "  ${InputLine}" -NoNewline
+        $inputRow = [Console]::CursorTop
+        $inputCol = [Console]::CursorLeft
+        Write-Host ''
+    }
+    # Error or blank
+    if ($ErrorMsg) {
+        Write-Pad "${C_RED}${ErrorMsg}${C_RESET}" 2
+    } else {
+        Write-C ''
+    }
+    # Footer
+    if ($Footer) {
+        Write-Pad "${C_DIM}${Footer}${C_RESET}" 2
+    }
+
+    # Refresh progress bar (jumps to progress area, draws, returns)
+    Show-ProgressBar
+
+    # Position cursor on the input line
+    if ($InputLine -and -not [Console]::IsOutputRedirected) {
+        [Console]::SetCursorPosition($inputCol, $inputRow)
+    }
 }
 
-function Read-YesNo([string]$prompt, [bool]$default) {
-    $hint = 'y/N'
-    if ($default) { $hint = 'Y/n' }
-    Write-Host "  ${C_CYAN}>${C_RESET} ${prompt} ${C_DIM}[${hint}]${C_RESET}: " -NoNewline
-    $val = Read-Host
-    if ([string]::IsNullOrWhiteSpace($val)) { return $default }
-    return ($val -match '^[yYsS]')
+# Shared ReadKey loop for text input. Returns the typed string,
+# or $null if the user pressed Escape (when AllowBack).
+function Read-TextKey([switch]$AllowBack) {
+    $buf = [System.Text.StringBuilder]::new()
+    while ($true) {
+        $k = [Console]::ReadKey($true)
+        switch ($k.Key) {
+            'Escape'    { if ($AllowBack) { return $null } }
+            'Enter'     { return $buf.ToString() }
+            'Backspace' {
+                if ($buf.Length -gt 0) {
+                    $buf.Remove($buf.Length - 1, 1) | Out-Null
+                    Write-Host "`b `b" -NoNewline
+                }
+            }
+            default {
+                $ch = $k.KeyChar
+                if ([int][char]$ch -ge 32) {
+                    $buf.Append($ch) | Out-Null
+                    Write-Host $ch -NoNewline
+                }
+            }
+        }
+    }
+}
+
+function Read-Value {
+    param(
+        [string]$Prompt, [string]$Default, [switch]$Required, [switch]$AllowBack,
+        [string]$Hint = '', [string]$Footer = '',
+        [string]$StepTitle = '', [string[]]$SummaryLines = @()
+    )
+
+    $dd = if ($Default) { " ${C_DIM}[${Default}]${C_RESET}" } else { '' }
+    if ($StepTitle -and -not [Console]::IsOutputRedirected) {
+        # === Anchored layout: full step-area repaint ===
+        $inputPrefix = "${C_CYAN}>${C_RESET}${dd}: "
+        $errorMsg = ''
+        while ($true) {
+            Show-StepContent -StepTitle $StepTitle -SummaryLines $SummaryLines `
+                -Label $Prompt -InputLine $inputPrefix `
+                -Hint $Hint -Footer $Footer -ErrorMsg $errorMsg
+
+            $raw = Read-TextKey -AllowBack:$AllowBack
+            if ($null -eq $raw) { return $null }
+
+            $val = $raw.Trim()
+            if ([string]::IsNullOrWhiteSpace($val)) {
+                if ($Default) { return $Default }
+                if ($Required) { $errorMsg = 'Value required.'; continue }
+                return ''
+            }
+            return $val
+        }
+    } elseif ($AllowBack -and -not [Console]::IsOutputRedirected) {
+        # === Simple inline with ESC support ===
+        Write-Host "  ${C_CYAN}>${C_RESET} ${Prompt}${dd}: " -NoNewline
+        $raw = Read-TextKey -AllowBack
+        if ($null -eq $raw) { return $null }
+        $val = $raw.Trim()
+        if ([string]::IsNullOrWhiteSpace($val)) {
+            if ($Default) { return $Default }
+            if ($Required) {
+                Write-Pad "${C_RED}Value required.${C_RESET}" 2
+                return (Read-Value -Prompt $Prompt -Default $Default -Required:$Required -AllowBack)
+            }
+            return ''
+        }
+        return $val
+    } else {
+        # === Simplest: Read-Host ===
+        Write-Host "  ${C_CYAN}>${C_RESET} ${Prompt}${dd}: " -NoNewline
+        $val = Read-Host
+        if ([string]::IsNullOrWhiteSpace($val)) {
+            if ($Default) { return $Default }
+            if ($Required) {
+                Write-Pad "${C_RED}Value required.${C_RESET}" 2
+                return (Read-Value -Prompt $Prompt -Default $Default -Required:$Required)
+            }
+            return ''
+        }
+        return $val.Trim()
+    }
+}
+
+function Read-YesNo {
+    param(
+        [string]$Prompt, [bool]$Default, [switch]$AllowBack,
+        [string]$Hint = '', [string]$Footer = '',
+        [string]$StepTitle = '', [string[]]$SummaryLines = @()
+    )
+
+    $ynHint = if ($Default) { 'Y/n' } else { 'y/N' }
+    if ($StepTitle -and -not [Console]::IsOutputRedirected) {
+        # === Anchored layout: full step-area repaint ===
+        $inputPrefix = "${C_CYAN}>${C_RESET} ${C_DIM}[${ynHint}]${C_RESET}: "
+        Show-StepContent -StepTitle $StepTitle -SummaryLines $SummaryLines `
+            -Label $Prompt -InputLine $inputPrefix `
+            -Hint $Hint -Footer $Footer
+    } elseif ($AllowBack) {
+        Write-Host "  ${C_CYAN}>${C_RESET} ${Prompt} ${C_DIM}[${ynHint}]${C_RESET}: " -NoNewline
+    } else {
+        Write-Host "  ${C_CYAN}>${C_RESET} ${Prompt} ${C_DIM}[${ynHint}]${C_RESET}: " -NoNewline
+    }
+
+    if ($AllowBack -and -not [Console]::IsOutputRedirected) {
+        while ($true) {
+            $k = [Console]::ReadKey($true)
+            switch ($k.Key) {
+                'Escape' { return $null }
+                'Enter'  { return $Default }
+                default {
+                    $ch = $k.KeyChar
+                    if ($ch -match '[yYsS]') { Write-Host $ch; return $true }
+                    if ($ch -match '[nN]') { Write-Host $ch; return $false }
+                }
+            }
+        }
+    } else {
+        $val = Read-Host
+        if ([string]::IsNullOrWhiteSpace($val)) { return $Default }
+        return ($val -match '^[yYsS]')
+    }
 }
 
 function Read-Continue {
     Write-C ''
-    Write-Host "  ${C_DIM}Press Enter to continue...${C_RESET}" -NoNewline
+    Write-Pad "${C_DIM}Enter  Continue${C_RESET}" 2
     Read-Host | Out-Null
 }
 
@@ -377,7 +521,8 @@ function Read-InteractiveChoice {
         [string]$Title,
         [string[]]$Options,
         [string[]]$Hints,
-        [int]$Default = 0
+        [int]$Default = 0,
+        [switch]$AllowBack
     )
 
     # Fallback if output is redirected (no interactive TUI)
@@ -402,22 +547,28 @@ function Read-InteractiveChoice {
 
     $selected = $Default
     $optCount = $Options.Count
-    # Calculate how many lines we render so we can erase them
-    # Title(1) + blank(1) + options(n) + blank(1) + hint box(6) + blank(1) + footer(1) = n + 11
-    $hintBoxHeight = 6
-    $totalLines = 1 + 1 + $optCount + 1 + $hintBoxHeight + 1 + 1
+    # Title(1) + options(n) + blank(1) + footer(1) = n + 3
+    $totalLines = 1 + $optCount + 1 + 1
 
     # Hide cursor during selection
     Write-Host $C_HIDE -NoNewline
 
     try {
+        # Reserve vertical space to prevent scroll-induced rendering artifacts.
+        # Writing blank lines first pushes the viewport down if needed;
+        # CursorTop after the writes gives the correct post-scroll anchor.
+        for ($i = 0; $i -lt $totalLines; $i++) { Write-Host '' }
+        $startRow = [Console]::CursorTop - $totalLines
+        if ($startRow -lt 0) { $startRow = 0 }
+
         while ($true) {
-            # Save cursor position
-            $startRow = [Console]::CursorTop
+            # Clear and reposition at the fixed anchor
+            [Console]::SetCursorPosition(0, $startRow)
+            for ($i = 0; $i -lt $totalLines; $i++) { Write-Host "${C_CLR_LN}" }
+            [Console]::SetCursorPosition(0, $startRow)
 
             # Title
             Write-Pad "${C_BOLD}${C_WHITE}${Title}${C_RESET}" 2
-            Write-C ''
 
             # Options
             for ($i = 0; $i -lt $optCount; $i++) {
@@ -430,66 +581,35 @@ function Read-InteractiveChoice {
 
             Write-C ''
 
-            # Hint box
-            $hint = ''
-            if ($Hints -and $selected -lt $Hints.Count) {
-                $hint = $Hints[$selected]
-            }
-            $boxWidth = 55
-            Write-Pad "${C_DIM}+$('-' * $boxWidth)+${C_RESET}" 4
-            # Wrap hint text into lines
-            $hintLines = @()
-            if ($hint) {
-                $words = $hint -split '\s+'
-                $line = ''
-                foreach ($w in $words) {
-                    if (($line.Length + $w.Length + 1) -gt ($boxWidth - 4)) {
-                        $hintLines += $line
-                        $line = $w
-                    } else {
-                        if ($line) { $line += ' ' }
-                        $line += $w
-                    }
-                }
-                if ($line) { $hintLines += $line }
-            }
-            # Pad to fixed height (4 content lines)
-            while ($hintLines.Count -lt 4) { $hintLines += '' }
-            for ($i = 0; $i -lt 4; $i++) {
-                $content = $hintLines[$i]
-                $padLen = $boxWidth - 2 - $content.Length
-                if ($padLen -lt 0) { $padLen = 0 }
-                Write-Pad "${C_DIM}|${C_RESET}  ${content}$(' ' * $padLen)${C_DIM}|${C_RESET}" 4
-            }
-            Write-Pad "${C_DIM}+$('-' * $boxWidth)+${C_RESET}" 4
-
-            Write-C ''
-
             # Footer
-            $pos = "$($selected + 1)/${optCount}"
-            Write-Pad "${C_DIM}Up/Down Navigate   Enter Select${C_RESET}                       ${C_DIM}${pos}${C_RESET}" 2
+            $backText = ''
+            if ($AllowBack) { $backText = '   Esc Back' }
+            $navText = "Up/Down Navigate   Enter Select${backText}"
+            Write-Pad "${C_DIM}${navText}${C_RESET}" 2
 
             # Read key
             $key = [Console]::ReadKey($true)
             switch ($key.Key) {
                 'UpArrow'   { $selected = [Math]::Max(0, $selected - 1) }
                 'DownArrow' { $selected = [Math]::Min($optCount - 1, $selected + 1) }
+                'Escape'    {
+                    if ($AllowBack) {
+                        Write-Host $C_SHOW -NoNewline
+                        [Console]::SetCursorPosition(0, $startRow)
+                        for ($i = 0; $i -lt $totalLines; $i++) { Write-Host "${C_CLR_LN}" }
+                        [Console]::SetCursorPosition(0, $startRow)
+                        return -1
+                    }
+                }
                 'Enter'     {
                     Write-Host $C_SHOW -NoNewline
-                    # Clear selector area
                     [Console]::SetCursorPosition(0, $startRow)
                     for ($i = 0; $i -lt $totalLines; $i++) { Write-Host "${C_CLR_LN}" }
                     [Console]::SetCursorPosition(0, $startRow)
-                    # Show final selection
                     Write-Pad "${C_GREEN}[ok]${C_RESET} $($Options[$selected])" 4
                     return $selected
                 }
             }
-
-            # Erase and redraw
-            [Console]::SetCursorPosition(0, $startRow)
-            for ($i = 0; $i -lt $totalLines; $i++) { Write-Host "${C_CLR_LN}" }
-            [Console]::SetCursorPosition(0, $startRow)
         }
     } finally {
         Write-Host $C_SHOW -NoNewline
@@ -555,39 +675,71 @@ function Test-Prerequisites {
 # ===================================================================
 
 function Get-ProjectConfig {
-    Show-StepHeader 'Project name and location'
-    Show-ProgressBar
+    $nameDefault = ''
+    $bdDefault = (Get-Location).Path
+    $subStep = 0
 
-    $name = Read-Value 'Project name (e.g. mi-app)' '' -Required
-    $slug = ($name -replace '[^a-zA-Z0-9_-]', '-').Trim('-').ToLower()
-    if ($slug -ne $name) {
-        Write-Pad "Normalized to: ${C_BOLD}${slug}${C_RESET}" 4
-    }
+    while ($true) {
+        $slug = ''
 
-    Write-C ''
-    $bd = Read-Value 'Base directory' (Get-Location).Path
-    if (-not (Test-Path $bd)) {
-        if (Read-YesNo "Directory '${bd}' does not exist. Create it?" $true) {
-            if (-not $DryRun) { New-Item -Path $bd -ItemType Directory -Force | Out-Null }
-            Write-Pad "${C_GREEN}[ok]${C_RESET} Created ${bd}" 4
-        } else {
-            Write-Pad "${C_RED}Aborting.${C_RESET}" 2
-            exit 1
+        if ($subStep -le 0) {
+            # Q1: project name (no back — first question)
+            $name = Read-Value 'Project name (e.g. mi-app)' $nameDefault -Required `
+                -StepTitle 'Project name and location' `
+                -Hint 'Choose a short identifier for your project. It will be used as the spec repo name prefix (e.g. "mi-app" -> spec-mi-app) and as the VS Code workspace name. Only letters, numbers, hyphens and underscores are allowed.' `
+                -Footer 'Type to enter   Enter Confirm'
+            $slug = ($name -replace '[^a-zA-Z0-9_-]', '-').Trim('-').ToLower()
+            $nameDefault = $slug
         }
-    }
+        $slug = $nameDefault
 
-    $script:projectName = $slug
-    $script:specName    = "spec-${slug}"
-    $resolvedBd = Resolve-Path $bd -ErrorAction SilentlyContinue
-    if ($resolvedBd) {
-        $script:baseDir = $resolvedBd.Path
-    } else {
+        # Q2: base directory
+        $bd = Read-Value 'Base directory' $bdDefault -AllowBack `
+            -StepTitle 'Project name and location' `
+            -SummaryLines @("${C_DIM}> Project name: ${C_RESET}${C_BOLD}${slug}${C_RESET}") `
+            -Hint "Parent folder where the spec repo will be created. The wizard will clone or create a sub-folder named 'spec-${slug}' inside this directory. Defaults to the current working directory." `
+            -Footer 'Type to enter   Enter Confirm   Esc Back'
+        if ($null -eq $bd) {
+            $subStep = 0
+            continue
+        }
+        $bdDefault = $bd
+        $script:createBaseDir = $false
+
+        # Q3: create dir?
+        if (-not (Test-Path $bd)) {
+            $result = Read-YesNo "Directory '${bd}' does not exist. Create it?" $true -AllowBack `
+                -StepTitle 'Project name and location' `
+                -SummaryLines @(
+                    "${C_DIM}> Project name: ${C_RESET}${C_BOLD}${slug}${C_RESET}",
+                    "${C_DIM}> Base directory: ${C_RESET}${C_BOLD}${bd}${C_RESET}"
+                ) `
+                -Hint "The directory '${bd}' does not exist yet. Answer Yes to have the bootstrap create it automatically when the wizard is confirmed. Answer No to go back and enter a different path." `
+                -Footer 'Y/N Confirm   Esc Back'
+            if ($null -eq $result) {
+                $subStep = 1
+                continue
+            }
+            if (-not $result) {
+                Write-Pad "${C_RED}Aborting.${C_RESET}" 2
+                exit 1
+            }
+            $script:createBaseDir = $true
+        }
+
+        $script:projectName = $slug
+        $script:specName    = "spec-${slug}"
+        if (-not $script:createBaseDir) {
+            $resolvedBd = Resolve-Path $bd -ErrorAction SilentlyContinue
+            if ($resolvedBd) { $bd = $resolvedBd.Path }
+        }
         $script:baseDir = $bd
-    }
 
-    $script:currentStep = 2
-    Show-ProgressBar
-    Start-Sleep -Milliseconds 300
+        $script:currentStep = 2
+        Show-ProgressBar
+        Start-Sleep -Milliseconds 300
+        return 'ok'
+    }
 }
 
 # ===================================================================
@@ -595,61 +747,72 @@ function Get-ProjectConfig {
 # ===================================================================
 
 function Get-SpecConfig {
-    Show-StepHeader 'Spec repository'
-    Show-ProgressBar
+    :stepLoop while ($true) {
+        Show-StepHeader 'Spec repository'
+        Show-ProgressBar
 
-    $hasGh = ($null -ne $script:stepResults['gh'])
+        $hasGh = ($null -ne $script:stepResults['gh'])
 
-    $options = @()
-    $hints   = @()
-    if ($hasGh) {
-        $options += 'Create from GitHub template'
-        $hints   += 'Creates a new private/public repo in your GitHub org using the spec-kit-template. Requires the GitHub CLI (gh) to be installed and authenticated.'
-    } else {
-        $options += 'Create from GitHub template (gh not found)'
-        $hints   += 'Requires the GitHub CLI (gh) which was not found. Install gh and authenticate first, then re-run the bootstrap.'
-    }
-    $options += 'Clone template locally'
-    $hints   += 'Clones the spec-kit-template repo and reinitializes git history. You get a fresh local repo that you can push to any remote later. Best for GitLab, Bitbucket, or Azure DevOps.'
-    $options += 'Use existing spec repo'
-    $hints   += 'Point to a spec repo already cloned on your machine. The bootstrap will link it to the workspace without modifying it.'
+        $options = @()
+        $hints   = @()
+        if ($hasGh) {
+            $options += 'Create from GitHub template'
+            $hints   += 'Creates a new private/public repo in your GitHub org using the spec-kit-template. Requires the GitHub CLI (gh) to be installed and authenticated.'
+        } else {
+            $options += 'Create from GitHub template (gh not found)'
+            $hints   += 'Requires the GitHub CLI (gh) which was not found. Install gh and authenticate first, then re-run the bootstrap.'
+        }
+        $options += 'Clone template locally'
+        $hints   += 'Clones the spec-kit-template repo and reinitializes git history. You get a fresh local repo that you can push to any remote later. Best for GitLab, Bitbucket, or Azure DevOps.'
+        $options += 'Use existing spec repo'
+        $hints   += 'Point to a spec repo already cloned on your machine. The bootstrap will link it to the workspace without modifying it.'
 
-    $defaultChoice = 1
-    if (-not $hasGh) { $defaultChoice = 1 }
-    $choice = Read-InteractiveChoice -Title 'How do you want to set up the spec repository?' -Options $options -Hints $hints -Default $defaultChoice
+        $defaultChoice = 1
+        if (-not $hasGh) { $defaultChoice = 1 }
+        $choice = Read-InteractiveChoice -Title 'How do you want to set up the spec repository?' -Options $options -Hints $hints -Default $defaultChoice -AllowBack
 
-    switch ($choice) {
-        0 {
-            if (-not $hasGh) {
-                Write-Pad "${C_YELLOW}gh CLI not found. Falling back to clone.${C_RESET}" 4
-                $script:specMode = 'clone'
-            } else {
+        if ($choice -eq -1) { return 'back' }
+
+        $needRestart = $false
+        switch ($choice) {
+            0 {
+                if (-not $hasGh) {
+                    Write-Pad "${C_YELLOW}gh CLI not found. Falling back to clone.${C_RESET}" 4
+                    $script:specMode = 'clone'
+                } else {
+                    Write-C ''
+                    $org = Read-Value 'GitHub org/user for the new repo' 'lksnext-ai-lab' -AllowBack
+                    if ($null -eq $org) { $needRestart = $true; break }
+                    $visChoice = Read-InteractiveChoice -Title 'Repository visibility' -Options @('Private', 'Public') -Hints @(
+                        'The repository will only be visible to you and collaborators you explicitly grant access to.',
+                        'The repository will be visible to everyone on the internet. Choose this for open-source projects.'
+                    ) -Default 0 -AllowBack
+                    if ($visChoice -eq -1) { $needRestart = $true; break }
+                    $script:specMode  = 'template'
+                    $script:specOrg   = $org
+                    $script:specVisibility = if ($visChoice -eq 0) { 'private' } else { 'public' }
+                }
+            }
+            1 { $script:specMode = 'clone' }
+            2 {
                 Write-C ''
-                $org = Read-Value 'GitHub org/user for the new repo' 'lksnext-ai-lab'
-                $visChoice = Read-InteractiveChoice -Title 'Repository visibility' -Options @('Private', 'Public') -Hints @(
-                    'The repository will only be visible to you and collaborators you explicitly grant access to.',
-                    'The repository will be visible to everyone on the internet. Choose this for open-source projects.'
-                ) -Default 0
-                $script:specMode  = 'template'
-                $script:specOrg   = $org
-                $script:specVisibility = if ($visChoice -eq 0) { 'private' } else { 'public' }
+                $p = Read-Value 'Path to existing spec repo' '' -Required -AllowBack
+                if ($null -eq $p) { $needRestart = $true; break }
+                if (-not (Test-Path (Join-Path $p 'docs/spec'))) {
+                    Write-Pad "${C_YELLOW}Warning: docs/spec/ not found in path. Continuing anyway.${C_RESET}" 4
+                }
+                $script:specMode = 'existing'
+                $script:specPath = $p
             }
         }
-        1 { $script:specMode = 'clone' }
-        2 {
-            Write-C ''
-            $p = Read-Value 'Path to existing spec repo' '' -Required
-            if (-not (Test-Path (Join-Path $p 'docs/spec'))) {
-                Write-Pad "${C_YELLOW}Warning: docs/spec/ not found in path. Continuing anyway.${C_RESET}" 4
-            }
-            $script:specMode = 'existing'
-            $script:specPath = $p
-        }
-    }
 
-    $script:currentStep = 3
-    Show-ProgressBar
-    Start-Sleep -Milliseconds 300
+        if ($needRestart) { continue }
+
+        $script:currentStep = 3
+        Show-ProgressBar
+        Start-Sleep -Milliseconds 300
+        return 'ok'
+    }
 }
 
 # ===================================================================
@@ -657,57 +820,68 @@ function Get-SpecConfig {
 # ===================================================================
 
 function Get-CodebaseConfig {
-    Show-StepHeader 'Codebase project'
-    Show-ProgressBar
+    :stepLoop while ($true) {
+        Show-StepHeader 'Codebase project'
+        Show-ProgressBar
 
-    $options = @(
-        'Existing local repo',
-        'Clone from URL',
-        'Create empty (git init)',
-        'Skip (no codebase for now)'
-    )
-    $hints = @(
-        'Link an existing codebase project already on your machine. The bootstrap adds it to the VS Code workspace as a second root folder (read-only from spec perspective).',
-        'Clone a remote Git repository as the codebase folder. It will be added as a second root in the VS Code workspace.',
-        'Creates a new empty folder with git initialized. Perfect for greenfield projects where the codebase does not exist yet.',
-        'Do not add a codebase folder now. You can add one later by editing the .code-workspace file manually.'
-    )
-    $choice = Read-InteractiveChoice -Title 'How do you want to set up the codebase project?' -Options $options -Hints $hints -Default 0
+        $options = @(
+            'Existing local repo',
+            'Clone from URL',
+            'Create empty (git init)',
+            'Skip (no codebase for now)'
+        )
+        $hints = @(
+            'Link an existing codebase project already on your machine. The bootstrap adds it to the VS Code workspace as a second root folder (read-only from spec perspective).',
+            'Clone a remote Git repository as the codebase folder. It will be added as a second root in the VS Code workspace.',
+            'Creates a new empty folder with git initialized. Perfect for greenfield projects where the codebase does not exist yet.',
+            'Do not add a codebase folder now. You can add one later by editing the .code-workspace file manually.'
+        )
+        $choice = Read-InteractiveChoice -Title 'How do you want to set up the codebase project?' -Options $options -Hints $hints -Default 0 -AllowBack
 
-    switch ($choice) {
-        0 {
-            Write-C ''
-            $p = Read-Value 'Path to codebase repo' '' -Required
-            if (-not (Test-Path $p)) {
-                Write-Pad "${C_RED}Path not found: ${p}${C_RESET}" 4
-                Get-CodebaseConfig
-                return
+        if ($choice -eq -1) { return 'back' }
+
+        $needRestart = $false
+        switch ($choice) {
+            0 {
+                Write-C ''
+                $p = Read-Value 'Path to codebase repo' '' -Required -AllowBack
+                if ($null -eq $p) { $needRestart = $true; break }
+                if (-not (Test-Path $p)) {
+                    Write-Pad "${C_RED}Path not found: ${p}${C_RESET}" 4
+                    $needRestart = $true
+                    break
+                }
+                $script:codebaseMode = 'existing'
+                $script:codebasePath = (Resolve-Path $p).Path
+                $script:codebaseName = Split-Path $p -Leaf
             }
-            $script:codebaseMode = 'existing'
-            $script:codebasePath = (Resolve-Path $p).Path
-            $script:codebaseName = Split-Path $p -Leaf
+            1 {
+                Write-C ''
+                $url = Read-Value 'Git clone URL' '' -Required -AllowBack
+                if ($null -eq $url) { $needRestart = $true; break }
+                $dirName = Read-Value 'Local folder name' $script:projectName -AllowBack
+                if ($null -eq $dirName) { $needRestart = $true; break }
+                $script:codebaseMode = 'clone'
+                $script:codebaseUrl  = $url
+                $script:codebaseName = $dirName
+            }
+            2 {
+                $script:codebaseMode = 'empty'
+                $script:codebaseName = $script:projectName
+            }
+            3 {
+                $script:codebaseMode = 'skip'
+                $script:codebaseName = $null
+            }
         }
-        1 {
-            Write-C ''
-            $url = Read-Value 'Git clone URL' '' -Required
-            $dirName = Read-Value 'Local folder name' $script:projectName
-            $script:codebaseMode = 'clone'
-            $script:codebaseUrl  = $url
-            $script:codebaseName = $dirName
-        }
-        2 {
-            $script:codebaseMode = 'empty'
-            $script:codebaseName = $script:projectName
-        }
-        3 {
-            $script:codebaseMode = 'skip'
-            $script:codebaseName = $null
-        }
-    }
 
-    $script:currentStep = 4
-    Show-ProgressBar
-    Start-Sleep -Milliseconds 300
+        if ($needRestart) { continue }
+
+        $script:currentStep = 4
+        Show-ProgressBar
+        Start-Sleep -Milliseconds 300
+        return 'ok'
+    }
 }
 
 # ===================================================================
@@ -726,15 +900,24 @@ function Get-ExtrasConfig {
     $script:openVsCode  = $false
 
     if ($hasPython -and (-not $NoVenv)) {
-        $script:installVenv = Read-YesNo 'Create Python venv and install mkdocs + tools?' $true
+        $result = Read-YesNo 'Create Python venv and install mkdocs + tools?' $true -AllowBack `
+            -StepTitle 'Optional setup' -Footer 'Y/N Confirm   Esc Back'
+        if ($null -eq $result) { return 'back' }
+        $script:installVenv = $result
     } elseif (-not $hasPython) {
         Write-Pad "${C_DIM}[  ] Python venv -- skipped (python not found)${C_RESET}" 4
     }
 
     if ($hasCode) {
-        $script:installExtensions = Read-YesNo 'Install recommended VS Code extensions?' $false
+        $result = Read-YesNo 'Install recommended VS Code extensions?' $false -AllowBack `
+            -StepTitle 'Optional setup' -Footer 'Y/N Confirm   Esc Back'
+        if ($null -eq $result) { return 'back' }
+        $script:installExtensions = $result
         if (-not $NoOpen) {
-            $script:openVsCode = Read-YesNo 'Open VS Code when done?' $true
+            $result = Read-YesNo 'Open VS Code when done?' $true -AllowBack `
+                -StepTitle 'Optional setup' -Footer 'Y/N Confirm   Esc Back'
+            if ($null -eq $result) { return 'back' }
+            $script:openVsCode = $result
         }
     } else {
         Write-Pad "${C_DIM}[  ] VS Code extensions -- skipped (code not found)${C_RESET}" 4
@@ -743,6 +926,55 @@ function Get-ExtrasConfig {
     $script:currentStep = 5
     Show-ProgressBar
     Start-Sleep -Milliseconds 300
+    return 'ok'
+}
+
+# ===================================================================
+# STEP 5 -- CONFIRMATION
+# ===================================================================
+
+function Show-ConfirmationSummary {
+    Show-StepHeader 'Review and confirm'
+    Show-ProgressBar
+
+    Write-Pad "${C_BOLD}Project${C_RESET}      ${C_WHITE}${script:projectName}${C_RESET}" 4
+    $locExtra = if ($script:createBaseDir) { "  ${C_YELLOW}(will be created)${C_RESET}" } else { '' }
+    Write-Pad "${C_BOLD}Location${C_RESET}     ${script:baseDir}${locExtra}" 4
+
+    $specDesc = switch ($script:specMode) {
+        'template' { "GitHub template -> $($script:specOrg)/$($script:specName) ($($script:specVisibility))" }
+        'clone'    { "Clone template -> $($script:specName)" }
+        'existing' { "Existing repo -> $($script:specPath)" }
+    }
+    Write-Pad "${C_BOLD}Spec repo${C_RESET}    ${specDesc}" 4
+
+    $cbDesc = switch ($script:codebaseMode) {
+        'existing' { "Existing -> $($script:codebasePath)" }
+        'clone'    { "Clone -> $($script:codebaseUrl) as $($script:codebaseName)" }
+        'empty'    { "New empty -> $($script:codebaseName)" }
+        'skip'     { "${C_DIM}Skipped${C_RESET}" }
+    }
+    Write-Pad "${C_BOLD}Codebase${C_RESET}     ${cbDesc}" 4
+
+    $venvTxt = if ($script:installVenv) { "${C_GREEN}Yes${C_RESET}" } else { "${C_DIM}No${C_RESET}" }
+    $extTxt  = if ($script:installExtensions) { "${C_GREEN}Yes${C_RESET}" } else { "${C_DIM}No${C_RESET}" }
+    $openTxt = if ($script:openVsCode) { "${C_GREEN}Yes${C_RESET}" } else { "${C_DIM}No${C_RESET}" }
+    Write-Pad "${C_BOLD}Venv${C_RESET} ${venvTxt}  ${C_BOLD}Extensions${C_RESET} ${extTxt}  ${C_BOLD}Open VS Code${C_RESET} ${openTxt}" 4
+
+    Write-C ''
+
+    $choice = Read-InteractiveChoice `
+        -Title 'Ready to proceed?' `
+        -Options @('Confirm and execute', 'Go back', 'Exit without changes') `
+        -Hints @(
+            'Apply all settings now: create repos, generate workspace and .speckit files, and configure extras.',
+            'Return to the previous step and review or modify your choices.',
+            'Quit the bootstrap wizard without making any changes.'
+        ) -Default 0 -AllowBack
+
+    if ($choice -eq -1 -or $choice -eq 1) { return 'back' }
+    if ($choice -eq 2) { return 'exit' }
+    return 'proceed'
 }
 
 # ===================================================================
@@ -771,6 +1003,22 @@ function Write-Task([string]$label, [string]$status) {
 
 function Write-TaskDetail([string]$detail) {
     Write-Pad "${C_DIM}    ${detail}${C_RESET}" 6
+}
+
+function Show-ExecProgress([int]$done, [int]$total, [string]$label) {
+    if (-not $script:useTui) { return }
+    $pct = [math]::Floor(($done / $total) * 100)
+    $filled = [math]::Floor(($done / $total) * 40)
+    $empty = 40 - $filled
+    $bar = ('=' * $filled) + ('-' * $empty)
+    $savedRow = [Console]::CursorTop
+    $savedCol = [Console]::CursorLeft
+    Set-CursorAt $PROGRESS_TOP 0
+    for ($i = 0; $i -lt $PROGRESS_HEIGHT; $i++) { Write-Host "${C_CLR_LN}" }
+    Set-CursorAt $PROGRESS_TOP 0
+    Write-C "  ${C_DIM}Applying${C_RESET} ${C_CYAN}${bar}${C_RESET}  ${C_BOLD}${pct}%${C_RESET}  ${C_DIM}(${done}/${total})${C_RESET}"
+    Write-C "  ${C_DIM}${label}${C_RESET}"
+    [Console]::SetCursorPosition($savedCol, $savedRow)
 }
 
 # ===================================================================
@@ -843,15 +1091,29 @@ function Update-SpecKitFile([string]$specDir, [string]$newVersion) {
 function Invoke-Setup {
     Clear-StepArea
     Write-C ''
-    Write-Pad "${C_BOLD}${C_WHITE}Setting up workspace...${C_RESET}" 2
+    Write-Pad "${C_BOLD}${C_WHITE}Applying configuration...${C_RESET}" 2
     Write-Pad "${C_DIM}$('_' * 56)${C_RESET}" 2
     Write-C ''
 
     $prevEAP = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
 
+    # -- Base directory (deferred from wizard) -------------------------
+    if ($script:createBaseDir) {
+        Write-Task 'Creating base directory' 'running'
+        if (-not $DryRun) { New-Item -Path $script:baseDir -ItemType Directory -Force | Out-Null }
+        Write-Task 'Creating base directory' 'done'
+        Write-TaskDetail $script:baseDir
+        $resolvedBd = Resolve-Path $script:baseDir -ErrorAction SilentlyContinue
+        if ($resolvedBd) { $script:baseDir = $resolvedBd.Path }
+    }
+
     $specDir       = Join-Path $script:baseDir $script:specName
     $workspaceFile = Join-Path $script:baseDir "$($script:projectName).code-workspace"
+
+    # -- Task progress -------------------------------------------------
+    $tasksTotal = 6
+    $tasksDone  = 0
 
     # -- Spec repo -----------------------------------------------------
     switch ($script:specMode) {
@@ -893,6 +1155,8 @@ function Invoke-Setup {
             Write-TaskDetail $specDir
         }
     }
+    $tasksDone++
+    Show-ExecProgress $tasksDone $tasksTotal 'Spec repo'
 
     # -- Codebase ------------------------------------------------------
     $codebaseDir = $null
@@ -929,6 +1193,8 @@ function Invoke-Setup {
             Write-Task 'Codebase' 'skip'
         }
     }
+    $tasksDone++
+    Show-ExecProgress $tasksDone $tasksTotal 'Codebase'
 
     # -- Workspace file ------------------------------------------------
     Write-Task 'Generating workspace file' 'running'
@@ -966,12 +1232,16 @@ ${foldersJson}
     }
     Write-Task 'Generating workspace file' 'done'
     Write-TaskDetail (Split-Path $workspaceFile -Leaf)
+    $tasksDone++
+    Show-ExecProgress $tasksDone $tasksTotal 'Workspace file'
 
     # -- .speckit control file -----------------------------------------
     Write-Task 'Generating version control file' 'running'
     Write-SpecKitFile $specDir $script:specMode
     Write-Task 'Generating version control file' 'done'
     Write-TaskDetail $SPECKIT_FILE
+    $tasksDone++
+    Show-ExecProgress $tasksDone $tasksTotal 'Version control'
 
     # -- Python venv ---------------------------------------------------
     if ($script:installVenv) {
@@ -995,6 +1265,8 @@ ${foldersJson}
     } else {
         Write-Task 'Python venv' 'skip'
     }
+    $tasksDone++
+    Show-ExecProgress $tasksDone $tasksTotal 'Python environment'
 
     # -- VS Code extensions --------------------------------------------
     if ($script:installExtensions) {
@@ -1008,6 +1280,8 @@ ${foldersJson}
     } else {
         Write-Task 'VS Code extensions' 'skip'
     }
+    $tasksDone++
+    Show-ExecProgress $tasksDone $tasksTotal 'Extensions'
 
     # -- Summary -------------------------------------------------------
     Show-InstallSummary $workspaceFile $specDir $codebaseDir
@@ -1566,10 +1840,43 @@ function Main {
         Invoke-UpdateFlow $specDir
     } else {
         Test-Prerequisites
-        Get-ProjectConfig
-        Get-SpecConfig
-        Get-CodebaseConfig
-        Get-ExtrasConfig
+        $wizardStep = 1
+        while ($wizardStep -le 5) {
+            switch ($wizardStep) {
+                1 {
+                    $script:currentStep = 1
+                    $r = Get-ProjectConfig
+                    if ($r -eq 'back') { $wizardStep = 1 } else { $wizardStep = 2 }
+                }
+                2 {
+                    $script:currentStep = 2
+                    $r = Get-SpecConfig
+                    if ($r -eq 'back') { $wizardStep = 1 } else { $wizardStep = 3 }
+                }
+                3 {
+                    $script:currentStep = 3
+                    $r = Get-CodebaseConfig
+                    if ($r -eq 'back') { $wizardStep = 2 } else { $wizardStep = 4 }
+                }
+                4 {
+                    $script:currentStep = 4
+                    $r = Get-ExtrasConfig
+                    if ($r -eq 'back') { $wizardStep = 3 } else { $wizardStep = 5 }
+                }
+                5 {
+                    $script:currentStep = 5
+                    $r = Show-ConfirmationSummary
+                    if ($r -eq 'back') { $wizardStep = 4 }
+                    elseif ($r -eq 'exit') {
+                        Write-C ''
+                        Write-Pad "${C_DIM}Exited without changes.${C_RESET}" 2
+                        Write-C ''
+                        return
+                    }
+                    else { $wizardStep = 6 }
+                }
+            }
+        }
         Invoke-Setup
     }
 }

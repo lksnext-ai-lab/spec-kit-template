@@ -1,6 +1,6 @@
 # Spec Kit Template
 
-> **Versión:** `2.3.0` — fuente única en [`VERSION`](VERSION) <!-- x-release-please-version -->
+> **Versión:** `2.4.1` — fuente única en [`VERSION`](VERSION) <!-- x-release-please-version -->
 
 Plantilla para crear **especificaciones técnicas** en Markdown con VS Code + GitHub Copilot, siguiendo un flujo agéntico: **Entender → Especificar → RFC → Implementar**, versionado con Git.
 
@@ -21,7 +21,7 @@ El script de bootstrap crea automáticamente el workspace completo (spec + codeb
   |     ___/ / ____/ /___/ /___    / /| |_/ /  / /               |
   |    /____/_/   /_____/\____/   /_/ |_/___/ /_/                |
   |                                                              |
-  |  Workspace Bootstrap                              v2.3.0     |
+  |  Workspace Bootstrap                              v2.X.X     |
   |  by LKS Next                                                 |
   |                                                              |
   +==============================================================+

@@ -95,7 +95,7 @@ El script verifica las herramientas disponibles:
 
 ```
   STEP 1 / 5 -- Checking prerequisites
-  ________________________________________________________
+  --------------------------------------------------------
 
     ✓ Git        2.43.0         (requerido)
     ✓ VS Code    1.87.0         (opcional)
@@ -116,7 +116,7 @@ El script verifica las herramientas disponibles:
 
 ```
   STEP 2 / 5 -- Project name and location
-  ________________________________________________________
+  --------------------------------------------------------
 
   > Project name (e.g. mi-app): mi-crm
   > Base directory [C:\Dev]:
@@ -229,7 +229,7 @@ El workspace solo tendrá la carpeta `spec`. Se puede añadir el codebase más a
 
 ```
   STEP 5 / 5 -- Optional setup
-  ________________________________________________________
+  --------------------------------------------------------
 
   > Create Python venv and install mkdocs + tools? [Y/n]:
   > Install recommended VS Code extensions? [y/N]:

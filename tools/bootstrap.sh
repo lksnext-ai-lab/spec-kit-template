@@ -17,7 +17,7 @@ set -euo pipefail
 
 TEMPLATE_REPO="lksnext-ai-lab/spec-kit-template"
 TEMPLATE_URL="https://github.com/$TEMPLATE_REPO.git"
-SCRIPT_VERSION="2.3.0" # x-release-please-version
+SCRIPT_VERSION="2.4.1" # x-release-please-version
 
 SPECKIT_FILE="tools/.speckit"
 
@@ -71,7 +71,7 @@ done
 # ── TUI geometry ──────────────────────────────────────────
 HEADER_HEIGHT=14
 STEP_AREA_HEIGHT=14
-PROGRESS_HEIGHT=4
+PROGRESS_HEIGHT=0
 STEP_AREA_TOP=$HEADER_HEIGHT
 PROGRESS_TOP=$(( HEADER_HEIGHT + STEP_AREA_HEIGHT ))
 
@@ -91,7 +91,7 @@ C_SHOW='\033[?25h'
 # ── State ─────────────────────────────────────────────────
 USE_TUI=false
 CURRENT_STEP=0
-TOTAL_STEPS=5
+TOTAL_STEPS=6
 
 HAS_GIT="" ; HAS_CODE="" ; HAS_GH="" ; HAS_PYTHON=""
 
@@ -99,6 +99,8 @@ PROJECT_NAME="" ; SPEC_NAME="" ; BASE_DIR=""
 SPEC_MODE="" ; SPEC_ORG="" ; SPEC_VIS="" ; SPEC_PATH=""
 CB_MODE="" ; CB_NAME="" ; CB_PATH="" ; CB_URL=""
 INSTALL_VENV=false ; INSTALL_EXT=false ; OPEN_VSCODE=false
+CREATE_BASE_DIR=false
+STEP_RESULT=""
 RUN_MODE="install"
 HEADER_ANIMATED=false
 UPDATE_TMP_DIR=""
@@ -108,7 +110,7 @@ UPDATED_COUNT=0
 ADDED_COUNT=0
 UPDATED_FOLDERS=()
 
-STEP_LABELS=("Prerequisites" "Project" "Spec repo" "Codebase" "Extras")
+STEP_LABELS=("Prerequisites" "Project" "Spec repo" "Codebase" "Extras" "Confirm")
 
 # ═══════════════════════════════════════════════════════════════
 # TUI HELPERS
@@ -293,39 +295,20 @@ show_header() {
 # PROGRESS BAR
 # ═══════════════════════════════════════════════════════════════
 
-show_progress_bar() {
-    $USE_TUI || return
-    printf '\033[s'
-
-    cursor_at "$PROGRESS_TOP" 0
-    for (( i=0; i<PROGRESS_HEIGHT; i++ )); do printf '\033[K\n'; done
-    cursor_at "$PROGRESS_TOP" 0
-
+get_progress_divider() {
     local pct=$(( CURRENT_STEP * 100 / TOTAL_STEPS ))
-    local filled=$(( CURRENT_STEP * 40 / TOTAL_STEPS ))
-    local empty=$(( 40 - filled ))
+    local left="Step ${CURRENT_STEP}/${TOTAL_STEPS} "
+    local right=" ${pct}%"
+    local bar_width=$(( 62 - ${#left} - ${#right} ))
+    (( bar_width < 4 )) && bar_width=4
+    local filled=$(( CURRENT_STEP * bar_width / TOTAL_STEPS ))
     local bar=""
     for (( i=0; i<filled; i++ )); do bar+="━"; done
-    for (( i=0; i<empty; i++ )); do bar+="○"; done
-    printf "  ${C_DIM}Step %d/%d${C_RESET} ${C_CYAN}%s${C_RESET}  ${C_BOLD}%d%%${C_RESET}\n" \
-        "$CURRENT_STEP" "$TOTAL_STEPS" "$bar" "$pct"
-    echo ''
-
-    local line='  '
-    for (( i=0; i<${#STEP_LABELS[@]}; i++ )); do
-        local label="${STEP_LABELS[$i]}"
-        if (( i < CURRENT_STEP )); then
-            line+=$(printf "${C_GREEN}✓ %s${C_RESET}  " "$label")
-        elif (( i == CURRENT_STEP )); then
-            line+=$(printf "${C_CYAN}${C_BOLD}▶ %s${C_RESET}  " "$label")
-        else
-            line+=$(printf "${C_DIM}○ %s${C_RESET}  " "$label")
-        fi
-    done
-    printf '%b\n' "$line"
-
-    printf '\033[u'
+    for (( i=0; i<bar_width - filled; i++ )); do bar+="○"; done
+    printf "${C_DIM}%s${C_RESET}${C_CYAN}%s${C_RESET}${C_DIM}%s${C_RESET}" "$left" "$bar" "$right"
 }
+
+show_progress_bar() { :; }
 
 # ═══════════════════════════════════════════════════════════════
 # STEP DISPLAY
@@ -334,12 +317,9 @@ show_progress_bar() {
 show_step_header() {
     local title="$1"
     clear_step_area
-    local num=$(( CURRENT_STEP + 1 ))
     echo ''
-    w_pad "$(printf "${C_BOLD}${C_WHITE}STEP %d / %d — %s${C_RESET}" "$num" "$TOTAL_STEPS" "$title")"
-    local sep=""
-    for (( i=0; i<56; i++ )); do sep+="─"; done
-    w_pad "$(printf "${C_DIM}%s${C_RESET}" "$sep")"
+    w_pad "$(printf "${C_BOLD}${C_WHITE}%s${C_RESET}" "$title")"
+    w_pad "$(get_progress_divider)"
     echo ''
 }
 
@@ -347,43 +327,230 @@ show_step_header() {
 # INPUT HELPERS
 # ═══════════════════════════════════════════════════════════════
 
+# Atomically paints the entire step area for a text/yesno question.
+# Clears the region, renders header + summaries + label + input prompt +
+# footer, then positions cursor on the input line.
+# Usage: render_step_content step_title label input_prefix hint footer error_msg summary1 summary2 ...
+render_step_content() {
+    local step_title="$1" label="$2" input_prefix="$3" hint="$4" footer="$5" error_msg="$6"
+    shift 6
+    local summaries=("$@")
+
+    clear_step_area
+
+    # Row 0-1: step header + divider
+    w_pad "$(printf "${C_BOLD}${C_WHITE}%s${C_RESET}" "$step_title")"
+    w_pad "$(get_progress_divider)"
+    echo ''
+    # Summary lines
+    for line in "${summaries[@]}"; do
+        [[ -n "$line" ]] && w_pad "$line"
+    done
+    # Label + input on the same line
+    if [[ -n "$label" ]] && [[ -n "$input_prefix" ]]; then
+        printf "  ${C_BOLD}${C_WHITE}%s${C_RESET}  %b" "$label" "$input_prefix"
+        printf '\033[s'
+        echo ''
+    elif [[ -n "$label" ]]; then
+        w_pad "$(printf "${C_BOLD}${C_WHITE}%s${C_RESET}" "$label")"
+    elif [[ -n "$input_prefix" ]]; then
+        printf '  %b' "$input_prefix"
+        printf '\033[s'
+        echo ''
+    fi
+
+    # Error or blank
+    if [[ -n "$error_msg" ]]; then
+        w_pad "$(printf "${C_RED}%s${C_RESET}" "$error_msg")"
+    else
+        echo ''
+    fi
+
+    # Footer
+    [[ -n "$footer" ]] && w_pad "$(printf "${C_DIM}%s${C_RESET}" "$footer")"
+
+    # Progress bar
+    show_progress_bar
+
+    # Restore cursor to input line
+    printf '\033[u'
+}
+
+# Shared ReadKey loop for text input. Returns the typed string on stdout.
+# Exit code 2 = ESC pressed (when allow_back=true).
+# Usage: result=$(read_text_key [allow_back])
+read_text_key() {
+    local allow_back="${1:-false}"
+    local buffer="" old_settings
+    old_settings=$(stty -g)
+    stty raw -echo
+    while true; do
+        local ch
+        IFS= read -rsn1 ch
+        case "$ch" in
+            $'\x1b')
+                local seq=""
+                IFS= read -rsn4 -t 0.05 seq || true
+                if [[ -z "$seq" ]] && [[ "$allow_back" == "true" ]]; then
+                    stty "$old_settings"
+                    printf '\n' >/dev/tty
+                    return 2
+                fi
+                ;;
+            $'\x7f'|$'\b')
+                if [[ ${#buffer} -gt 0 ]]; then
+                    buffer="${buffer%?}"
+                    printf '\b \b' >/dev/tty
+                fi
+                ;;
+            $'\r'|$'\n')
+                stty "$old_settings"
+                printf '\n' >/dev/tty
+                local trimmed="${buffer## }"
+                trimmed="${trimmed%% }"
+                printf '%s\n' "$trimmed"
+                return 0
+                ;;
+            $'\x03')
+                stty "$old_settings"
+                printf '\n' >/dev/tty
+                exit 130
+                ;;
+            *)
+                [[ -n "$ch" ]] && buffer+="$ch" && printf '%s' "$ch" >/dev/tty
+                ;;
+        esac
+    done
+}
+
+# read_value prompt [default] [required] [allow_back] [step_title] [hint] [footer] [summaries...]
 read_value() {
-    local prompt="$1" default="${2:-}" required="${3:-false}"
+    local prompt="$1" default="${2:-}" required="${3:-false}" allow_back="${4:-false}"
+    local step_title="${5:-}" hint="${6:-}" footer="${7:-}"
+    shift 7 2>/dev/null || true
+    local summaries=("$@")
+
     local display_default=""
     [[ -n "$default" ]] && display_default=" $(printf "${C_DIM}[%s]${C_RESET}" "$default")"
-    printf "  ${C_CYAN}▸${C_RESET} %b%b: " "$prompt" "$display_default"
-    local val
-    read -r val
-    val="${val## }" ; val="${val%% }"
-    if [[ -z "$val" ]]; then
-        if [[ -n "$default" ]]; then echo "$default"; return; fi
-        if [[ "$required" == "true" ]]; then
-            w_pad "Value required." 2 "$C_RED"
-            read_value "$prompt" "$default" "$required"
-            return
+    if [[ -n "$step_title" ]] && [[ -t 0 ]]; then
+        # === Anchored layout: full step-area repaint ===
+        local input_prefix
+        input_prefix="$(printf "${C_CYAN}▸${C_RESET}%b: " "$display_default")"
+        local error_msg=""
+        while true; do
+            render_step_content "$step_title" "$prompt" "$input_prefix" "$hint" "$footer" "$error_msg" "${summaries[@]}"
+
+            local _rc=0
+            local raw
+            raw=$(read_text_key "$allow_back") || _rc=$?
+            if [[ $_rc -eq 2 ]]; then return 2; fi
+
+            if [[ -z "$raw" ]]; then
+                if [[ -n "$default" ]]; then printf '%s\n' "$default"; return 0; fi
+                if [[ "$required" == "true" ]]; then error_msg="Value required."; continue; fi
+                return 0
+            fi
+            printf '%s\n' "$raw"
+            return 0
+        done
+    elif [[ "$allow_back" == "true" ]] && [[ -t 0 ]]; then
+        # === Simple inline with ESC support ===
+        printf "  ${C_CYAN}▸${C_RESET} %b%b: " "$prompt" "$display_default" >/dev/tty
+        local _rc=0
+        local raw
+        raw=$(read_text_key true) || _rc=$?
+        if [[ $_rc -eq 2 ]]; then return 2; fi
+        if [[ -z "$raw" ]]; then
+            if [[ -n "$default" ]]; then printf '%s\n' "$default"; return 0; fi
+            if [[ "$required" == "true" ]]; then
+                w_pad "Value required." 2 "$C_RED"
+                read_value "$prompt" "$default" "$required" "$allow_back" "$step_title" "$hint" "$footer" "${summaries[@]}"
+                return $?
+            fi
+            return 0
         fi
-        echo ''
+        printf '%s\n' "$raw"
+        return 0
     else
-        echo "$val"
+        # === Simplest: read from stdin ===
+        printf "  ${C_CYAN}▸${C_RESET} %b%b: " "$prompt" "$display_default"
+        local val
+        read -r val
+        val="${val## }" ; val="${val%% }"
+        if [[ -z "$val" ]]; then
+            if [[ -n "$default" ]]; then echo "$default"; return; fi
+            if [[ "$required" == "true" ]]; then
+                w_pad "Value required." 2 "$C_RED"
+                read_value "$prompt" "$default" "$required" "$allow_back" "$step_title" "$hint" "$footer" "${summaries[@]}"
+                return
+            fi
+            echo ''
+        else
+            echo "$val"
+        fi
     fi
 }
 
+# read_yesno prompt [default] [allow_back] [step_title] [hint] [footer] [summaries...]
 read_yesno() {
-    local prompt="$1" default="${2:-true}"
-    local hint
-    [[ "$default" == "true" ]] && hint="Y/n" || hint="y/N"
-    printf "  ${C_CYAN}▸${C_RESET} %s ${C_DIM}[%s]${C_RESET}: " "$prompt" "$hint"
-    local val
-    read -r val
-    if [[ -z "$val" ]]; then
-        [[ "$default" == "true" ]] && return 0 || return 1
+    local prompt="$1" default="${2:-true}" allow_back="${3:-false}"
+    local step_title="${4:-}" hint="${5:-}" footer="${6:-}"
+    shift 6 2>/dev/null || true
+    local summaries=("$@")
+
+    local yn_hint
+    [[ "$default" == "true" ]] && yn_hint="Y/n" || yn_hint="y/N"
+    if [[ -n "$step_title" ]] && [[ -t 0 ]] && [[ -t 1 ]]; then
+        # === Anchored layout: full step-area repaint ===
+        local input_prefix
+        input_prefix="$(printf "${C_CYAN}▸${C_RESET} ${C_DIM}[%s]${C_RESET}: " "$yn_hint")"
+        render_step_content "$step_title" "$prompt" "$input_prefix" "$hint" "$footer" "" "${summaries[@]}"
+    elif [[ "$allow_back" == "true" ]]; then
+        printf "  ${C_CYAN}▸${C_RESET} %s ${C_DIM}[%s]${C_RESET}: " "$prompt" "$yn_hint"
+    else
+        printf "  ${C_CYAN}▸${C_RESET} %s ${C_DIM}[%s]${C_RESET}: " "$prompt" "$yn_hint"
     fi
-    [[ "$val" =~ ^[yYsS] ]] && return 0 || return 1
+
+    if [[ "$allow_back" == "true" ]] && [[ -t 0 ]] && [[ -t 1 ]]; then
+        while true; do
+            local char
+            IFS= read -rsn1 char
+            case "$char" in
+                $'\x1b')
+                    local seq
+                    read -rsn2 -t 0.1 seq || true
+                    if [[ -z "$seq" ]]; then
+                        echo ''
+                        return 2
+                    fi
+                    ;;
+                [yYsS])
+                    printf "%s\n" "$char"
+                    return 0
+                    ;;
+                [nN])
+                    printf "%s\n" "$char"
+                    return 1
+                    ;;
+                '')
+                    echo ''
+                    [[ "$default" == "true" ]] && return 0 || return 1
+                    ;;
+            esac
+        done
+    else
+        local val
+        read -r val
+        if [[ -z "$val" ]]; then
+            [[ "$default" == "true" ]] && return 0 || return 1
+        fi
+        [[ "$val" =~ ^[yYsS] ]] && return 0 || return 1
+    fi
 }
 
 read_continue() {
     echo ''
-    printf "  ${C_DIM}Press Enter to continue...${C_RESET}"
+    printf "  ${C_DIM}%s${C_RESET}\n" "Enter  Continue"
     read -r _
 }
 
@@ -391,12 +558,18 @@ read_continue() {
 # INTERACTIVE SELECTOR (arrow keys + context hints)
 # ═══════════════════════════════════════════════════════════════
 
-# Usage: read_interactive_choice "Title" default_idx opt1 opt2 ... -- hint1 hint2 ...
-# Returns 0-based index via stdout
+# Usage: read_interactive_choice "Title" default_idx [--allow-back] opt1 opt2 ... -- hint1 hint2 ...
+# Returns 0-based index via stdout, or -1 on Escape (when --allow-back)
 read_interactive_choice() {
     local title="$1"
     local default_idx="${2:-0}"
     shift 2
+
+    local allow_back=false
+    if [[ "${1:-}" == "--allow-back" ]]; then
+        allow_back=true
+        shift
+    fi
 
     local options=()
     local hints=()
@@ -441,41 +614,43 @@ read_interactive_choice() {
         return
     fi
 
-    local hint_box_height=6
-    local total_lines=$(( 1 + 1 + opt_count + 1 + hint_box_height + 1 + 1 ))
-
-    # Get current cursor row
-    _get_cursor_row() {
-        local old_settings
-        old_settings=$(stty -g)
-        stty raw -echo min 0
-        printf '\033[6n'
-        local response=""
-        while true; do
-            local char
-            read -rsn1 -t 1 char || break
-            response+="$char"
-            [[ "$char" == "R" ]] && break
-        done
-        stty "$old_settings"
-        response="${response#*[}"
-        echo "${response%;*}"
-    }
+    local total_lines=$(( 1 + opt_count + 1 + 1 ))
 
     # Hide cursor
     printf "${C_HIDE}"
     trap 'printf "${C_SHOW}"' RETURN
 
-    local start_row
-    start_row=$(_get_cursor_row)
+    # Reserve space to prevent scroll-induced corruption
+    for (( i=0; i<total_lines; i++ )); do echo ''; done
+    # Calculate stable start_row AFTER reservation
+    local cur_row
+    cur_row=$(tput lines 2>/dev/null || echo 24)
+    # Use device status report for actual cursor position
+    local actual_row
+    local old_settings
+    old_settings=$(stty -g)
+    stty raw -echo min 0
+    printf '\033[6n'
+    local response=""
+    while true; do
+        local ch
+        read -rsn1 -t 1 ch || break
+        response+="$ch"
+        [[ "$ch" == "R" ]] && break
+    done
+    stty "$old_settings"
+    response="${response#*[}"
+    actual_row="${response%;*}"
+    local start_row=$(( actual_row - total_lines ))
 
     while true; do
-        # Move to start position
+        # Move to start and clear
+        tput cup $(( start_row - 1 )) 0 2>/dev/null || printf "\033[${start_row};1H"
+        for (( i=0; i<total_lines; i++ )); do printf '\033[K\n'; done
         tput cup $(( start_row - 1 )) 0 2>/dev/null || printf "\033[${start_row};1H"
 
         # Title
         w_pad "$(printf "${C_BOLD}${C_WHITE}%s${C_RESET}" "$title")"
-        echo ''
 
         # Options
         for (( i=0; i<opt_count; i++ )); do
@@ -488,59 +663,31 @@ read_interactive_choice() {
 
         echo ''
 
-        # Hint box
-        local hint=""
-        if (( selected < ${#hints[@]} )); then
-            hint="${hints[$selected]}"
-        fi
-        local box_width=55
-        local border=""
-        for (( b=0; b<box_width; b++ )); do border+="-"; done
-        w_pad "$(printf "${C_DIM}+%s+${C_RESET}" "$border")" 4
-
-        # Wrap hint text
-        local hint_lines=()
-        if [[ -n "$hint" ]]; then
-            local line=""
-            for word in $hint; do
-                if (( ${#line} + ${#word} + 1 > box_width - 4 )); then
-                    hint_lines+=("$line")
-                    line="$word"
-                else
-                    [[ -n "$line" ]] && line+=" "
-                    line+="$word"
-                fi
-            done
-            [[ -n "$line" ]] && hint_lines+=("$line")
-        fi
-
-        while (( ${#hint_lines[@]} < 4 )); do
-            hint_lines+=("")
-        done
-        for (( i=0; i<4; i++ )); do
-            local content="${hint_lines[$i]}"
-            local pad_len=$(( box_width - 2 - ${#content} ))
-            (( pad_len < 0 )) && pad_len=0
-            local padding=""
-            for (( j=0; j<pad_len; j++ )); do padding+=" "; done
-            printf "    ${C_DIM}|${C_RESET}  %s%s${C_DIM}|${C_RESET}\n" "$content" "$padding"
-        done
-        w_pad "$(printf "${C_DIM}+%s+${C_RESET}" "$border")" 4
-
-        echo ''
-
-        local pos="$(( selected + 1 ))/${opt_count}"
-        printf "  ${C_DIM}Up/Down Navigate   Enter Select${C_RESET}                       ${C_DIM}%s${C_RESET}\n" "$pos"
+        local footer_hint="Up/Down Navigate   Enter Select"
+        $allow_back && footer_hint="Esc Back   Up/Down Navigate   Enter Select"
+        printf "  ${C_DIM}%s${C_RESET}\n" "$footer_hint"
 
         # Read key
         local key
         read -rsn1 key
         case "$key" in
             $'\x1b')
-                read -rsn2 -t 0.1 key
-                case "$key" in
+                local seq
+                read -rsn2 -t 0.1 seq || true
+                case "$seq" in
                     '[A') (( selected > 0 )) && (( selected-- )) || true ;;
                     '[B') (( selected < opt_count - 1 )) && (( selected++ )) || true ;;
+                    '')
+                        # Pure Escape (no arrow sequence)
+                        if $allow_back; then
+                            printf "${C_SHOW}"
+                            tput cup $(( start_row - 1 )) 0 2>/dev/null || printf "\033[${start_row};1H"
+                            for (( i=0; i<total_lines; i++ )); do printf '\033[K\n'; done
+                            tput cup $(( start_row - 1 )) 0 2>/dev/null || printf "\033[${start_row};1H"
+                            echo "-1"
+                            return
+                        fi
+                        ;;
                 esac
                 ;;
             '') # Enter
@@ -553,10 +700,6 @@ read_interactive_choice() {
                 return
                 ;;
         esac
-
-        # Clear area for redraw
-        tput cup $(( start_row - 1 )) 0 2>/dev/null || printf "\033[${start_row};1H"
-        for (( i=0; i<total_lines; i++ )); do printf '\033[K\n'; done
     done
 }
 
@@ -630,34 +773,73 @@ test_prerequisites() {
 # ═══════════════════════════════════════════════════════════════
 
 get_project_config() {
-    show_step_header 'Project name & location'
-    show_progress_bar
+    local name_default=''
+    local bd_default
+    bd_default="$(pwd)"
+    local sub_step=0
 
-    PROJECT_NAME=$(read_value 'Project name (e.g. mi-app)' '' true)
-    local slug
-    slug=$(echo "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]/-/g; s/^-//; s/-$//')
-    if [[ "$slug" != "$PROJECT_NAME" ]]; then
-        w_pad "$(printf "Normalized to: ${C_BOLD}%s${C_RESET}" "$slug")" 4
-    fi
-    PROJECT_NAME="$slug"
-    SPEC_NAME="spec-$slug"
+    while true; do
+        local slug=''
 
-    echo ''
-    BASE_DIR=$(read_value 'Base directory' "$(pwd)")
-    if [[ ! -d "$BASE_DIR" ]]; then
-        if read_yesno "Directory '$BASE_DIR' does not exist. Create it?"; then
-            $DRY_RUN || mkdir -p "$BASE_DIR"
-            w_pad "$(printf "${C_GREEN}✓${C_RESET} Created %s" "$BASE_DIR")" 4
-        else
-            w_pad "$(printf "${C_RED}Aborting.${C_RESET}")"
-            exit 1
+        if [[ $sub_step -le 0 ]]; then
+            # Q1: project name (no back — first question)
+            local _raw_name
+            _raw_name=$(read_value 'Project name (e.g. mi-app)' "$name_default" true false \
+                'Project name & location' \
+                'Choose a short identifier for your project. It will be used as the spec repo name prefix (e.g. mi-app -> spec-mi-app) and as the VS Code workspace name. Only letters, numbers, hyphens and underscores are allowed.' \
+                'Type to enter   Enter Confirm')
+            slug=$(echo "$_raw_name" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]/-/g; s/^-//; s/-$//')
+            name_default="$slug"
         fi
-    fi
-    BASE_DIR=$(cd "$BASE_DIR" && pwd)
+        slug="$name_default"
 
-    CURRENT_STEP=2
-    show_progress_bar
-    sleep 0.3
+        # Q2: base directory
+        local _rc_bd=0
+        local _sum1
+        _sum1="$(printf "${C_DIM}▸ Project name:${C_RESET} ${C_BOLD}%s${C_RESET}" "$slug")"
+        BASE_DIR=$(read_value 'Base directory' "$bd_default" false true \
+            'Project name & location' \
+            "Parent folder where the spec repo will be created. The wizard will clone or create a sub-folder named 'spec-${slug}' inside this directory. Defaults to the current working directory." \
+            'Type to enter   Enter Confirm   Esc Back' \
+            "$_sum1") || _rc_bd=$?
+        if [[ $_rc_bd -eq 2 ]]; then
+            sub_step=0
+            continue
+        fi
+        bd_default="$BASE_DIR"
+        CREATE_BASE_DIR=false
+
+        # Q3: create dir?
+        if [[ ! -d "$BASE_DIR" ]]; then
+            local _sum2
+            _sum2="$(printf "${C_DIM}▸ Base directory:${C_RESET} ${C_BOLD}%s${C_RESET}" "$BASE_DIR")"
+            local _rc_create=0
+            read_yesno "Directory '$BASE_DIR' does not exist. Create it?" true true \
+                'Project name & location' \
+                "The directory '$BASE_DIR' does not exist yet. Answer Yes to have the bootstrap create it automatically when the wizard is confirmed. Answer No to go back and enter a different path." \
+                'Y/N Confirm   Esc Back' \
+                "$_sum1" "$_sum2" || _rc_create=$?
+            if [[ $_rc_create -eq 2 ]]; then
+                sub_step=1
+                continue
+            fi
+            if [[ $_rc_create -ne 0 ]]; then
+                w_pad "$(printf "${C_RED}Aborting.${C_RESET}")"
+                exit 1
+            fi
+            CREATE_BASE_DIR=true
+        else
+            BASE_DIR=$(cd "$BASE_DIR" && pwd)
+        fi
+
+        PROJECT_NAME="$slug"
+        SPEC_NAME="spec-$slug"
+        CURRENT_STEP=2
+        show_progress_bar
+        sleep 0.3
+        STEP_RESULT='ok'
+        return
+    done
 }
 
 # ═══════════════════════════════════════════════════════════════
@@ -665,66 +847,90 @@ get_project_config() {
 # ═══════════════════════════════════════════════════════════════
 
 get_spec_config() {
-    show_step_header 'Spec repository'
-    show_progress_bar
+    while true; do
+        show_step_header 'Spec repository'
+        show_progress_bar
 
-    local gh_label gh_hint default_choice
-    if [[ -n "$HAS_GH" ]]; then
-        gh_label="Create from GitHub template"
-        gh_hint="Creates a new private/public repo in your GitHub org using the spec-kit-template. Requires the GitHub CLI (gh) to be installed and authenticated."
-        default_choice=1
-    else
-        gh_label="Create from GitHub template (gh not found)"
-        gh_hint="Requires the GitHub CLI (gh) which was not found. Install gh and authenticate first, then re-run the bootstrap."
-        default_choice=1
-    fi
+        local gh_label gh_hint default_choice
+        if [[ -n "$HAS_GH" ]]; then
+            gh_label="Create from GitHub template"
+            gh_hint="Creates a new private/public repo in your GitHub org using the spec-kit-template. Requires the GitHub CLI (gh) to be installed and authenticated."
+            default_choice=1
+        else
+            gh_label="Create from GitHub template (gh not found)"
+            gh_hint="Requires the GitHub CLI (gh) which was not found. Install gh and authenticate first, then re-run the bootstrap."
+            default_choice=1
+        fi
 
-    local choice
-    choice=$(read_interactive_choice \
-        "How do you want to set up the spec repository?" \
-        "$default_choice" \
-        "$gh_label" \
-        "Clone template locally" \
-        "Use existing spec repo" \
-        -- \
-        "$gh_hint" \
-        "Clones the spec-kit-template repo and reinitializes git history. You get a fresh local repo that you can push to any remote later. Best for GitLab, Bitbucket, or Azure DevOps." \
-        "Point to a spec repo already cloned on your machine. The bootstrap will link it to the workspace without modifying it.")
+        local choice
+        choice=$(read_interactive_choice \
+            "How do you want to set up the spec repository?" \
+            "$default_choice" \
+            --allow-back \
+            "$gh_label" \
+            "Clone template locally" \
+            "Use existing spec repo" \
+            -- \
+            "$gh_hint" \
+            "Clones the spec-kit-template repo and reinitializes git history. You get a fresh local repo that you can push to any remote later. Best for GitLab, Bitbucket, or Azure DevOps." \
+            "Point to a spec repo already cloned on your machine. The bootstrap will link it to the workspace without modifying it.")
 
-    case "$choice" in
-        0)
-            if [[ -z "$HAS_GH" ]]; then
-                w_pad "$(printf "${C_YELLOW}gh CLI not found. Falling back to clone.${C_RESET}")"
-                SPEC_MODE='clone'
-            else
+        if [[ "$choice" == "-1" ]]; then STEP_RESULT='back'; return; fi
+
+        local need_restart=false
+        case "$choice" in
+            0)
+                if [[ -z "$HAS_GH" ]]; then
+                    w_pad "$(printf "${C_YELLOW}gh CLI not found. Falling back to clone.${C_RESET}")"
+                    SPEC_MODE='clone'
+                else
+                    echo ''
+                    local _rc_org=0
+                    SPEC_ORG=$(read_value 'GitHub org/user for the new repo' 'lksnext-ai-lab' false true) || _rc_org=$?
+                    if [[ $_rc_org -eq 2 ]]; then
+                        need_restart=true
+                    else
+                        local vis
+                        vis=$(read_interactive_choice \
+                            "Repository visibility" \
+                            0 \
+                            --allow-back \
+                            "Private" "Public" \
+                            -- \
+                            "The repository will only be visible to you and collaborators you explicitly grant access to." \
+                            "The repository will be visible to everyone on the internet. Choose this for open-source projects.")
+                        if [[ "$vis" == "-1" ]]; then need_restart=true;
+                        else
+                            SPEC_MODE='template'
+                            [[ "$vis" == "0" ]] && SPEC_VIS='private' || SPEC_VIS='public'
+                        fi
+                    fi
+                fi
+                ;;
+            1) SPEC_MODE='clone' ;;
+            2)
                 echo ''
-                SPEC_ORG=$(read_value 'GitHub org/user for the new repo' 'lksnext-ai-lab')
-                local vis
-                vis=$(read_interactive_choice \
-                    "Repository visibility" \
-                    0 \
-                    "Private" "Public" \
-                    -- \
-                    "The repository will only be visible to you and collaborators you explicitly grant access to." \
-                    "The repository will be visible to everyone on the internet. Choose this for open-source projects.")
-                SPEC_MODE='template'
-                [[ "$vis" == "0" ]] && SPEC_VIS='private' || SPEC_VIS='public'
-            fi
-            ;;
-        1) SPEC_MODE='clone' ;;
-        2)
-            echo ''
-            SPEC_PATH=$(read_value 'Path to existing spec repo' '' true)
-            if [[ ! -d "$SPEC_PATH/docs/spec" ]]; then
-                w_pad "$(printf "${C_YELLOW}Warning: docs/spec/ not found in '%s'. Continuing anyway.${C_RESET}" "$SPEC_PATH")"
-            fi
-            SPEC_MODE='existing'
-            ;;
-    esac
+                local _rc_sp=0
+                SPEC_PATH=$(read_value 'Path to existing spec repo' '' true true) || _rc_sp=$?
+                if [[ $_rc_sp -eq 2 ]]; then
+                    need_restart=true
+                else
+                    if [[ ! -d "$SPEC_PATH/docs/spec" ]]; then
+                        w_pad "$(printf "${C_YELLOW}Warning: docs/spec/ not found in '%s'. Continuing anyway.${C_RESET}" "$SPEC_PATH")"
+                    fi
+                    SPEC_MODE='existing'
+                fi
+                ;;
+        esac
 
-    CURRENT_STEP=3
-    show_progress_bar
-    sleep 0.3
+        $need_restart && continue
+
+        CURRENT_STEP=3
+        show_progress_bar
+        sleep 0.3
+        STEP_RESULT='ok'
+        return
+    done
 }
 
 # ═══════════════════════════════════════════════════════════════
@@ -732,54 +938,78 @@ get_spec_config() {
 # ═══════════════════════════════════════════════════════════════
 
 get_codebase_config() {
-    show_step_header 'Codebase project'
-    show_progress_bar
+    while true; do
+        show_step_header 'Codebase project'
+        show_progress_bar
 
-    local choice
-    choice=$(read_interactive_choice \
-        "How do you want to set up the codebase project?" \
-        0 \
-        "Existing local repo" \
-        "Clone from URL" \
-        "Create empty (git init)" \
-        "Skip (no codebase for now)" \
-        -- \
-        "Link an existing codebase project already on your machine. The bootstrap adds it to the VS Code workspace as a second root folder (read-only from spec perspective)." \
-        "Clone a remote Git repository as the codebase folder. It will be added as a second root in the VS Code workspace." \
-        "Creates a new empty folder with git initialized. Perfect for greenfield projects where the codebase does not exist yet." \
-        "Do not add a codebase folder now. You can add one later by editing the .code-workspace file manually.")
+        local choice
+        choice=$(read_interactive_choice \
+            "How do you want to set up the codebase project?" \
+            0 \
+            --allow-back \
+            "Existing local repo" \
+            "Clone from URL" \
+            "Create empty (git init)" \
+            "Skip (no codebase for now)" \
+            -- \
+            "Link an existing codebase project already on your machine. The bootstrap adds it to the VS Code workspace as a second root folder (read-only from spec perspective)." \
+            "Clone a remote Git repository as the codebase folder. It will be added as a second root in the VS Code workspace." \
+            "Creates a new empty folder with git initialized. Perfect for greenfield projects where the codebase does not exist yet." \
+            "Do not add a codebase folder now. You can add one later by editing the .code-workspace file manually.")
 
-    case "$choice" in
-        0)
-            echo ''
-            CB_PATH=$(read_value 'Path to codebase repo' '' true)
-            if [[ ! -d "$CB_PATH" ]]; then
-                w_pad "$(printf "${C_RED}Path not found: %s${C_RESET}" "$CB_PATH")"
-                get_codebase_config; return
-            fi
-            CB_MODE='existing'
-            CB_PATH=$(cd "$CB_PATH" && pwd)
-            CB_NAME=$(basename "$CB_PATH")
-            ;;
-        1)
-            echo ''
-            CB_URL=$(read_value 'Git clone URL' '' true)
-            CB_NAME=$(read_value 'Local folder name' "$PROJECT_NAME")
-            CB_MODE='clone'
-            ;;
-        2)
-            CB_MODE='empty'
-            CB_NAME="$PROJECT_NAME"
-            ;;
-        3)
-            CB_MODE='skip'
-            CB_NAME=''
-            ;;
-    esac
+        if [[ "$choice" == "-1" ]]; then STEP_RESULT='back'; return; fi
 
-    CURRENT_STEP=4
-    show_progress_bar
-    sleep 0.3
+        local need_restart=false
+        case "$choice" in
+            0)
+                echo ''
+                local _rc_cb=0
+                CB_PATH=$(read_value 'Path to codebase repo' '' true true) || _rc_cb=$?
+                if [[ $_rc_cb -eq 2 ]]; then
+                    need_restart=true
+                elif [[ ! -d "$CB_PATH" ]]; then
+                    w_pad "$(printf "${C_RED}Path not found: %s${C_RESET}" "$CB_PATH")"
+                    need_restart=true
+                else
+                    CB_MODE='existing'
+                    CB_PATH=$(cd "$CB_PATH" && pwd)
+                    CB_NAME=$(basename "$CB_PATH")
+                fi
+                ;;
+            1)
+                echo ''
+                local _rc_url=0
+                CB_URL=$(read_value 'Git clone URL' '' true true) || _rc_url=$?
+                if [[ $_rc_url -eq 2 ]]; then
+                    need_restart=true
+                else
+                    local _rc_nm=0
+                    CB_NAME=$(read_value 'Local folder name' "$PROJECT_NAME" false true) || _rc_nm=$?
+                    if [[ $_rc_nm -eq 2 ]]; then
+                        need_restart=true
+                    else
+                        CB_MODE='clone'
+                    fi
+                fi
+                ;;
+            2)
+                CB_MODE='empty'
+                CB_NAME="$PROJECT_NAME"
+                ;;
+            3)
+                CB_MODE='skip'
+                CB_NAME=''
+                ;;
+        esac
+
+        $need_restart && continue
+
+        CURRENT_STEP=4
+        show_progress_bar
+        sleep 0.3
+        STEP_RESULT='ok'
+        return
+    done
 }
 
 # ═══════════════════════════════════════════════════════════════
@@ -795,15 +1025,24 @@ get_extras_config() {
     OPEN_VSCODE=false
 
     if [[ -n "$HAS_PYTHON" ]] && ! $NO_VENV; then
-        read_yesno 'Create Python venv & install mkdocs + tools?' && INSTALL_VENV=true
+        local rc=0
+        read_yesno 'Create Python venv & install mkdocs + tools?' true true 'Optional setup' '' 'Y/N Confirm   Esc Back' || rc=$?
+        if [[ $rc -eq 2 ]]; then STEP_RESULT='back'; return; fi
+        [[ $rc -eq 0 ]] && INSTALL_VENV=true
     elif [[ -z "$HAS_PYTHON" ]]; then
         w_pad "$(printf "${C_DIM}○ Python venv — skipped (python not found)${C_RESET}")" 4
     fi
 
     if [[ -n "$HAS_CODE" ]]; then
-        read_yesno 'Install recommended VS Code extensions?' false && INSTALL_EXT=true
+        local rc=0
+        read_yesno 'Install recommended VS Code extensions?' false true 'Optional setup' '' 'Y/N Confirm   Esc Back' || rc=$?
+        if [[ $rc -eq 2 ]]; then STEP_RESULT='back'; return; fi
+        [[ $rc -eq 0 ]] && INSTALL_EXT=true
         if ! $NO_OPEN; then
-            read_yesno 'Open VS Code when done?' true && OPEN_VSCODE=true
+            rc=0
+            read_yesno 'Open VS Code when done?' true true 'Optional setup' '' 'Y/N Confirm   Esc Back' || rc=$?
+            if [[ $rc -eq 2 ]]; then STEP_RESULT='back'; return; fi
+            [[ $rc -eq 0 ]] && OPEN_VSCODE=true
         fi
     else
         w_pad "$(printf "${C_DIM}○ VS Code — skipped (code not found)${C_RESET}")" 4
@@ -812,6 +1051,64 @@ get_extras_config() {
     CURRENT_STEP=5
     show_progress_bar
     sleep 0.3
+    STEP_RESULT='ok'
+}
+
+# ═══════════════════════════════════════════════════════════════
+# STEP 5 — CONFIRMATION
+# ═══════════════════════════════════════════════════════════════
+
+show_confirmation_summary() {
+    show_step_header 'Review and confirm'
+    show_progress_bar
+
+    w_pad "$(printf "${C_BOLD}Project${C_RESET}      ${C_WHITE}%s${C_RESET}" "$PROJECT_NAME")" 4
+
+    local loc_extra=""
+    $CREATE_BASE_DIR && loc_extra="  $(printf "${C_YELLOW}(will be created)${C_RESET}")"
+    w_pad "$(printf "${C_BOLD}Location${C_RESET}     %s%b" "$BASE_DIR" "$loc_extra")" 4
+
+    local spec_desc
+    case "$SPEC_MODE" in
+        template) spec_desc="GitHub template -> ${SPEC_ORG}/${SPEC_NAME} (${SPEC_VIS})" ;;
+        clone)    spec_desc="Clone template -> ${SPEC_NAME}" ;;
+        existing) spec_desc="Existing repo -> ${SPEC_PATH}" ;;
+    esac
+    w_pad "$(printf "${C_BOLD}Spec repo${C_RESET}    %s" "$spec_desc")" 4
+
+    local cb_desc
+    case "$CB_MODE" in
+        existing) cb_desc="Existing -> ${CB_PATH}" ;;
+        clone)    cb_desc="Clone -> ${CB_URL} as ${CB_NAME}" ;;
+        empty)    cb_desc="New empty -> ${CB_NAME}" ;;
+        skip)     cb_desc="$(printf "${C_DIM}Skipped${C_RESET}")" ;;
+    esac
+    w_pad "$(printf "${C_BOLD}Codebase${C_RESET}     %s" "$cb_desc")" 4
+
+    local venv_txt ext_txt open_txt
+    $INSTALL_VENV && venv_txt="$(printf "${C_GREEN}Yes${C_RESET}")" || venv_txt="$(printf "${C_DIM}No${C_RESET}")"
+    $INSTALL_EXT  && ext_txt="$(printf "${C_GREEN}Yes${C_RESET}")"  || ext_txt="$(printf "${C_DIM}No${C_RESET}")"
+    $OPEN_VSCODE  && open_txt="$(printf "${C_GREEN}Yes${C_RESET}")" || open_txt="$(printf "${C_DIM}No${C_RESET}")"
+    w_pad "$(printf "${C_BOLD}Venv${C_RESET} %b  ${C_BOLD}Extensions${C_RESET} %b  ${C_BOLD}Open VS Code${C_RESET} %b" "$venv_txt" "$ext_txt" "$open_txt")" 4
+
+    echo ''
+
+    local choice
+    choice=$(read_interactive_choice \
+        "Ready to proceed?" \
+        0 \
+        --allow-back \
+        "Confirm and execute" \
+        "Go back" \
+        "Exit without changes" \
+        -- \
+        "Apply all settings now: create repos, generate workspace and .speckit files, and configure extras." \
+        "Return to the previous step and review or modify your choices." \
+        "Quit the bootstrap wizard without making any changes.")
+
+    if [[ "$choice" == "-1" ]] || [[ "$choice" == "1" ]]; then STEP_RESULT='back'; return; fi
+    if [[ "$choice" == "2" ]]; then STEP_RESULT='exit'; return; fi
+    STEP_RESULT='proceed'
 }
 
 # ═══════════════════════════════════════════════════════════════
@@ -830,6 +1127,24 @@ write_task() {
 
 write_task_detail() {
     w_pad "$(printf "${C_DIM}└─ %s${C_RESET}" "$1")" 6
+}
+
+show_exec_progress() {
+    local done_count="$1" total="$2" label="$3"
+    $USE_TUI || return
+    local pct=$(( done_count * 100 / total ))
+    local filled=$(( done_count * 40 / total ))
+    local empty=$(( 40 - filled ))
+    local bar=""
+    for (( i=0; i<filled; i++ )); do bar+="━"; done
+    for (( i=0; i<empty; i++ )); do bar+="○"; done
+    printf '\033[s'
+    cursor_at "$PROGRESS_TOP" 0
+    for (( i=0; i<PROGRESS_HEIGHT; i++ )); do printf '\033[K\n'; done
+    cursor_at "$PROGRESS_TOP" 0
+    printf "  ${C_DIM}Applying${C_RESET} ${C_CYAN}%s${C_RESET}  ${C_BOLD}%d%%${C_RESET}  ${C_DIM}(%d/%d)${C_RESET}\n" "$bar" "$pct" "$done_count" "$total"
+    printf "  ${C_DIM}%s${C_RESET}\n" "$label"
+    printf '\033[u'
 }
 
 python_cmd() {
@@ -899,12 +1214,24 @@ update_speckit_file() {
 invoke_setup() {
     clear_step_area
     echo ''
-    w_pad "$(printf "${C_BOLD}${C_WHITE}Setting up workspace...${C_RESET}")"
+    w_pad "$(printf "${C_BOLD}${C_WHITE}Applying configuration...${C_RESET}")"
     w_pad "$(printf "${C_DIM}%s${C_RESET}" "$(printf '─%.0s' {1..56})")"
     echo ''
 
+    # ── Base directory (deferred from wizard) ───────────
+    if $CREATE_BASE_DIR; then
+        write_task 'Creating base directory'
+        $DRY_RUN || mkdir -p "$BASE_DIR"
+        write_task 'Creating base directory' 'done'
+        write_task_detail "$BASE_DIR"
+        BASE_DIR=$(cd "$BASE_DIR" && pwd)
+    fi
+
     local spec_dir="$BASE_DIR/$SPEC_NAME"
     local workspace_file="$BASE_DIR/${PROJECT_NAME}.code-workspace"
+
+    local tasks_total=6
+    local tasks_done=0
 
     # ── Spec repo ──────────────────────────────────────
     case "$SPEC_MODE" in
@@ -945,6 +1272,8 @@ invoke_setup() {
             write_task_detail "$spec_dir"
             ;;
     esac
+    (( tasks_done++ )) || true
+    show_exec_progress $tasks_done $tasks_total 'Spec repo'
 
     # ── Codebase ───────────────────────────────────────
     local codebase_dir=""
@@ -981,6 +1310,8 @@ invoke_setup() {
             write_task 'Codebase' 'skip'
             ;;
     esac
+    (( tasks_done++ )) || true
+    show_exec_progress $tasks_done $tasks_total 'Codebase'
 
     # ── Workspace file ─────────────────────────────────
     write_task 'Generating workspace file'
@@ -1039,12 +1370,16 @@ WSJSON
     fi
     write_task 'Generating workspace file' 'done'
     write_task_detail "$(basename "$workspace_file")"
+    (( tasks_done++ )) || true
+    show_exec_progress $tasks_done $tasks_total 'Workspace file'
 
     # ── .speckit control file ──────────────────────────
     write_task 'Generating version control file'
     write_speckit_file "$spec_dir" "$SPEC_MODE"
     write_task 'Generating version control file' 'done'
     write_task_detail "$SPECKIT_FILE"
+    (( tasks_done++ )) || true
+    show_exec_progress $tasks_done $tasks_total 'Version control'
 
     # ── Python venv ────────────────────────────────────
     if $INSTALL_VENV; then
@@ -1065,6 +1400,8 @@ WSJSON
     else
         write_task 'Python venv' 'skip'
     fi
+    (( tasks_done++ )) || true
+    show_exec_progress $tasks_done $tasks_total 'Python environment'
 
     # ── VS Code extensions ─────────────────────────────
     if $INSTALL_EXT; then
@@ -1078,6 +1415,8 @@ WSJSON
     else
         write_task 'VS Code extensions' 'skip'
     fi
+    (( tasks_done++ )) || true
+    show_exec_progress $tasks_done $tasks_total 'Extensions'
 
     # ── Summary ────────────────────────────────────────
     show_install_summary "$workspace_file" "$spec_dir" "$codebase_dir"
@@ -1602,10 +1941,45 @@ main() {
         invoke_update_flow "$spec_dir"
     else
         test_prerequisites
-        get_project_config
-        get_spec_config
-        get_codebase_config
-        get_extras_config
+        local wizard_step=1
+        while (( wizard_step <= 5 )); do
+            case $wizard_step in
+                1)
+                    CURRENT_STEP=1
+                    get_project_config
+                    [[ "$STEP_RESULT" == "back" ]] && wizard_step=1 || wizard_step=2
+                    ;;
+                2)
+                    CURRENT_STEP=2
+                    get_spec_config
+                    [[ "$STEP_RESULT" == "back" ]] && wizard_step=1 || wizard_step=3
+                    ;;
+                3)
+                    CURRENT_STEP=3
+                    get_codebase_config
+                    [[ "$STEP_RESULT" == "back" ]] && wizard_step=2 || wizard_step=4
+                    ;;
+                4)
+                    CURRENT_STEP=4
+                    get_extras_config
+                    [[ "$STEP_RESULT" == "back" ]] && wizard_step=3 || wizard_step=5
+                    ;;
+                5)
+                    CURRENT_STEP=5
+                    show_confirmation_summary
+                    if [[ "$STEP_RESULT" == "back" ]]; then
+                        wizard_step=4
+                    elif [[ "$STEP_RESULT" == "exit" ]]; then
+                        echo ''
+                        w_pad "$(printf "${C_DIM}Exited without changes.${C_RESET}")"
+                        echo ''
+                        return
+                    else
+                        wizard_step=6
+                    fi
+                    ;;
+            esac
+        done
         invoke_setup
     fi
 }
