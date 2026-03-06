@@ -17,7 +17,7 @@ set -euo pipefail
 
 TEMPLATE_REPO="lksnext-ai-lab/spec-kit-template"
 TEMPLATE_URL="https://github.com/$TEMPLATE_REPO.git"
-SCRIPT_VERSION="2.4.2" # x-release-please-version
+SCRIPT_VERSION="2.5.0" # x-release-please-version
 
 SPECKIT_FILE="tools/.speckit"
 

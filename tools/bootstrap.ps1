@@ -11,12 +11,7 @@
 # Requirements: PowerShell 5.1+, git.
 # Optional: gh (GitHub CLI), python 3.8+, code (VS Code CLI).
 # Link: https://github.com/lksnext-ai-lab/spec-kit-template
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification='Interactive TUI rendering requires direct console output and cursor control.')]
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification='This is an interactive bootstrap script, not an advanced cmdlet module.')]
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', '', Justification='Positional arguments keep this script concise and readable.')]
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification='Function names are kept stable for compatibility in this script.')]
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '', Justification='Best-effort fallback paths intentionally ignore non-fatal probe errors.')]
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '', Justification='Some compatibility and future-use parameters are intentionally retained.')]
+& {
 [CmdletBinding()]
 param(
     [switch]$WorkspaceOnly,
@@ -37,7 +32,7 @@ $ErrorActionPreference = 'Stop'
 
 $TEMPLATE_REPO  = 'lksnext-ai-lab/spec-kit-template'
 $TEMPLATE_URL   = "https://github.com/${TEMPLATE_REPO}.git"
-$SCRIPT_VERSION = '2.4.2' # x-release-please-version
+$SCRIPT_VERSION = '2.5.0' # x-release-please-version
 
 $SPECKIT_FILE   = 'tools/.speckit'
 
@@ -1801,9 +1796,14 @@ function Invoke-UpdateFlow([string]$specDir) {
 # ===================================================================
 
 function Find-RunMode {
-    # Check if tools/.speckit exists relative to the script location
-    $scriptDir = Split-Path $PSCommandPath -Parent
-    $specDir   = Split-Path $scriptDir -Parent
+    # Check if tools/.speckit exists relative to the script location.
+    # $PSCommandPath is empty when running via iex; fall back to cwd.
+    if ($PSCommandPath) {
+        $scriptDir = Split-Path $PSCommandPath -Parent
+        $specDir   = Split-Path $scriptDir -Parent
+    } else {
+        $specDir = (Get-Location).Path
+    }
     $speckitPath = Join-Path $specDir $SPECKIT_FILE
 
     if (Test-Path $speckitPath) {
@@ -1879,3 +1879,4 @@ function Main {
 }
 
 Main
+} @args
