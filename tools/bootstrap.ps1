@@ -1,19 +1,16 @@
-﻿<#
-.SYNOPSIS
-    Spec Kit - Workspace Bootstrap & Update (Windows)
-.DESCRIPTION
-    First run  : wizard that creates the spec project from the GitHub template,
-                 links (or creates) a codebase project, generates the VS Code
-                 .code-workspace file, and optionally installs Python/mkdocs deps.
-    Subsequent : detects the existing SPEC-KIT installation via tools/.speckit,
-                 checks for upstream updates against the template repo, and
-                 offers an interactive update flow.
-.NOTES
-    Requirements: PowerShell 5.1+, git.
-    Optional: gh (GitHub CLI), python 3.8+, code (VS Code CLI).
-.LINK
-    https://github.com/lksnext-ai-lab/spec-kit-template
-#>
+﻿# Spec Kit - Workspace Bootstrap and Update (Windows)
+# First run:
+#   - Creates the spec project from the GitHub template.
+#   - Links (or creates) a codebase project.
+#   - Generates the VS Code .code-workspace file.
+#   - Optionally installs Python/mkdocs dependencies.
+# Subsequent runs:
+#   - Detect existing SPEC-KIT installation via tools/.speckit.
+#   - Check for upstream updates against the template repo.
+#   - Offer an interactive update flow.
+# Requirements: PowerShell 5.1+, git.
+# Optional: gh (GitHub CLI), python 3.8+, code (VS Code CLI).
+# Link: https://github.com/lksnext-ai-lab/spec-kit-template
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification='Interactive TUI rendering requires direct console output and cursor control.')]
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification='This is an interactive bootstrap script, not an advanced cmdlet module.')]
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', '', Justification='Positional arguments keep this script concise and readable.')]
@@ -40,7 +37,7 @@ $ErrorActionPreference = 'Stop'
 
 $TEMPLATE_REPO  = 'lksnext-ai-lab/spec-kit-template'
 $TEMPLATE_URL   = "https://github.com/${TEMPLATE_REPO}.git"
-$SCRIPT_VERSION = '2.4.1' # x-release-please-version
+$SCRIPT_VERSION = '2.4.2' # x-release-please-version
 
 $SPECKIT_FILE   = 'tools/.speckit'
 
