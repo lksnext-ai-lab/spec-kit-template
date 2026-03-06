@@ -32,7 +32,7 @@ $ErrorActionPreference = 'Stop'
 
 $TEMPLATE_REPO  = 'lksnext-ai-lab/spec-kit-template'
 $TEMPLATE_URL   = "https://github.com/${TEMPLATE_REPO}.git"
-$SCRIPT_VERSION = '2.5.4' # x-release-please-version
+$SCRIPT_VERSION = '2.5.5' # x-release-please-version
 
 $SPECKIT_FILE   = 'tools/.speckit'
 
@@ -1580,7 +1580,7 @@ function Invoke-Update([string]$specDir, [string]$sourceDir) {
     $prevEAP = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
 
-    $stats = @{ updated = 0; added = 0; folders = @() }
+    $stats = @{ updated = 0; added = 0; errors = @(); folders = @() }
 
     foreach ($managedPath in $MANAGED_PATHS) {
         $src = Join-Path $sourceDir $managedPath
@@ -1588,34 +1588,52 @@ function Invoke-Update([string]$specDir, [string]$sourceDir) {
 
         if (-not (Test-Path $src)) { continue }
 
-        $label = $managedPath
         $isDir = (Test-Path $src -PathType Container)
 
         if ($isDir) {
-            Write-Task "Updating ${label}" 'running'
-            if (-not $DryRun) {
-                if (Test-Path $dst) {
-                    Remove-Item $dst -Recurse -Force
+            $stats.folders += $managedPath
+            # Copy each file individually: avoids Remove-Item -Recurse on tools/ (which
+            # contains the running script and can be locked on Windows) and enables
+            # per-file live output and error trapping.
+            $srcFiles = Get-ChildItem $src -Recurse -File
+            foreach ($srcFile in $srcFiles) {
+                $relFile = $srcFile.FullName.Substring($src.Length).TrimStart('\', '/')
+                $dstFile = Join-Path $dst $relFile
+                $existed = Test-Path $dstFile
+                $tag = if ($existed) { 'upd' } else { 'new' }
+                $fileLabel = $managedPath + '/' + ($relFile -replace '\\', '/')
+                Write-Pad "${C_DIM}${tag}  ${fileLabel}${C_RESET}" 4
+                if (-not $DryRun) {
+                    try {
+                        $dstParent = Split-Path $dstFile -Parent
+                        if (-not (Test-Path $dstParent)) {
+                            New-Item -Path $dstParent -ItemType Directory -Force | Out-Null
+                        }
+                        Copy-Item $srcFile.FullName $dstFile -Force
+                        if ($existed) { $stats.updated++ } else { $stats.added++ }
+                    } catch {
+                        Write-Pad "${C_RED}ERR  ${fileLabel}: $_${C_RESET}" 4
+                        $stats.errors += $fileLabel
+                    }
                 }
-                Copy-Item $src $dst -Recurse -Force
             }
-            $count = (Get-ChildItem $src -Recurse -File).Count
-            $stats.updated += $count
-            $stats.folders += $label
-            Write-Task "Updating ${label}" 'done'
-            Write-TaskDetail "${count} files"
         } else {
             $existed = Test-Path $dst
-            Write-Task "Updating ${label}" 'running'
+            $tag = if ($existed) { 'upd' } else { 'new' }
+            Write-Pad "${C_DIM}${tag}  ${managedPath}${C_RESET}" 4
             if (-not $DryRun) {
-                $parentDir = Split-Path $dst -Parent
-                if (-not (Test-Path $parentDir)) {
-                    New-Item -Path $parentDir -ItemType Directory -Force | Out-Null
+                try {
+                    $parentDir = Split-Path $dst -Parent
+                    if (-not (Test-Path $parentDir)) {
+                        New-Item -Path $parentDir -ItemType Directory -Force | Out-Null
+                    }
+                    Copy-Item $src $dst -Force
+                    if ($existed) { $stats.updated++ } else { $stats.added++ }
+                } catch {
+                    Write-Pad "${C_RED}ERR  ${managedPath}: $_${C_RESET}" 4
+                    $stats.errors += $managedPath
                 }
-                Copy-Item $src $dst -Force
             }
-            if ($existed) { $stats.updated++ } else { $stats.added++ }
-            Write-Task "Updating ${label}" 'done'
         }
     }
 
@@ -1639,31 +1657,43 @@ function Remove-UpdateTemp {
 # ===================================================================
 
 function Show-UpdateSummary([string]$fromVersion, [string]$toVersion, $stats) {
+    $hasErrors = $stats.errors.Count -gt 0
+    $tc = if ($hasErrors) { $C_YELLOW } else { $C_GREEN }
     Write-C ''
-    Write-C "  ${C_GREEN}${C_BOLD}+==============================================================+${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}  ${C_BOLD}${C_GREEN}Updated: v${fromVersion} -> v${toVersion}${C_RESET}"
-    Write-C "  ${C_GREEN}+==============================================================+${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}  ${C_BOLD}Updated areas:${C_RESET}"
+    Write-C "  ${tc}${C_BOLD}+==============================================================+${C_RESET}"
+    Write-C "  ${tc}|${C_RESET}  ${C_BOLD}${tc}Updated: v${fromVersion} -> v${toVersion}${C_RESET}"
+    Write-C "  ${tc}+==============================================================+${C_RESET}"
+    Write-C "  ${tc}|${C_RESET}                                                              ${tc}|${C_RESET}"
+    Write-C "  ${tc}|${C_RESET}  ${C_BOLD}Updated areas:${C_RESET}"
 
     foreach ($folder in $stats.folders) {
-        Write-C "  ${C_GREEN}|${C_RESET}    ${C_CYAN}*${C_RESET} ${folder}"
+        Write-C "  ${tc}|${C_RESET}    ${C_CYAN}*${C_RESET} ${folder}"
     }
 
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}  ${C_DIM}Total: $($stats.updated) files updated, $($stats.added) files added${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}+--------------------------------------------------------------+${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}  ${C_YELLOW}!!${C_RESET}  ${C_BOLD}Reload VS Code to apply changes${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}     Ctrl+Shift+P -> ${C_CYAN}Reload Window${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}+--------------------------------------------------------------+${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}  ${C_BOLD}SPEC KIT${C_RESET} by ${C_CYAN}LKS Next${C_RESET}                                       ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}  ${C_DIM}Thank you for using SPEC KIT!${C_RESET}                               ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}${C_BOLD}+==============================================================+${C_RESET}"
+    Write-C "  ${tc}|${C_RESET}                                                              ${tc}|${C_RESET}"
+    $totLine = "  ${tc}|${C_RESET}  ${C_DIM}Total: $($stats.updated) updated, $($stats.added) added"
+    if ($hasErrors) { $totLine += ", ${C_RED}$($stats.errors.Count) errors${C_RESET}" } else { $totLine += $C_RESET }
+    Write-C $totLine
+    if ($hasErrors) {
+        Write-C "  ${tc}|${C_RESET}                                                              ${tc}|${C_RESET}"
+        Write-C "  ${tc}|${C_RESET}  ${C_RED}${C_BOLD}Files that could not be updated:${C_RESET}"
+        foreach ($e in $stats.errors) {
+            Write-C "  ${tc}|${C_RESET}    ${C_RED}x${C_RESET} ${e}"
+        }
+        Write-C "  ${tc}|${C_RESET}  ${C_DIM}Run the bootstrap again or copy them manually.${C_RESET}"
+    }
+    Write-C "  ${tc}|${C_RESET}                                                              ${tc}|${C_RESET}"
+    Write-C "  ${tc}+--------------------------------------------------------------+${C_RESET}"
+    Write-C "  ${tc}|${C_RESET}                                                              ${tc}|${C_RESET}"
+    Write-C "  ${tc}|${C_RESET}  ${C_YELLOW}!!${C_RESET}  ${C_BOLD}Reload VS Code to apply changes${C_RESET}"
+    Write-C "  ${tc}|${C_RESET}     Ctrl+Shift+P -> ${C_CYAN}Reload Window${C_RESET}"
+    Write-C "  ${tc}|${C_RESET}                                                              ${tc}|${C_RESET}"
+    Write-C "  ${tc}+--------------------------------------------------------------+${C_RESET}"
+    Write-C "  ${tc}|${C_RESET}                                                              ${tc}|${C_RESET}"
+    Write-C "  ${tc}|${C_RESET}  ${C_BOLD}SPEC KIT${C_RESET} by ${C_CYAN}LKS Next${C_RESET}                                       ${tc}|${C_RESET}"
+    Write-C "  ${tc}|${C_RESET}  ${C_DIM}Thank you for using SPEC KIT!${C_RESET}                               ${tc}|${C_RESET}"
+    Write-C "  ${tc}|${C_RESET}                                                              ${tc}|${C_RESET}"
+    Write-C "  ${tc}${C_BOLD}+==============================================================+${C_RESET}"
     Write-C ''
 }
 

@@ -17,7 +17,7 @@ set -euo pipefail
 
 TEMPLATE_REPO="lksnext-ai-lab/spec-kit-template"
 TEMPLATE_URL="https://github.com/$TEMPLATE_REPO.git"
-SCRIPT_VERSION="2.5.4" # x-release-please-version
+SCRIPT_VERSION="2.5.5" # x-release-please-version
 
 SPECKIT_FILE="tools/.speckit"
 
@@ -1600,7 +1600,9 @@ invoke_update() {
 
     UPDATED_COUNT=0
     ADDED_COUNT=0
+    ERROR_COUNT=0
     UPDATED_FOLDERS=()
+    UPDATE_ERRORS=()
 
     for managed_path in "${MANAGED_PATHS[@]}"; do
         local src="${source_dir}/${managed_path}"
@@ -1608,34 +1610,44 @@ invoke_update() {
 
         [[ ! -e "$src" ]] && continue
 
-        local label="$managed_path"
-
         if [[ -d "$src" ]]; then
-            write_task "Updating ${label}"
-            if ! $DRY_RUN; then
-                [[ -e "$dst" ]] && rm -rf "$dst"
-                cp -r "$src" "$dst"
-            fi
-            local count
-            count=$(find "$src" -type f | wc -l | tr -d ' ')
-            UPDATED_COUNT=$(( UPDATED_COUNT + count ))
-            UPDATED_FOLDERS+=("$label")
-            write_task "Updating ${label}" 'done'
-            write_task_detail "${count} files"
+            UPDATED_FOLDERS+=("$managed_path")
+            # Copy each file individually: avoids bulk rm -rf (which breaks self-update
+            # when tools/ contains the running script) and enables per-file live output
+            # and error trapping.
+            while IFS= read -r -d '' src_file; do
+                local rel_file="${src_file#${src}/}"
+                local dst_file="${dst}/${rel_file}"
+                local existed=false
+                [[ -e "$dst_file" ]] && existed=true
+                local tag; $existed && tag='upd' || tag='new'
+                w_pad "$(printf "${C_DIM}%s  %s/%s${C_RESET}" "$tag" "$managed_path" "$rel_file")" 4
+                if ! $DRY_RUN; then
+                    mkdir -p "$(dirname "$dst_file")" 2>/dev/null || true
+                    if cp "$src_file" "$dst_file" 2>/dev/null; then
+                        $existed && UPDATED_COUNT=$(( UPDATED_COUNT + 1 )) || ADDED_COUNT=$(( ADDED_COUNT + 1 ))
+                    else
+                        w_pad "$(printf "${C_RED}ERR  %s/%s: copy failed${C_RESET}" "$managed_path" "$rel_file")" 4
+                        UPDATE_ERRORS+=("${managed_path}/${rel_file}")
+                        ERROR_COUNT=$(( ERROR_COUNT + 1 ))
+                    fi
+                fi
+            done < <(find "$src" -type f -print0 | sort -z)
         else
             local existed=false
             [[ -e "$dst" ]] && existed=true
-            write_task "Updating ${label}"
+            local tag; $existed && tag='upd' || tag='new'
+            w_pad "$(printf "${C_DIM}%s  %s${C_RESET}" "$tag" "$managed_path")" 4
             if ! $DRY_RUN; then
-                mkdir -p "$(dirname "$dst")"
-                cp "$src" "$dst"
+                mkdir -p "$(dirname "$dst")" 2>/dev/null || true
+                if cp "$src" "$dst" 2>/dev/null; then
+                    $existed && UPDATED_COUNT=$(( UPDATED_COUNT + 1 )) || ADDED_COUNT=$(( ADDED_COUNT + 1 ))
+                else
+                    w_pad "$(printf "${C_RED}ERR  %s: copy failed${C_RESET}" "$managed_path")" 4
+                    UPDATE_ERRORS+=("$managed_path")
+                    ERROR_COUNT=$(( ERROR_COUNT + 1 ))
+                fi
             fi
-            if $existed; then
-                UPDATED_COUNT=$(( UPDATED_COUNT + 1 ))
-            else
-                ADDED_COUNT=$(( ADDED_COUNT + 1 ))
-            fi
-            write_task "Updating ${label}" 'done'
         fi
     done
 }
@@ -1657,32 +1669,46 @@ remove_update_temp() {
 
 show_update_summary() {
     local from_version="$1" to_version="$2"
+    local tc=$C_GREEN
+    (( ERROR_COUNT > 0 )) && tc=$C_YELLOW
 
     echo ''
-    printf "  ${C_GREEN}${C_BOLD}╔══════════════════════════════════════════════════════════════╗${C_RESET}\n"
-    printf "  ${C_GREEN}║${C_RESET}  ${C_BOLD}${C_GREEN}Updated: v%s -> v%s${C_RESET}\n" "$from_version" "$to_version"
-    printf "  ${C_GREEN}╠══════════════════════════════════════════════════════════════╣${C_RESET}\n"
-    printf "  ${C_GREEN}║${C_RESET}                                                              ${C_GREEN}║${C_RESET}\n"
-    printf "  ${C_GREEN}║${C_RESET}  ${C_BOLD}Updated areas:${C_RESET}\n"
+    printf "  ${tc}${C_BOLD}╔══════════════════════════════════════════════════════════════╗${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}  ${C_BOLD}${tc}Updated: v%s -> v%s${C_RESET}\n" "$from_version" "$to_version"
+    printf "  ${tc}╠══════════════════════════════════════════════════════════════╣${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}                                                              ${tc}║${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}  ${C_BOLD}Updated areas:${C_RESET}\n"
 
     for folder in "${UPDATED_FOLDERS[@]}"; do
-        printf "  ${C_GREEN}║${C_RESET}    ${C_CYAN}*${C_RESET} %s\n" "$folder"
+        printf "  ${tc}║${C_RESET}    ${C_CYAN}*${C_RESET} %s\n" "$folder"
     done
 
-    printf "  ${C_GREEN}║${C_RESET}                                                              ${C_GREEN}║${C_RESET}\n"
-    printf "  ${C_GREEN}║${C_RESET}  ${C_DIM}Total: %d files updated, %d files added${C_RESET}\n" "$UPDATED_COUNT" "$ADDED_COUNT"
-    printf "  ${C_GREEN}║${C_RESET}                                                              ${C_GREEN}║${C_RESET}\n"
-    printf "  ${C_GREEN}╠══════════════════════════════════════════════════════════════╣${C_RESET}\n"
-    printf "  ${C_GREEN}║${C_RESET}                                                              ${C_GREEN}║${C_RESET}\n"
-    printf "  ${C_GREEN}║${C_RESET}  ${C_YELLOW}!!${C_RESET}  ${C_BOLD}Reload VS Code to apply changes${C_RESET}\n"
-    printf "  ${C_GREEN}║${C_RESET}     Ctrl+Shift+P -> ${C_CYAN}Reload Window${C_RESET}\n"
-    printf "  ${C_GREEN}║${C_RESET}                                                              ${C_GREEN}║${C_RESET}\n"
-    printf "  ${C_GREEN}╠══════════════════════════════════════════════════════════════╣${C_RESET}\n"
-    printf "  ${C_GREEN}║${C_RESET}                                                              ${C_GREEN}║${C_RESET}\n"
-    printf "  ${C_GREEN}║${C_RESET}  ${C_BOLD}SPEC KIT${C_RESET} by ${C_CYAN}LKS Next${C_RESET}                                       ${C_GREEN}║${C_RESET}\n"
-    printf "  ${C_GREEN}║${C_RESET}  ${C_DIM}Thank you for using SPEC KIT!${C_RESET}                               ${C_GREEN}║${C_RESET}\n"
-    printf "  ${C_GREEN}║${C_RESET}                                                              ${C_GREEN}║${C_RESET}\n"
-    printf "  ${C_GREEN}${C_BOLD}╚══════════════════════════════════════════════════════════════╝${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}                                                              ${tc}║${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}  ${C_DIM}Total: %d updated, %d added" "$UPDATED_COUNT" "$ADDED_COUNT"
+    if (( ERROR_COUNT > 0 )); then
+        printf ", ${C_RED}%d errors${C_RESET}" "$ERROR_COUNT"
+    fi
+    printf "${C_RESET}\n"
+    if (( ERROR_COUNT > 0 )); then
+        printf "  ${tc}║${C_RESET}                                                              ${tc}║${C_RESET}\n"
+        printf "  ${tc}║${C_RESET}  ${C_RED}${C_BOLD}Files that could not be updated:${C_RESET}\n"
+        for err_file in "${UPDATE_ERRORS[@]}"; do
+            printf "  ${tc}║${C_RESET}    ${C_RED}x${C_RESET} %s\n" "$err_file"
+        done
+        printf "  ${tc}║${C_RESET}  ${C_DIM}Run the bootstrap again or copy them manually.${C_RESET}\n"
+    fi
+    printf "  ${tc}║${C_RESET}                                                              ${tc}║${C_RESET}\n"
+    printf "  ${tc}╠══════════════════════════════════════════════════════════════╣${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}                                                              ${tc}║${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}  ${C_YELLOW}!!${C_RESET}  ${C_BOLD}Reload VS Code to apply changes${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}     Ctrl+Shift+P -> ${C_CYAN}Reload Window${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}                                                              ${tc}║${C_RESET}\n"
+    printf "  ${tc}╠══════════════════════════════════════════════════════════════╣${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}                                                              ${tc}║${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}  ${C_BOLD}SPEC KIT${C_RESET} by ${C_CYAN}LKS Next${C_RESET}                                       ${tc}║${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}  ${C_DIM}Thank you for using SPEC KIT!${C_RESET}                               ${tc}║${C_RESET}\n"
+    printf "  ${tc}║${C_RESET}                                                              ${tc}║${C_RESET}\n"
+    printf "  ${tc}${C_BOLD}╚══════════════════════════════════════════════════════════════╝${C_RESET}\n"
     echo ''
 }
 
