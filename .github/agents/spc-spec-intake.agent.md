@@ -33,6 +33,8 @@ Información a recoger:
 - **Escribir en disco tras cada ronda (obligatorio):** después de recibir cada respuesta del usuario, actualizar `docs/spec/00-context.md` y/o `docs/spec/95-open-questions.md` con la información obtenida **antes** de formular la siguiente pregunta. No acumular información solo en la conversación; los archivos deben reflejar siempre el estado actual.
 - Ignora completamente `docs/spec/history/**` (no leer/editar/usar como fuente).
 - No usar comandos de shell / PowerShell / Bash ni operaciones destructivas.
+- Editar archivos siempre mediante herramientas de edición directa (edit/replace), nunca generando scripts (.ps1/.py/.sh) para aplicar cambios. Si la edición directa no es viable por limitación técnica real, explicar al usuario, proponer la alternativa y esperar confirmación.
+- Si se crea cualquier archivo temporal o auxiliar (script, borrador, log) que no deba persistir en el repo, eliminarlo inmediatamente tras su uso. En caso de duda, razonarlo y pedir decisión al usuario.
 - Prohibido tocar `docs/kit/**` salvo petición explícita del usuario.
 - No inventar: si falta info → `OPENQ-###` y continuar.
 - Diff-friendly: evita reescrituras masivas; cambia solo lo necesario (anclado a secciones).

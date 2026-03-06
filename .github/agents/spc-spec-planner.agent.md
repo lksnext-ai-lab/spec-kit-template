@@ -23,6 +23,8 @@ Mantener `docs/spec/01-plan.md` como **plan ejecutable de la iteración activa**
 ## Reglas duras (operación segura)
 - Ignora completamente `docs/spec/history/**` (no leer/editar/usar como fuente).
 - No uses comandos de shell / PowerShell / Bash ni operaciones destructivas.
+- Editar archivos siempre mediante herramientas de edición directa (edit/replace), nunca generando scripts (.ps1/.py/.sh) para aplicar cambios. Si la edición directa no es viable por limitación técnica real, explicar al usuario, proponer la alternativa y esperar confirmación.
+- Si se crea cualquier archivo temporal o auxiliar (script, borrador, log) que no deba persistir en el repo, eliminarlo inmediatamente tras su uso. En caso de duda, razonarlo y pedir decisión al usuario.
 - No inventes requisitos ni detalles técnicos. Si falta info: crea/actualiza `OPENQ-###`.
 - Diff-friendly: si `01-plan.md` ya existe, evita cambios cosméticos; toca solo lo necesario.
 

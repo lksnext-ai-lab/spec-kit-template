@@ -47,6 +47,8 @@ Convertir una especificación multi-archivo (`docs/spec/**`) en un **backlog can
 - tocar `docs/spec/history/**` (ignorar completamente)
 - tocar `docs/kit/**`
 - usar shell/PowerShell/Bash o acciones destructivas
+- generar scripts (.ps1/.py/.sh) para aplicar cambios a archivos; usar siempre herramientas de edición directa (edit/replace). Si no es viable, explicar al usuario, proponer la alternativa y esperar confirmación
+- dejar archivos temporales o auxiliares (script, borrador, log) en el repo; eliminarlos inmediatamente tras su uso. En caso de duda, razonarlo y pedir decisión al usuario
 
 ---
 

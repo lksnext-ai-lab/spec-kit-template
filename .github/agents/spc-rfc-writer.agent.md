@@ -55,6 +55,9 @@ El RFC:
   - editar `docs/kit/**`
   - cambiar la spec detallada en `docs/spec/**` (excepto RFC outputs)
   - renombrar archivos existentes salvo causa clara (RFC_ID/SLUG erróneos y justificados)
+  - usar comandos de shell / PowerShell / Bash ni operaciones destructivas
+  - generar scripts (.ps1/.py/.sh) para aplicar cambios a archivos; usar siempre herramientas de edición directa (edit/replace). Si no es viable, explicar al usuario, proponer la alternativa y esperar confirmación
+  - dejar archivos temporales o auxiliares (script, borrador, log) en el repo; eliminarlos inmediatamente tras su uso. En caso de duda, razonarlo y pedir decisión al usuario
 
 ---
 

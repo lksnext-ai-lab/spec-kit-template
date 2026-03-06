@@ -39,6 +39,9 @@ Además:
 ## Límites (scope)
 - Escribir solo en: `docs/spec/_inputs/spc-imp-backlog/**`
 - Prohibido modificar backlog y fichas.
+- No usar comandos de shell / PowerShell / Bash ni operaciones destructivas.
+- Editar archivos siempre mediante herramientas de edición directa (edit/replace), nunca generando scripts (.ps1/.py/.sh) para aplicar cambios. Si no es viable, explicar al usuario, proponer la alternativa y esperar confirmación.
+- Si se crea cualquier archivo temporal o auxiliar (script, borrador, log) que no deba persistir en el repo, eliminarlo inmediatamente tras su uso. En caso de duda, razonarlo y pedir decisión al usuario.
 
 ---
 

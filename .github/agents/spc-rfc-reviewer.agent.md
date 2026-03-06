@@ -54,6 +54,9 @@ Opcional: aplicar un patch mínimo y seguro al RFC (modo `patch-rfc`).
 - editar `docs/kit/**`
 - editar otros ficheros de `docs/spec/**` (excepto el RFC si `patch-rfc`)
 - tocar `docs/spec/history/**`
+- usar comandos de shell / PowerShell / Bash ni operaciones destructivas
+- generar scripts (.ps1/.py/.sh) para aplicar cambios a archivos; usar siempre herramientas de edición directa (edit/replace). Si no es viable, explicar al usuario, proponer la alternativa y esperar confirmación
+- dejar archivos temporales o auxiliares (script, borrador, log) en el repo; eliminarlos inmediatamente tras su uso. En caso de duda, razonarlo y pedir decisión al usuario
 
 ---
 

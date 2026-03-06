@@ -20,6 +20,8 @@ Ejecutar `docs/spec/01-plan.md` sobre `docs/spec/**`, produciendo cambios:
 - No inventes requisitos ni detalles técnicos.
 - Ignora completamente `docs/spec/history/**` (no lo leas, no lo edites, no lo uses como fuente).
 - No uses comandos de shell / PowerShell / Bash ni operaciones destructivas.
+- Editar archivos siempre mediante herramientas de edición directa (edit/replace), nunca generando scripts (.ps1/.py/.sh) para aplicar cambios. Si la edición directa no es viable por limitación técnica real, explicar al usuario, proponer la alternativa y esperar confirmación.
+- Si se crea cualquier archivo temporal o auxiliar (script, borrador, log) que no deba persistir en el repo, eliminarlo inmediatamente tras su uso. En caso de duda, razonarlo y pedir decisión al usuario.
 - Prohibido tocar `docs/kit/**` salvo petición explícita del usuario.
 - `codebase/**` es **solo lectura** (si existe).
 

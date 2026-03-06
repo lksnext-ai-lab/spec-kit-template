@@ -32,7 +32,7 @@ $ErrorActionPreference = 'Stop'
 
 $TEMPLATE_REPO  = 'lksnext-ai-lab/spec-kit-template'
 $TEMPLATE_URL   = "https://github.com/${TEMPLATE_REPO}.git"
-$SCRIPT_VERSION = '2.5.0' # x-release-please-version
+$SCRIPT_VERSION = '2.5.1' # x-release-please-version
 
 $SPECKIT_FILE   = 'tools/.speckit'
 
@@ -984,12 +984,68 @@ function Get-RelPath([string]$from, [string]$to) {
     }
 }
 
+# ===================================================================
+# TASK SPINNER
+# ===================================================================
+
+$script:spinnerTimer = $null
+$script:spinnerState = $null
+$script:taskSpinnerRow = 0
+
+function Start-TaskSpinner([int]$row) {
+    if ([Console]::IsOutputRedirected) { return }
+    $state = [hashtable]::Synchronized(@{ Active = $true; Idx = 0; Row = $row; Col = 5 })
+    $script:spinnerState = $state
+    $t = New-Object System.Timers.Timer
+    $t.Interval = 100
+    $t.AutoReset = $true
+    $t | Add-Member -NotePropertyName SpState -NotePropertyValue $state
+    $t.add_Elapsed({
+        param($src, $ev)
+        $s = $src.SpState
+        if (-not $s.Active) { return }
+        $chars = @('/ ', '- ', '\ ', '| ')
+        try {
+            [Console]::SetCursorPosition($s.Col, $s.Row)
+            [Console]::Write($chars[$s.Idx % 4])
+            $s.Idx++
+        } catch {}
+    })
+    $t.Start()
+    $script:spinnerTimer = $t
+}
+
+function Stop-TaskSpinner {
+    if ($script:spinnerState) { $script:spinnerState.Active = $false }
+    if ($script:spinnerTimer) {
+        $script:spinnerTimer.Stop()
+        $script:spinnerTimer.Dispose()
+        $script:spinnerTimer = $null
+    }
+    $script:spinnerState = $null
+}
+
 function Write-Task([string]$label, [string]$status) {
     switch ($status) {
-        'running' { Write-Pad "${C_CYAN}[..]${C_RESET} ${label}${C_DIM}...${C_RESET}" 4 }
-        'done'    { Write-Pad "${C_GREEN}[ok]${C_RESET} ${label}" 4 }
+        'running' {
+            $script:taskSpinnerRow = if (-not [Console]::IsOutputRedirected) { [Console]::CursorTop } else { 0 }
+            Write-Pad "${C_CYAN}[..]${C_RESET} ${label}${C_DIM}...${C_RESET}" 4
+            Start-TaskSpinner $script:taskSpinnerRow
+        }
+        'done' {
+            Stop-TaskSpinner
+            if (-not [Console]::IsOutputRedirected) {
+                [Console]::SetCursorPosition(0, $script:taskSpinnerRow)
+                Write-Host "${C_CLR_LN}" -NoNewline
+                [Console]::SetCursorPosition(0, $script:taskSpinnerRow)
+            }
+            Write-Pad "${C_GREEN}[ok]${C_RESET} ${label}" 4
+        }
         'skip'    { Write-Pad "${C_DIM}[  ] ${label} -- skipped${C_RESET}" 4 }
-        'fail'    { Write-Pad "${C_RED}[!!]${C_RESET} ${label}" 4 }
+        'fail'    {
+            Stop-TaskSpinner
+            Write-Pad "${C_RED}[!!]${C_RESET} ${label}" 4
+        }
     }
 }
 
@@ -1003,6 +1059,12 @@ function Show-ExecProgress([int]$done, [int]$total, [string]$label) {
     $filled = [math]::Floor(($done / $total) * 40)
     $empty = 40 - $filled
     $bar = ('=' * $filled) + ('-' * $empty)
+    # When PROGRESS_HEIGHT is 0 there is no reserved area; render inline
+    # to avoid overwriting task output at the same cursor row.
+    if ($PROGRESS_HEIGHT -le 0) {
+        Write-C "  ${C_DIM}Applying${C_RESET} ${C_CYAN}${bar}${C_RESET}  ${C_BOLD}${pct}%${C_RESET}  ${C_DIM}(${done}/${total})${C_RESET}"
+        return
+    }
     $savedRow = [Console]::CursorTop
     $savedCol = [Console]::CursorLeft
     Set-CursorAt $PROGRESS_TOP 0
@@ -1299,34 +1361,59 @@ function Show-InstallSummary([string]$workspaceFile, [string]$specDir, [string]$
     $wsName   = Split-Path $workspaceFile -Leaf
     $specLeaf = Split-Path $specDir -Leaf
 
-    Write-C ''
-    Write-C "  ${C_GREEN}${C_BOLD}+==============================================================+${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}  ${C_BOLD}${C_GREEN}DONE!${C_RESET}                                                      ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}+==============================================================+${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}  ${C_DIM}${wsBase}\${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}    +-- ${C_CYAN}${specLeaf}\${C_RESET}              ${C_DIM}spec${C_RESET}"
-
-    if ($codebaseDir) {
-        $cbLeaf = Split-Path $codebaseDir -Leaf
-        Write-C "  ${C_GREEN}|${C_RESET}    +-- ${C_BLUE}${cbLeaf}\${C_RESET}                  ${C_DIM}codebase${C_RESET}"
+    # Inner width between the two vertical borders (62 chars)
+    $iw = 62
+    # Helper: pad a visible-text line to exactly $iw chars (ANSI codes excluded from count)
+    function Fmt([string]$visibleText, [int]$width) {
+        if ($visibleText.Length -ge $width) { return $visibleText }
+        return $visibleText + (' ' * ($width - $visibleText.Length))
     }
 
-    Write-C "  ${C_GREEN}|${C_RESET}    +-- ${C_WHITE}${wsName}${C_RESET}          ${C_DIM}workspace${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}+--------------------------------------------------------------+${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
+    # Build tree lines with aligned labels
+    $treePad = 22  # column where the label (spec/codebase/workspace) starts
+    $baseLine   = "${wsBase}\"
+    $specEntry  = "  +-- ${specLeaf}\"
+    $specLabel  = 'spec'
+    $wsEntry    = "  +-- ${wsName}"
+    $wsLabel    = 'workspace'
+
+    Write-C ''
+    Write-C "  ${C_GREEN}${C_BOLD}+$('=' * $iw)+${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}$(Fmt "  ${C_BOLD}${C_GREEN}DONE!${C_RESET}" $iw)${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}+$('=' * $iw)+${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}$(' ' * $iw)${C_GREEN}|${C_RESET}"
+
+    # Path & tree (these lines can exceed inner width with long names, so no right border)
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_DIM}${baseLine}${C_RESET}"
+    # Spec
+    $gap1 = [Math]::Max(1, $treePad - $specEntry.Length)
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_CYAN}${specEntry}${C_RESET}$(' ' * $gap1)${C_DIM}${specLabel}${C_RESET}"
+    # Codebase
+    if ($codebaseDir) {
+        $cbLeaf  = Split-Path $codebaseDir -Leaf
+        $cbEntry = "  +-- ${cbLeaf}\"
+        $cbLabel = 'codebase'
+        $gap2 = [Math]::Max(1, $treePad - $cbEntry.Length)
+        Write-C "  ${C_GREEN}|${C_RESET}  ${C_BLUE}${cbEntry}${C_RESET}$(' ' * $gap2)${C_DIM}${cbLabel}${C_RESET}"
+    }
+    # Workspace file
+    $gap3 = [Math]::Max(1, $treePad - $wsEntry.Length)
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_WHITE}${wsEntry}${C_RESET}$(' ' * $gap3)${C_DIM}${wsLabel}${C_RESET}"
+
+    Write-C "  ${C_GREEN}|${C_RESET}$(' ' * $iw)${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}+$('-' * $iw)+${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}$(' ' * $iw)${C_GREEN}|${C_RESET}"
     Write-C "  ${C_GREEN}|${C_RESET}  ${C_BOLD}Next steps:${C_RESET}"
     Write-C "  ${C_GREEN}|${C_RESET}    1. Open the workspace in VS Code"
     Write-C "  ${C_GREEN}|${C_RESET}    2. In Copilot Chat: ${C_CYAN}@spc-spec-director${C_RESET}"
     Write-C "  ${C_GREEN}|${C_RESET}    3. Or run ${C_CYAN}/new-spec${C_RESET} to start the specification"
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}+--------------------------------------------------------------+${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}  ${C_BOLD}SPEC KIT${C_RESET} by ${C_CYAN}LKS Next${C_RESET}                                       ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}  ${C_DIM}Thank you for using SPEC KIT!${C_RESET}                               ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}|${C_RESET}                                                              ${C_GREEN}|${C_RESET}"
-    Write-C "  ${C_GREEN}${C_BOLD}+==============================================================+${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}$(' ' * $iw)${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}+$('-' * $iw)+${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}$(' ' * $iw)${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_BOLD}SPEC KIT${C_RESET} by ${C_CYAN}LKS Next${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}  ${C_DIM}Thank you for using SPEC KIT!${C_RESET}"
+    Write-C "  ${C_GREEN}|${C_RESET}$(' ' * $iw)${C_GREEN}|${C_RESET}"
+    Write-C "  ${C_GREEN}${C_BOLD}+$('=' * $iw)+${C_RESET}"
     Write-C ''
 }
 

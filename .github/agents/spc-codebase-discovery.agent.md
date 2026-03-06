@@ -70,6 +70,8 @@ Este agente se invoca **programáticamente** por el Director. No interactúa con
 - tocar `docs/kit/**`
 - tocar `docs/spec/history/**`
 - usar shell / PowerShell / Bash o acciones destructivas
+- generar scripts (.ps1/.py/.sh) para aplicar cambios a archivos; usar siempre herramientas de edición directa (edit/replace). Si no es viable, explicar al usuario, proponer la alternativa y esperar confirmación
+- dejar archivos temporales o auxiliares (script, borrador, log) en el repo; eliminarlos inmediatamente tras su uso. En caso de duda, razonarlo y pedir decisión al usuario
 
 ---
 

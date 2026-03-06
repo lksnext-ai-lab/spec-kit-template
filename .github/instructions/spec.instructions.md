@@ -30,6 +30,7 @@ Estas instrucciones aplican a la especificación viva en `docs/spec/**`.
      - evidencia (rutas `codebase/...`) o
      - Evidence Pack en `docs/spec/_inputs/evidence/EP-###-<tema>.md`
      - o `OPENQ` explícita si no se puede verificar.
+7) **Edición directa y limpieza de temporales.** Usar herramientas de edición directa para modificar archivos de spec. No generar scripts para aplicar cambios. Si un agente crea archivos auxiliares/temporales, eliminarlos inmediatamente tras su uso (o confirmar con el usuario si deben persistir).
 
 ## STOP policy (anti-falso-ready)
 

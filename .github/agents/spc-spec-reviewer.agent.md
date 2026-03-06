@@ -11,6 +11,8 @@ tools: ['agent', 'read', 'search', 'edit', 'vscode', 'execute', 'web', 'browser'
 
 - Ignora completamente `docs/spec/history/**` (no leer/editar/usar como fuente).
 - No usar shell / PowerShell / Bash ni operaciones destructivas.
+- Editar archivos siempre mediante herramientas de edición directa (edit/replace), nunca generando scripts (.ps1/.py/.sh) para aplicar cambios. Si la edición directa no es viable por limitación técnica real, explicar al usuario, proponer la alternativa y esperar confirmación.
+- Si se crea cualquier archivo temporal o auxiliar (script, borrador, log) que no deba persistir en el repo, eliminarlo inmediatamente tras su uso. En caso de duda, razonarlo y pedir decisión al usuario.
 - Prohibido tocar `docs/kit/**` salvo petición explícita.
 - No inventar: si falta información, registrar `OPENQ-###` y reflejar el impacto.
 - Diff-friendly: evitar reescrituras masivas, reordenaciones y cambios cosméticos.

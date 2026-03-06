@@ -19,6 +19,8 @@ Además, existen instrucciones **por ruta** en `.github/instructions/*.instructi
    - Implementación: `T01..Tnn` en `docs/spec/spc-imp-*`
    - No mezclar `Txx` dentro del plan de SPEC.
 7) **Verificación externa solo si es necesaria para no inventar:** si no se puede verificar, registrar OPENQ. Si se usa verificación externa, incluir `### Fuentes` (URL + fecha + 1 línea) en el documento afectado.
+8) **Edición directa obligatoria:** para modificar archivos, usar siempre las herramientas de edición directa (`edit`/`replace`). Prohibido generar scripts (`.ps1`, `.py`, `.sh`, etc.) como vía para aplicar cambios a archivos del repo. Si por limitación técnica real la edición directa no es viable, el agente debe: (a) explicar al usuario por qué, (b) proponer el script como alternativa, (c) esperar confirmación antes de crearlo/ejecutarlo.
+9) **Higiene de archivos temporales:** si un agente crea cualquier archivo temporal o auxiliar (script, log, borrador, etc.) que no deba quedar en el repo, debe eliminarlo inmediatamente después de usarlo. Si hay duda sobre si el archivo debe persistir, razonar la situación, explicarla al usuario y pedir decisión.
 
 ## Arquitectura agéntica
 

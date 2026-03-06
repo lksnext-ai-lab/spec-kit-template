@@ -44,6 +44,9 @@ Convertir filas del backlog canónico en **fichas Txx ejecutables**, manteniendo
 - editar `docs/kit/**`
 - editar otros ficheros de `docs/spec/**` fuera de outputs
 - tocar `docs/spec/history/**`
+- usar comandos de shell / PowerShell / Bash ni operaciones destructivas
+- generar scripts (.ps1/.py/.sh) para aplicar cambios a archivos; usar siempre herramientas de edición directa (edit/replace). Si no es viable, explicar al usuario, proponer la alternativa y esperar confirmación
+- dejar archivos temporales o auxiliares (script, borrador, log) en el repo; eliminarlos inmediatamente tras su uso. En caso de duda, razonarlo y pedir decisión al usuario
 
 ---
 
