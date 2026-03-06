@@ -17,7 +17,7 @@ set -euo pipefail
 
 TEMPLATE_REPO="lksnext-ai-lab/spec-kit-template"
 TEMPLATE_URL="https://github.com/$TEMPLATE_REPO.git"
-SCRIPT_VERSION="2.5.3" # x-release-please-version
+SCRIPT_VERSION="2.5.4" # x-release-please-version
 
 SPECKIT_FILE="tools/.speckit"
 
@@ -1573,7 +1573,9 @@ test_git_clean() {
     for managed_path in "${MANAGED_PATHS[@]}"; do
         if [[ -e "$managed_path" ]]; then
             local status
-            status=$(git status --porcelain -- "$managed_path" 2>/dev/null || true)
+            # Exclude untracked files (??): they are not overwritten by the update
+            # (only tracked modified/deleted files will be clobbered)
+            status=$(git status --porcelain -- "$managed_path" 2>/dev/null | grep -v '^??' || true)
             if [[ -n "$status" ]]; then
                 dirty_files+="$status"$'\n'
             fi
