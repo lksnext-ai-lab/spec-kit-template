@@ -17,7 +17,7 @@ set -euo pipefail
 
 TEMPLATE_REPO="lksnext-ai-lab/spec-kit-template"
 TEMPLATE_URL="https://github.com/$TEMPLATE_REPO.git"
-SCRIPT_VERSION="2.5.1" # x-release-please-version
+SCRIPT_VERSION="2.5.2" # x-release-please-version
 
 SPECKIT_FILE="tools/.speckit"
 
@@ -1745,8 +1745,35 @@ invoke_update_flow() {
 
     echo ''
 
+    # Capture anchor row so the menu always renders at the same position
+    # (prevents sub-content like changelog/file list from pushing the menu down on re-render)
+    local _menu_anchor_0=0
+    if [[ -t 1 ]]; then
+        local _ma_s _ma_r _ma_c
+        _ma_s=$(stty -g); stty raw -echo min 0
+        printf '\033[6n'; _ma_r=""
+        while true; do
+            read -rsn1 -t 0.5 _ma_c || break
+            _ma_r+="$_ma_c"
+            [[ "$_ma_c" == "R" ]] && break
+        done
+        stty "$_ma_s"
+        _ma_r="${_ma_r#*[}"
+        _menu_anchor_0=$(( ${_ma_r%;*} - 1 ))
+    fi
+
     local update_done=false
     while ! $update_done; do
+        # Reset cursor to anchor: wipe any sub-content printed in the previous iteration
+        if [[ -t 1 ]]; then
+            local _term_h; _term_h=$(tput lines 2>/dev/null || echo 24)
+            local _cl=$(( _term_h - _menu_anchor_0 - 2 ))
+            (( _cl < 5 )) && _cl=5
+            tput cup "$_menu_anchor_0" 0
+            for (( _i=0; _i<_cl; _i++ )); do printf '\033[K\n'; done
+            tput cup "$_menu_anchor_0" 0
+        fi
+
         local target_label
         if [[ "$remote_version" == "$local_version" ]]; then
             target_label="Re-apply v${remote_version}"

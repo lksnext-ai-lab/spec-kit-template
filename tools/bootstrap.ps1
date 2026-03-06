@@ -32,7 +32,7 @@ $ErrorActionPreference = 'Stop'
 
 $TEMPLATE_REPO  = 'lksnext-ai-lab/spec-kit-template'
 $TEMPLATE_URL   = "https://github.com/${TEMPLATE_REPO}.git"
-$SCRIPT_VERSION = '2.5.1' # x-release-please-version
+$SCRIPT_VERSION = '2.5.2' # x-release-please-version
 
 $SPECKIT_FILE   = 'tools/.speckit'
 
@@ -1727,9 +1727,21 @@ function Invoke-UpdateFlow([string]$specDir) {
 
     Write-C ''
 
+    # Capture anchor row so the menu always renders at the same position
+    # (prevents sub-content like changelog/file list from pushing the menu down on re-render)
+    $menuAnchorRow = if ([Console]::IsOutputRedirected) { 0 } else { [Console]::CursorTop }
+
     # Interactive update menu
     $updateDone = $false
     while (-not $updateDone) {
+        # Reset cursor to anchor: wipe any sub-content printed in the previous iteration
+        if (-not [Console]::IsOutputRedirected) {
+            $clearEnd = [Math]::Min([Console]::CursorTop + 2, [Console]::WindowHeight - 2)
+            [Console]::SetCursorPosition(0, $menuAnchorRow)
+            for ($r = $menuAnchorRow; $r -le $clearEnd; $r++) { Write-Host "${C_CLR_LN}" }
+            [Console]::SetCursorPosition(0, $menuAnchorRow)
+        }
+
         $targetLabel = if ($remoteVersion -eq $localVersion) { "Re-apply v${remoteVersion}" } else { "Update to v${remoteVersion}" }
 
         $menuOptions = @(

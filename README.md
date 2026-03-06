@@ -1,6 +1,6 @@
 # Spec Kit Template
 
-> **Versión:** `2.5.1` — fuente única en [`VERSION`](VERSION) <!-- x-release-please-version -->
+> **Versión:** `2.5.2` — fuente única en [`VERSION`](VERSION) <!-- x-release-please-version -->
 
 Plantilla para crear **especificaciones técnicas** en Markdown con VS Code + GitHub Copilot, siguiendo un flujo agéntico: **Entender → Especificar → RFC → Implementar**, versionado con Git.
 
